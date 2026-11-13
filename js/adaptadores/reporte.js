@@ -18,6 +18,7 @@
 import { VEREDICTO_CUMPLE } from "../nucleo/evaluador_limites.js";
 import { filaDeRegistro, textoLectura, textoPorcentaje, NOMBRES_MEDICION, nombreCortoCondicion } from "./historial.js";
 import { crearDocumentoPdf } from "./pdf.js";
+import { textoTiempoCarga, detalleCarga } from "./tiempo_carga.js";
 
 /** Explicación de la incertidumbre (se usa en Comparar y en el reporte). */
 export const TEXTO_INCERTIDUMBRE = "La incertidumbre (U) indica cuánto podría diferir la lectura del analizador real. Se calcula con la exactitud que declara el fabricante del ESA620, ±(1 % de la lectura + 1 µA), según la guía GUM (JCGM 100:2008): u = exactitud/√3 y U = 2·u. Ejemplo: 14.73 ± 1.32 µA significa que el analizador real podría mostrar entre 13.41 y 16.05 µA.";
@@ -119,12 +120,14 @@ function textoMayorPorcentaje(registro) {
 /**
  * Arma el contenido del reporte (datos generales y filas de la tabla). Es el
  * mismo para la pantalla y para el PDF, así los dos nunca se diferencian.
- * @param {{nombre: string, registros: object[], parametros: object, fecha: Date}} datos - Datos del reporte.
+ * Incluye el tiempo de carga de la página (ES03) con el navegador y la hora.
+ * @param {{nombre: string, registros: object[], parametros: object, fecha: Date, cargaPagina: object|null}} datos - Datos del reporte.
  * @returns {{datosGenerales: [string, string][], columnas: string[], filas: string[][]}} Contenido.
  */
 export function contenidoDelReporte(datos) {
-  const { nombre, registros, parametros, fecha } = datos;
+  const { nombre, registros, parametros, fecha, cargaPagina } = datos;
   const resumen = resumir(registros);
+  const [terminoCarga, valorCarga] = textoTiempoCarga(cargaPagina).split(": ");
   const datosGenerales = [
     ["Estudiante", nombre || NOMBRE_VACIO],
     ["Fecha y hora", fecha.toLocaleString(IDIOMA_FECHAS, FORMATO_FECHA)],
@@ -132,6 +135,8 @@ export function contenidoDelReporte(datos) {
     ["Clasificación", `Clase ${parametros.equipo.clase}, parte aplicada ${parametros.equipo.parte_aplicada}`],
     ["Normas", `${parametros.equipo.norma_general} y ${parametros.equipo.norma_particular}`],
     ["Resumen", textoResumen(resumen)],
+    [terminoCarga, valorCarga],
+    ["Navegador y hora de la carga", detalleCarga(cargaPagina)],
   ];
   // La lectura más cerca de su límite solo existe si hay lecturas
   if (resumen.mayor !== null) {
@@ -258,12 +263,13 @@ export function nombreArchivoReporte(fecha) {
 
 /**
  * Arma el resumen corto del reporte que el botón «Copiar resumen» pone en el
- * portapapeles. El estudiante lo pega en su correo y adjunta el PDF.
- * @param {{nombre: string, registros: object[], parametros: object, fecha: Date}} datos - Datos del reporte.
+ * portapapeles. El estudiante lo pega en su correo y adjunta el PDF. Incluye
+ * el tiempo de carga de la página, el navegador y la hora (para ES03).
+ * @param {{nombre: string, registros: object[], parametros: object, fecha: Date, cargaPagina: object|null}} datos - Datos del reporte.
  * @returns {string} Resumen en varias líneas.
  */
 export function armarResumen(datos) {
-  const { nombre, registros, parametros, fecha } = datos;
+  const { nombre, registros, parametros, fecha, cargaPagina } = datos;
   const resumen = resumir(registros);
   const lineas = [
     "Reporte de práctica – Analizador transparente",
@@ -276,6 +282,8 @@ export function armarResumen(datos) {
   if (resumen.mayor !== null) {
     lineas.push(`Más cerca del límite: ${textoMayorPorcentaje(resumen.mayor)}`);
   }
+  // Datos de la carga de la página (ES03)
+  lineas.push(textoTiempoCarga(cargaPagina), `Navegador y hora de la carga: ${detalleCarga(cargaPagina)}`);
   lineas.push("", "Adjunto el reporte completo en PDF (botón «Descargar reporte (PDF)» de la herramienta).", TEXTO_AVISO);
   return lineas.join(SALTO_RESUMEN);
 }

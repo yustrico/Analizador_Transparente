@@ -25,6 +25,7 @@ import {
   generarReporte, crearPdfReporte, nombreArchivoReporte, armarResumen, limpiarNombre, TEXTO_INCERTIDUMBRE,
 } from "./reporte.js";
 import { descargarPdf } from "./pdf.js";
+import { medirCargaPagina, textoTiempoCarga, detalleCarga } from "./tiempo_carga.js";
 
 /* ------------------------------------------------------------------------ */
 /* Constantes                                                               */
@@ -958,6 +959,7 @@ function generarYMostrarReporte(estado) {
     registros: estado.historial.obtenerRegistros(),
     parametros: estado.parametros,
     fecha: new Date(),
+    cargaPagina: estado.cargaPagina,
   };
   campoNombre.value = datos.nombre;
   // Se guardan los datos para que el PDF y el resumen copiado sean iguales a lo que se ve
@@ -1046,7 +1048,13 @@ export function iniciarInterfaz(parametros) {
     visualizador: crearVisualizador(elemento("svg-circuito"), parametros),
     historial: crearHistorial(),
     datosReporte: null,
+    cargaPagina: null,
   };
+  // Tiempo de carga de esta página (ES03): se mide cuando termina el evento load
+  medirCargaPagina().then((carga) => {
+    estado.cargaPagina = carga;
+    elemento("tiempo-carga").textContent = `${textoTiempoCarga(carga)} (${detalleCarga(carga)})`;
+  });
   mostrarEquipo(parametros);
   configurarNavegacion(estado);
   elemento("boton-siguiente-paso").addEventListener("click", () => avanzarPaso(estado));

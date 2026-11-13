@@ -24,9 +24,10 @@
   <link rel="stylesheet" href="css/estilos.css" integrity="sha384-bS+dNOK6doZvucqx3Ar8u+vqIQfiZG6BsosYcStIpispPoA1A1E6Z6eazx54eptb">
   <!-- SRI: inicio (generado por tools/sri.mjs, no editar a mano) -->
   <link rel="modulepreload" href="js/adaptadores/historial.js" integrity="sha384-SBajryGpaL4P86U45EXnob/SUdqmBOUou+iPCxya3/mSrOJa1zictB5Tz0rLbqCT">
-  <link rel="modulepreload" href="js/adaptadores/interfaz.js" integrity="sha384-JomzZnkg5RlVENHNIav6tSBWJSjiuGeWwtbpIXidfNDBBuMhCFtMBVm4ufN96tW3">
+  <link rel="modulepreload" href="js/adaptadores/interfaz.js" integrity="sha384-3dtAF3nXp7Rknvy8Y1nn/rbw4L9J/6FroQ2q+hiRXJLoQKU3vtU3jV70PQ+b//dt">
   <link rel="modulepreload" href="js/adaptadores/pdf.js" integrity="sha384-2bsaqYFrn7TfsVHh4NNg/UZ/TKFo9l/ML73tb0/wKUH5vbk0/s9G8wDUJ7o3lAWD">
-  <link rel="modulepreload" href="js/adaptadores/reporte.js" integrity="sha384-0A6mCnCsJIeliY7eix6dAUkDzqyC55UX9dBf4UeAxj/WEJaIqIlrmZ7JKpbULqYc">
+  <link rel="modulepreload" href="js/adaptadores/reporte.js" integrity="sha384-p1dBpS0SUVKbywMiq+U+XucHyEdjgkNR55dATbhByjsN/B7+LxR9xo7e103+h9rq">
+  <link rel="modulepreload" href="js/adaptadores/tiempo_carga.js" integrity="sha384-HJaZ87n6slac+sCKpiv4PovGknwW6qIsYSbPkXqTEJSFVD0wGqJegnc9QHmWVjjg">
   <link rel="modulepreload" href="js/adaptadores/visualizador.js" integrity="sha384-BChwXZFE8xxYeuRAKjrWvaPet2N1m+30ddtFM2qRvag6PjZnnt1gRkEKLXV0K3Lp">
   <link rel="modulepreload" href="js/nucleo/evaluador_limites.js" integrity="sha384-LSSN73TpGvoxmTACuvKwqcKZummgYCZPvczsVXZj/GsRoFqz3rfI5hMqsZ8C2VSi">
   <link rel="modulepreload" href="js/nucleo/modelo_equipo.js" integrity="sha384-Qb77MAsOdDZAsRuC732Knrv2Be3wnwhGJUnjfM8eAdnjyFOmr2XRHseQUxFzPz9u">
@@ -204,6 +205,7 @@
     <section id="seccion-historial" class="seccion" data-seccion="historial" hidden>
       <h2 class="no-imprimir">Historial y reporte</h2>
       <p class="nota-importante no-imprimir" id="nota-borrado">Tus lecturas se borran al cerrar la pestaña. Descarga tu reporte antes de cerrar.</p>
+      <p class="nota no-imprimir" id="tiempo-carga" aria-live="polite">Tiempo de carga de esta página: midiendo…</p>
 
       <!-- Vista 1: historial de lecturas y botón para finalizar -->
       <div id="historial-vista">

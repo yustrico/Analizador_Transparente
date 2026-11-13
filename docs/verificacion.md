@@ -10,7 +10,7 @@ Equipo de medición: PC con Windows 11 (16 núcleos lógicos), Chrome 157.0.8103
 |---|---|---|---|---|---|
 | ES01 | Error del cálculo frente a la referencia | ≤ 1 % en cada caso | `npm test` (`tests/motor_calculo.test.js`): I y U de las 12 configuraciones frente a la tabla de referencia de CLAUDE.md §5 | Error máximo **0.41 %** (12 de 12 ≤ 1 %) | ✅ Sí |
 | ES02 | Concordancia con el ESA620, E_n | \|E_n\| ≤ 1 en cada configuración | `npm test` (`tests/es02_validacion.test.js`): E_n = \|I_modelo − media\| / U_med con las mediciones reales del R12 (n = 3 por configuración) | E_n máximo **0.186** (12 de 12 ≤ 1) | ✅ Sí |
-| ES03 | Latencia con 30 usuarios virtuales | p95 ≤ 1 s y 0 % de errores | `npx autocannon -c 30 -d 60` contra la URL publicada, 1 corrida | **67.2 % de errores** (HTTP 429, límite de GitHub Pages); p95 entre 22.8 s (p90) y 25.6 s (p97.5) | ❌ No (ver §ES03) |
+| ES03 | Tiempo de carga con 30 usuarios reales simultáneos | p95 ≤ 1 s y 0 % de errores | 30 personas abren la página a la vez en incógnito; cada navegador mide su carga con Navigation Timing y la pega en su resumen (`docs/protocolo_ES03_30_usuarios.md`) | Pendiente: prueba con 30 usuarios reales | Pendiente (ver §ES03) |
 | ES04 | Tiempo de carga (LCP) | ≤ 2.5 s | Lighthouse 12.8.2, perfil escritorio, 5 corridas contra la URL publicada, mediana | Mediana **0.288 s** (5 de 5 corridas entre 0.286 y 0.296 s) | ✅ Sí |
 | ES05 | Peso descargado en la primera carga | ≤ 1 600 KiB | `npm run peso` (archivos en disco) y pestaña Red / CDP sin caché en la URL publicada | **62.0 KiB** transferidos (comprimidos por GitHub Pages); 188.1 KiB sin comprimir, 13 archivos | ✅ Sí |
 | ES06 | Navegadores sin errores | ≥ 2 (Chrome y Edge en Windows) | Práctica completa automatizada en cada navegador contra la URL publicada (ver §ES06) | **2 de 2**: Chrome 157 y Edge 157, 0 errores de consola | ✅ Sí |
@@ -23,7 +23,7 @@ Equipo de medición: PC con Windows 11 (16 núcleos lógicos), Chrome 157.0.8103
 | ES14 | RAM de la pestaña | Máximo ≤ 300 MB | Memoria del proceso de la pestaña al final de una práctica completa (Chrome y Edge, sin ventana) | Máximo **46 MB** de memoria privada (91 MB de conjunto de trabajo) | ✅ Sí (preliminar; confirmar 18/11) |
 | ES15 | CPU de la pestaña | Promedio ≤ 20 % | Tiempo de CPU del proceso de la pestaña: 60 s con el circuito animado y actividad, y 30 s en reposo | **10.0 %** de un núcleo animando; **0.0 %** en reposo | ✅ Sí (preliminar; confirmar 18/11) |
 
-**Estado:** 10 cumplen (2 de ellas preliminares), 1 no cumple (ES03) y 3 quedan pendientes de la sesión con estudiantes (ES08, ES10, ES11).
+**Estado:** 10 cumplen (2 de ellas preliminares) y 4 quedan pendientes: ES03 (prueba con 30 usuarios reales) y ES08, ES10 y ES11 (sesión con estudiantes del 18/11).
 
 ## Detalle de cada medición
 
@@ -53,12 +53,17 @@ U_med = 2·√((s/√3)² + ((0.01·media + 1 µA)/√3)²), mediciones del R12 
 
 Nota honesta (docs/03 §6): C_L, C_N, C_AP y el término de 0.83 µA se ajustaron con estas mismas mediciones, así que ES02 muestra que el simulador calibrado reproduce lo que el estudiante verá en el laboratorio; no es una predicción independiente.
 
-### ES03 — Latencia con 30 usuarios virtuales
+### ES03 — Tiempo de carga con 30 usuarios reales
+**Método actual (desde el 13/11/2026):** 30 personas reales abren la página publicada al mismo tiempo en una ventana de incógnito. La herramienta mide en cada navegador el tiempo de carga con Navigation Timing (inicio de la navegación → `loadEventEnd`), lo muestra en «Historial y reporte» («Tiempo de carga de esta página: X ms») y lo incluye, con el navegador y la fecha y hora, en el PDF y en «Copiar resumen». p95 por el método del rango más cercano y % de errores (quien no pudo cargar la página). Protocolo y tabla de 30 filas: `docs/protocolo_ES03_30_usuarios.md`. **Resultado: pendiente.**
+
+Comprobación de la medición (13/11/2026, perfil nuevo sin caché, con CSP): Chrome 157 mostró 138 ms y Edge 157 85 ms en localhost, exactamente iguales a Navigation Timing leído directamente; una recarga se marca como «recarga».
+
+**Prueba descartada: autocannon.** Se deja documentada con honestidad: no representaba el uso real y GitHub Pages la bloqueó (429).
 - Comando: `npx autocannon@8 -c 30 -d 60 --json https://yustrico.github.io/Analizador_Transparente/` (una sola corrida, 13/11/2026 ≈ 14:20 hora Colombia, desde una red residencial en Cali).
 - Resultado: 28 509 solicitudes en 60.3 s (≈ 475 por segundo); **9 355 respuestas 200** y **19 154 respuestas 429 «Too Many Requests»** (67.2 % de errores); 0 errores de conexión y 0 tiempos agotados.
 - Latencia (todas las respuestas): media 9.08 ± 8.91 s; p50 7.13 s; p90 22.8 s; p97.5 25.6 s; p99 26.1 s; mínimo 13 ms. autocannon no reporta p95, que está entre p90 y p97.5.
-- **Por qué no cumple:** autocannon no simula 30 estudiantes; abre 30 conexiones que piden la página **sin pausa**, una detrás de otra. Eso generó unas 28 500 solicitudes en un minuto. Un curso de 30 estudiantes que abre la herramienta hace unas 30 × 13 = 390 solicitudes en total, 73 veces menos. GitHub Pages detecta la ráfaga como abuso y responde 429 a esa red. El bloqueo duró unos 5 minutos después de la prueba (de ≈ 14:24 a 14:29): durante ese tiempo la página tampoco abría desde esa red (otros sitios de github.io sí).
-- **Qué falta decidir:** repetir la medición con un ritmo realista o reportar este resultado tal cual. Por ejemplo, `npx autocannon -c 30 -d 60 --connectionRate 1 <URL>` hace que cada usuario virtual pida la página una vez por segundo (30 solicitudes/s; unos 1 800 en el minuto). Esto lo decide el equipo, de preferencia con el profesor. **No correrla desde la red de la universidad**: GitHub podría bloquear a toda la red.
+- **Por qué se descartó:** autocannon no simula 30 estudiantes; abre 30 conexiones que piden la página **sin pausa**, una detrás de otra. Eso generó unas 28 500 solicitudes en un minuto. Un curso de 30 estudiantes que abre la herramienta hace unas 30 × 13 = 390 solicitudes en total, 73 veces menos. GitHub Pages detecta la ráfaga como abuso y responde 429 a esa red. El bloqueo duró unos 5 minutos después de la prueba (de ≈ 14:24 a 14:29): durante ese tiempo la página tampoco abría desde esa red (otros sitios de github.io sí).
+- **Decisión del equipo (13/11/2026):** no repetir autocannon y medir ES03 con 30 usuarios reales (método actual, arriba). Con autocannon la prueba medía el límite anti-abuso de GitHub Pages, no la experiencia de los estudiantes. Tampoco se debe correr autocannon desde la red de la universidad: GitHub podría bloquear a toda la red.
 - Una vez cargada, la herramienta no vuelve a usar la red: cada navegador calcula solo, así que la concurrencia solo afecta la descarga inicial (docs/03 §11).
 
 ### ES04 — Tiempo de carga (LCP)
@@ -122,7 +127,7 @@ Resultado: Chrome 157.0.8103.51 y Edge 157.0.4341.57 con 0 errores ni avisos en 
 | ES | Comando o procedimiento |
 |---|---|
 | ES01, ES02 | `npm test` |
-| ES03 | `npx autocannon -c 30 -d 60 https://yustrico.github.io/Analizador_Transparente/` (una corrida; ver la advertencia de §ES03) |
+| ES03 | `docs/protocolo_ES03_30_usuarios.md` (30 usuarios reales; no usar autocannon) |
 | ES04 | `npx lighthouse https://yustrico.github.io/Analizador_Transparente/ --preset=desktop --only-categories=performance` × 5; tomar la mediana del LCP |
 | ES05 | `npm run peso`; o F12 → Red → «Desactivar caché» → recargar → el total «transferido» |
 | ES06, ES13 | F12 → Consola (sin errores) y Red (solo archivos de yustrico.github.io) durante una práctica completa en Chrome y en Edge |

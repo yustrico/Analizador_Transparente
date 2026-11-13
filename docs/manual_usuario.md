@@ -65,7 +65,7 @@ Aquí aparece la última lectura de cada configuración que hayas medido, en una
 📷 *Captura sugerida 5: la tabla y las barras con varias configuraciones medidas.*
 
 ### Paso 5 — Genera tu reporte (pestaña «5. Historial y reporte»)
-1. Revisa la tabla con todas tus lecturas, en orden y con la hora.
+1. Revisa la tabla con todas tus lecturas, en orden y con la hora. Arriba verás «Tiempo de carga de esta página: … ms»: es cuánto tardó la página en abrir en tu navegador (se usa para verificar la especificación ES03).
 2. Presiona **«Finalizar práctica»** y escribe tu nombre (opcional, máximo 60 caracteres). Presiona **«Generar reporte»**.
 3. Presiona **«Descargar reporte (PDF)»**: se descarga el archivo `reporte_seguridad_electrica_AAAA-MM-DD.pdf` a tu carpeta de **Descargas**.
 4. Presiona **«Copiar resumen»**: se copia un resumen corto.

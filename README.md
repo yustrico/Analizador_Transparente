@@ -65,6 +65,7 @@ docs/             Documentos del proyecto, manual y verificación
 - [Mantenimiento](docs/mantenimiento.md)
 - [Verificación de especificaciones ES01–ES15](docs/verificacion.md)
 - [Protocolo de prueba con usuarios (18/11/2026)](docs/protocolo_prueba_usuarios.md)
+- [Protocolo ES03: 30 usuarios reales simultáneos](docs/protocolo_ES03_30_usuarios.md)
 - [Registro de cambios](CHANGELOG.md)
 
 ## Licencia

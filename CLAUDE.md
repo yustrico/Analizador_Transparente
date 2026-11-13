@@ -132,9 +132,9 @@ Estilo:
 ```
 index.html · css/estilos.css · js/main.js
 js/nucleo/{secuencia,modelo_equipo,motor_calculo,evaluador_limites}.js
-js/adaptadores/{interfaz,visualizador,historial,reporte,pdf}.js
+js/adaptadores/{interfaz,visualizador,historial,reporte,pdf,tiempo_carga}.js
 datos/parametros_r12.json
-tests/{motor_calculo,evaluador_limites,secuencia,modelo_equipo,es02_validacion,pdf,sri}.test.js
+tests/{motor_calculo,evaluador_limites,secuencia,modelo_equipo,es02_validacion,pdf,sri,tiempo_carga}.test.js
 tools/sri.mjs (calcula los hashes SHA-384 de los JS y CSS y los escribe en index.html) · tools/peso.mjs (suma el peso descargado, ES05)
 docs/ (nuestros documentos + manual_usuario.md, solucion_problemas.md, mantenimiento.md, verificacion.md)
 README.md · LICENSE (MIT) · CHANGELOG.md · CLAUDE.md · .gitignore

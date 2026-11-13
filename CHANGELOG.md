@@ -5,6 +5,13 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Agregado
+- Tiempo de carga de la página con la API Navigation Timing (inicio de la navegación → loadEventEnd, en ms): se muestra en «Historial y reporte» como «Tiempo de carga de esta página: X ms» con el navegador, la fecha y hora y el tipo de carga (normal o recarga), y se incluye en el PDF y en «Copiar resumen». Nuevo módulo `js/adaptadores/tiempo_carga.js` y `tests/tiempo_carga.test.js` (79 pruebas en verde).
+- `docs/protocolo_ES03_30_usuarios.md`: 30 personas abren la página a la vez en incógnito y pegan su resumen; p95 por el método del rango más cercano, % de errores y tabla de 30 filas.
+
+### Cambiado
+- ES03 se medirá con 30 usuarios reales simultáneos (docs/03, docs/verificacion.md: «Pendiente: prueba con 30 usuarios reales»). Motivo: la prueba con autocannon (30 conexiones sin pausa, ≈ 28 500 solicitudes en un minuto) no representaba el uso real, y GitHub Pages la bloqueó con 429 «Too Many Requests» (67 % de las solicitudes). Se deja documentada en docs/verificacion.md.
+
 ## [1.0.0] - 2026-11-13
 Primera versión publicada en GitHub Pages: https://yustrico.github.io/Analizador_Transparente/
 
