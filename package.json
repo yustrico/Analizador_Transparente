@@ -7,9 +7,12 @@
   "license": "MIT",
   "author": "Yustin Rico, David Cardona, Santiago González",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "sri": "node tools/sri.mjs",
+    "sri:comprobar": "node tools/sri.mjs --comprobar",
+    "peso": "node tools/peso.mjs"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20.12"
   }
 }

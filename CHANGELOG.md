@@ -5,6 +5,20 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Agregado (Fase 4: seguridad y rendimiento)
+- Política de seguridad de contenido (CSP) en una meta etiqueta de index.html, exactamente la de CLAUDE.md: solo archivos del propio sitio; bloquea scripts, estilos y eventos en línea.
+- Integridad de subrecursos (SRI, SHA-384): `tools/sri.mjs` (`npm run sri`) escribe la huella del CSS, de main.js y, con `<link rel="modulepreload">`, de cada módulo JS (el integrity del `<script>` solo cubre main.js). `--comprobar` (`npm run sri:comprobar`) revisa sin escribir.
+- `tools/peso.mjs` (`npm run peso`): suma el peso de lo que descarga la página y lo compara con ES05 (≤ 1 600 KiB). Medido: 13 archivos, 188 KiB.
+- `tests/sri.test.js`: huellas al día, integrity en todos los JS/CSS, CSP exacta y nada en línea (75 pruebas en verde).
+
+### Cambiado (rendimiento, ES14–ES15)
+- La animación del camino de la corriente se detiene tras 30 s sin actividad (mouse, teclado, rueda) y se reanuda sola al moverse; antes solo se detenía con la pestaña oculta, en otra sección o con «menos movimiento».
+- La animación dibuja 30 cuadros por segundo en lugar de 60 (se ve igual a 40 px/s): CPU de la pestaña de ≈ 15 % a ≈ 10 % de un núcleo mientras anima; 0 % en reposo.
+
+### Revisado (seguridad)
+- Sin innerHTML, outerHTML, insertAdjacentHTML, document.write, eval, new Function, setTimeout con texto, atributos on* ni estilos en línea. El nombre del estudiante solo se usa con textContent y en el PDF como texto escapado.
+- Probado con archivos alterados: un módulo JS o el CSS modificados se bloquean por SRI; un script, un onclick y un estilo inyectados en el HTML se bloquean por la CSP (Chrome y Edge).
+
 ### Quitado (cierre de la Fase 3)
 - Botón «Enviar por correo» (enlace mailto:). Motivo: en Windows, si no hay un programa de correo configurado, abre una lista de programas, y si el estudiante elige un navegador no pasa nada; además no sirve para quien usa correo web. Quedan solo «Descargar reporte (PDF)» y «Copiar resumen», con la indicación «Para enviarlo: pega el resumen en tu correo (Outlook, Gmail o el de la universidad) y adjunta el PDF.»
 - Documentos actualizados (CLAUDE.md, docs/02 RF11, docs/03 ES09, docs/08, README): donde decía mailto ahora dice «copiar resumen al portapapeles»; CLAUDE.md también refleja el PDF propio y la nota en lugar del aviso al cerrar.

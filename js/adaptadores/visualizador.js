@@ -9,7 +9,9 @@
  *   y los valores salen de la MISMA medición del motor de cálculo (M4), así
  *   el dibujo nunca contradice al número.
  *   La animación se detiene cuando no hace falta (pestaña oculta, otra
- *   sección o usuario que prefiere menos movimiento) para ahorrar CPU (ES15).
+ *   sección, usuario que prefiere menos movimiento o 30 s sin que el
+ *   estudiante toque el mouse ni el teclado) para ahorrar CPU (ES15). El
+ *   camino rojo sigue dibujado; solo dejan de moverse los guiones.
  * Módulo: M6 – Visualizador (adaptador)
  * Autores: Yustin Rico, David Cardona, Santiago González
  * Creado: 2026-11-13 · Modificado: 2026-11-13
@@ -27,6 +29,22 @@ const PERIODO_GUIONES_PX = 18;
 
 /** Milisegundos por segundo. */
 const MILISEGUNDOS_POR_SEGUNDO = 1000;
+
+/**
+ * Cuadros por segundo de la animación. Los guiones avanzan solo 40 px/s, así
+ * que 30 cuadros/s se ven igual de suaves que 60 y redibujan la mitad (ES15).
+ */
+const CUADROS_POR_SEGUNDO = 30;
+const INTERVALO_CUADRO_MS = MILISEGUNDOS_POR_SEGUNDO / CUADROS_POR_SEGUNDO;
+
+/** Margen para el redondeo de las marcas de tiempo del navegador (ms). */
+const TOLERANCIA_CUADRO_MS = 2;
+
+/** Tiempo sin mover el mouse ni tocar el teclado tras el cual la animación se detiene (reposo). */
+const TIEMPO_REPOSO_MS = 30 * MILISEGUNDOS_POR_SEGUNDO;
+
+/** Acciones del estudiante que lo sacan del reposo. */
+const EVENTOS_DE_ACTIVIDAD = Object.freeze(["pointermove", "pointerdown", "keydown", "wheel", "touchstart"]);
 
 /** Por debajo de este valor (µA) la corriente se muestra con cifras significativas, no con decimales fijos. */
 const UMBRAL_VALOR_PEQUENO_UA = 0.01;
@@ -461,14 +479,19 @@ export function crearVisualizador(svg, parametros) {
   dibujarZonasDeAyuda(grupoAyuda, parametros);
 
   const preferenciaMovimiento = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const animacion = { idCuadro: null, ultimoTiempo: null, desplazamiento: 0, visible: false, caminos: [] };
+  const animacion = {
+    idCuadro: null, ultimoTiempo: null, desplazamiento: 0, visible: false, caminos: [],
+    ultimaActividad_ms: performance.now(), enReposo: false,
+  };
 
   /**
    * Indica si vale la pena animar ahora mismo.
-   * @returns {boolean} true si hay camino, la sección se ve, la pestaña está activa y se permite movimiento.
+   * @returns {boolean} true si hay camino, la sección se ve, la pestaña está activa,
+   *   se permite movimiento y el estudiante no está en reposo.
    */
   function debeAnimar() {
-    return animacion.caminos.length > 0 && animacion.visible && !document.hidden && !preferenciaMovimiento.matches;
+    return animacion.caminos.length > 0 && animacion.visible && !document.hidden
+      && !preferenciaMovimiento.matches && !animacion.enReposo;
   }
 
   /**
@@ -476,6 +499,17 @@ export function crearVisualizador(svg, parametros) {
    * @param {number} tiempoActual_ms - Marca de tiempo que da requestAnimationFrame (ms).
    */
   function animarCuadro(tiempoActual_ms) {
+    // Sin actividad durante TIEMPO_REPOSO_MS: se detiene y no pide más cuadros
+    if (tiempoActual_ms - animacion.ultimaActividad_ms > TIEMPO_REPOSO_MS) {
+      animacion.enReposo = true;
+      detenerAnimacion();
+      return;
+    }
+    // Si todavía no toca dibujar un cuadro nuevo, solo se espera al siguiente (no se redibuja nada)
+    if (animacion.ultimoTiempo !== null && tiempoActual_ms - animacion.ultimoTiempo < INTERVALO_CUADRO_MS - TOLERANCIA_CUADRO_MS) {
+      animacion.idCuadro = window.requestAnimationFrame(animarCuadro);
+      return;
+    }
     if (animacion.ultimoTiempo !== null) {
       const tiempoTranscurrido_s = (tiempoActual_ms - animacion.ultimoTiempo) / MILISEGUNDOS_POR_SEGUNDO;
       animacion.desplazamiento = (animacion.desplazamiento - VELOCIDAD_GUIONES_PX_S * tiempoTranscurrido_s) % PERIODO_GUIONES_PX;
@@ -506,8 +540,24 @@ export function crearVisualizador(svg, parametros) {
     }
   }
 
+  /**
+   * Anota que el estudiante hizo algo; si la animación estaba en reposo, la
+   * reanuda. Es muy liviana porque se llama con cada movimiento del mouse.
+   */
+  function registrarActividad() {
+    animacion.ultimaActividad_ms = performance.now();
+    if (animacion.enReposo) {
+      animacion.enReposo = false;
+      actualizarAnimacion();
+    }
+  }
+
   document.addEventListener("visibilitychange", actualizarAnimacion);
   preferenciaMovimiento.addEventListener("change", actualizarAnimacion);
+  // Cualquier acción del estudiante cuenta como actividad (passive: no frena el desplazamiento)
+  for (const nombreEvento of EVENTOS_DE_ACTIVIDAD) {
+    document.addEventListener(nombreEvento, registrarActividad, { passive: true });
+  }
 
   /**
    * Dibuja los conmutadores y la conexión de la MD según la condición y la medición elegidas.

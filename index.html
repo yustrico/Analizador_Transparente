@@ -5,7 +5,7 @@
   Descripción: Estructura de las 5 secciones (Equipo, Prueba guiada,
     Analizador, Comparar e Historial). El contenido que depende de los datos
     del equipo lo llena js/adaptadores/interfaz.js. No hay scripts ni estilos
-    en línea (lo exige la política de seguridad de contenido, Fase 4).
+    en línea (lo exige la política de seguridad de contenido, CSP).
   Módulo: M1 – Interfaz de usuario (adaptador)
   Autores: Yustin Rico, David Cardona, Santiago González
   Creado: 2026-11-13 · Modificado: 2026-11-13
@@ -14,12 +14,26 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
+  <!-- Política de seguridad de contenido: solo se cargan archivos de este mismo sitio; nada en línea -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Analizador transparente</title>
   <meta name="description" content="Simulador educativo de la prueba de seguridad eléctrica (IEC 60601-1) del electrocardiógrafo Mindray BeneHeart R12.">
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="css/estilos.css">
-  <script type="module" src="js/main.js"></script>
+  <!-- Integridad (SRI): las huellas SHA-384 las escribe tools/sri.mjs; correrlo después de cambiar JS o CSS -->
+  <link rel="stylesheet" href="css/estilos.css" integrity="sha384-bS+dNOK6doZvucqx3Ar8u+vqIQfiZG6BsosYcStIpispPoA1A1E6Z6eazx54eptb">
+  <!-- SRI: inicio (generado por tools/sri.mjs, no editar a mano) -->
+  <link rel="modulepreload" href="js/adaptadores/historial.js" integrity="sha384-SBajryGpaL4P86U45EXnob/SUdqmBOUou+iPCxya3/mSrOJa1zictB5Tz0rLbqCT">
+  <link rel="modulepreload" href="js/adaptadores/interfaz.js" integrity="sha384-JomzZnkg5RlVENHNIav6tSBWJSjiuGeWwtbpIXidfNDBBuMhCFtMBVm4ufN96tW3">
+  <link rel="modulepreload" href="js/adaptadores/pdf.js" integrity="sha384-2bsaqYFrn7TfsVHh4NNg/UZ/TKFo9l/ML73tb0/wKUH5vbk0/s9G8wDUJ7o3lAWD">
+  <link rel="modulepreload" href="js/adaptadores/reporte.js" integrity="sha384-0A6mCnCsJIeliY7eix6dAUkDzqyC55UX9dBf4UeAxj/WEJaIqIlrmZ7JKpbULqYc">
+  <link rel="modulepreload" href="js/adaptadores/visualizador.js" integrity="sha384-BChwXZFE8xxYeuRAKjrWvaPet2N1m+30ddtFM2qRvag6PjZnnt1gRkEKLXV0K3Lp">
+  <link rel="modulepreload" href="js/nucleo/evaluador_limites.js" integrity="sha384-LSSN73TpGvoxmTACuvKwqcKZummgYCZPvczsVXZj/GsRoFqz3rfI5hMqsZ8C2VSi">
+  <link rel="modulepreload" href="js/nucleo/modelo_equipo.js" integrity="sha384-Qb77MAsOdDZAsRuC732Knrv2Be3wnwhGJUnjfM8eAdnjyFOmr2XRHseQUxFzPz9u">
+  <link rel="modulepreload" href="js/nucleo/motor_calculo.js" integrity="sha384-a+lAytkzsbOWOm4e2wyyJAo1ZYLGrVOtsf1NCxVn6lyGoQvBx01AhwIuTUHloY1R">
+  <link rel="modulepreload" href="js/nucleo/secuencia.js" integrity="sha384-FKIHpcwKbIcHPpb1DNC/WpLa64I34nlWYzBgeRUiiJJS3AJvLHzfc26JI8YUiK9G">
+  <!-- SRI: fin -->
+  <script type="module" src="js/main.js" integrity="sha384-tNkb5vL2b5P1psSkVFlOiH62v7ps9hHJG2GjwrEuyRmJh+rzxChjuZeFBhNrpCkQ"></script>
 </head>
 <body>
   <header class="encabezado">
