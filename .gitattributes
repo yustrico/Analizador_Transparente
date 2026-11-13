@@ -1,0 +1,11 @@
+# Todos los archivos de texto se guardan con fin de línea LF (estilo Unix),
+# también en Windows. Es necesario para la integridad de subrecursos (SRI):
+# el hash se calcula sobre los bytes exactos del archivo, y si Git cambia
+# LF por CRLF al descargar el repositorio, el hash local no coincidiría con
+# el archivo que publica GitHub Pages y el navegador bloquearía el script.
+* text=auto eol=lf
+
+# Archivos binarios: Git no debe tocarlos
+*.png binary
+*.jpg binary
+*.pdf binary

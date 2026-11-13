@@ -1,0 +1,15 @@
+{
+  "name": "analizador-transparente",
+  "version": "0.1.0",
+  "description": "Simulador web educativo de la prueba de seguridad eléctrica (IEC 60601-1) del electrocardiógrafo Mindray BeneHeart R12",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "author": "Yustin Rico, David Cardona, Santiago González",
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

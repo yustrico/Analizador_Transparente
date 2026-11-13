@@ -1,0 +1,17 @@
+# Dependencias (el proyecto no tiene, pero npx puede crear esta carpeta)
+node_modules/
+
+# Archivos del sistema operativo
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Editores
+.vscode/
+.idea/
+
+# Configuración local de Claude Code
+.claude/settings.local.json
+
+# Reportes de Lighthouse u otras mediciones locales
+*.lighthouse.html
