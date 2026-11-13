@@ -1,0 +1,190 @@
+<!doctype html>
+<!--
+  ============================================================================
+  Título: Página principal del Analizador transparente
+  Descripción: Estructura de las 5 secciones (Equipo, Prueba guiada,
+    Analizador, Comparar e Historial). El contenido que depende de los datos
+    del equipo lo llena js/adaptadores/interfaz.js. No hay scripts ni estilos
+    en línea (lo exige la política de seguridad de contenido, Fase 4).
+  Módulo: M1 – Interfaz de usuario (adaptador)
+  Autores: Yustin Rico, David Cardona, Santiago González
+  Creado: 2026-11-13 · Modificado: 2026-11-13
+  ============================================================================
+-->
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Analizador transparente</title>
+  <meta name="description" content="Simulador educativo de la prueba de seguridad eléctrica (IEC 60601-1) del electrocardiógrafo Mindray BeneHeart R12.">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="css/estilos.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <header class="encabezado">
+    <div class="encabezado__contenido">
+      <div>
+        <h1 class="encabezado__titulo">Analizador transparente</h1>
+        <p class="encabezado__subtitulo">Prueba de seguridad eléctrica del electrocardiógrafo Mindray BeneHeart R12 (IEC 60601-1)</p>
+      </div>
+      <nav class="navegacion" aria-label="Secciones">
+        <button type="button" class="navegacion__boton" data-seccion="equipo">1. Equipo bajo prueba</button>
+        <button type="button" class="navegacion__boton" data-seccion="prueba">2. Prueba guiada</button>
+        <button type="button" class="navegacion__boton" data-seccion="analizador">3. Analizador</button>
+        <button type="button" class="navegacion__boton" data-seccion="comparar">4. Comparar</button>
+        <button type="button" class="navegacion__boton" data-seccion="historial">5. Historial y reporte</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="principal">
+    <p id="mensaje-error" class="mensaje-error" role="alert" hidden></p>
+
+    <!-- ===================== 1. Equipo bajo prueba ===================== -->
+    <section id="seccion-equipo" class="seccion" data-seccion="equipo" hidden>
+      <h2>Equipo bajo prueba</h2>
+      <div class="rejilla-dos">
+        <div class="tarjeta">
+          <h3>Ficha del equipo</h3>
+          <dl class="ficha">
+            <dt>Equipo</dt><dd id="ficha-nombre"></dd>
+            <dt>Clase</dt><dd id="ficha-clase"></dd>
+            <dt>Parte aplicada</dt><dd id="ficha-parte"></dd>
+            <dt>Partes aplicadas</dt><dd>Electrodos de ECG y cable de paciente</dd>
+            <dt>Normas</dt><dd id="ficha-normas"></dd>
+          </dl>
+          <p class="nota" id="ficha-fuente"></p>
+        </div>
+        <div class="tarjeta">
+          <h3>¿Por qué CF es la más estricta?</h3>
+          <p>Las partes aplicadas se clasifican según qué tan cerca del corazón pueden llegar:</p>
+          <ul>
+            <li><strong>B</strong> (<em>body</em>): tocan el cuerpo y pueden estar conectadas a tierra.</li>
+            <li><strong>BF</strong> (<em>body floating</em>): tocan el cuerpo y están aisladas de tierra (flotantes).</li>
+            <li><strong>CF</strong> (<em>cardiac floating</em>): flotantes y aptas para contacto directo con el corazón o muy cerca de él.</li>
+          </ul>
+          <p>Una corriente que entra directamente al corazón (<strong>microchoque</strong>) puede causar fibrilación ventricular con valores de microamperios, miles de veces menores que los que se sienten en la piel. Por eso la norma le permite a una parte CF diez veces menos corriente de paciente que a las partes B y BF.</p>
+        </div>
+      </div>
+      <div class="tarjeta">
+        <h3>Límites de IEC 60601-1 por tipo de parte aplicada (µA)</h3>
+        <table class="tabla" id="tabla-limites-equipo">
+          <thead>
+            <tr><th>Corriente</th><th>Condición</th><th>B</th><th>BF</th><th>CF (este equipo)</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========================= 2. Prueba guiada ========================= -->
+    <section id="seccion-prueba" class="seccion" data-seccion="prueba" hidden>
+      <h2>Prueba guiada</h2>
+      <p class="introduccion">La prueba de seguridad eléctrica se hace siempre en el mismo orden. Lee el propósito de cada paso antes de ver su resultado. No se puede avanzar sin completar el paso anterior.</p>
+      <ol class="pasos" id="lista-pasos"></ol>
+      <article class="tarjeta paso-actual" id="tarjeta-paso" aria-live="polite">
+        <h3 id="paso-titulo"></h3>
+        <div class="paso-bloque">
+          <h4>Propósito de seguridad</h4>
+          <p id="paso-proposito"></p>
+        </div>
+        <div class="paso-bloque" id="paso-bloque-resultado">
+          <h4>Resultado medido en el R12 del laboratorio</h4>
+          <dl class="ficha" id="paso-resultado"></dl>
+        </div>
+        <button type="button" class="boton boton--principal" id="boton-siguiente-paso">Entendido, siguiente paso</button>
+      </article>
+    </section>
+
+    <!-- =========================== 3. Analizador =========================== -->
+    <section id="seccion-analizador" class="seccion" data-seccion="analizador" hidden>
+      <h2>Analizador</h2>
+      <div class="analizador">
+        <div class="tarjeta controles">
+          <fieldset class="grupo">
+            <legend>Medición</legend>
+            <label class="opcion"><input type="radio" name="medicion" value="contacto" checked> Corriente de contacto</label>
+            <label class="opcion"><input type="radio" name="medicion" value="paciente"> Corriente de paciente CF</label>
+          </fieldset>
+          <fieldset class="grupo">
+            <legend>Polaridad</legend>
+            <label class="opcion"><input type="radio" name="polaridad" value="normal" checked> Normal</label>
+            <label class="opcion"><input type="radio" name="polaridad" value="invertida"> Invertida</label>
+          </fieldset>
+          <fieldset class="grupo">
+            <legend>Tierra de protección (PE)</legend>
+            <label class="opcion"><input type="radio" name="tierra" value="cerrada" checked> Cerrada</label>
+            <label class="opcion"><input type="radio" name="tierra" value="abierta"> Abierta</label>
+          </fieldset>
+          <fieldset class="grupo">
+            <legend>Neutro</legend>
+            <label class="opcion"><input type="radio" name="neutro" value="cerrado" checked> Cerrado</label>
+            <label class="opcion"><input type="radio" name="neutro" value="abierto"> Abierto</label>
+          </fieldset>
+          <p class="nota nota--aviso" id="aviso-doble-falla" hidden></p>
+          <button type="button" class="boton boton--principal boton--grande" id="boton-medir">Medir</button>
+        </div>
+
+        <div class="tarjeta lectura" aria-live="polite">
+          <p class="lectura__etiqueta" id="lectura-etiqueta">Lectura</p>
+          <p class="lectura__valor" id="lectura-valor">— µA</p>
+          <dl class="lectura__detalle">
+            <dt>Límite aplicable</dt><dd id="lectura-limite">—</dd>
+            <dt>% del límite usado</dt><dd id="lectura-porcentaje">—</dd>
+            <dt>Veredicto</dt><dd id="lectura-veredicto">—</dd>
+          </dl>
+          <div class="lectura__comparacion">
+            <p class="nota">Mismo caso con otros tipos de parte aplicada:</p>
+            <table class="tabla tabla--compacta" id="tabla-limites-lectura">
+              <thead><tr><th>B</th><th>BF</th><th>CF</th></tr></thead>
+              <tbody><tr><td>—</td><td>—</td><td>—</td></tr></tbody>
+            </table>
+          </div>
+          <p class="nota" id="lectura-pendiente">Elige la medición y la condición, y presiona «Medir».</p>
+        </div>
+
+        <div class="tarjeta circuito">
+          <h3>Circuito: así circula la corriente</h3>
+          <svg id="svg-circuito" class="circuito__svg" viewBox="0 0 780 380" role="img" aria-labelledby="circuito-descripcion"></svg>
+          <p class="nota" id="circuito-descripcion">Red de 120 V, conmutadores de polaridad, neutro y tierra, chasis del R12, parte aplicada y red de medición MD (la persona). En rojo, el camino de la corriente de fuga.</p>
+        </div>
+
+        <div class="tarjeta explicacion">
+          <h3>¿Por qué da este valor?</h3>
+          <div id="explicacion-texto"><p class="nota">La explicación aparece después de medir.</p></div>
+          <h4>Fórmula usada</h4>
+          <div id="explicacion-formula" class="formula"><p class="nota">—</p></div>
+          <h4>Banda ± U</h4>
+          <p id="explicacion-banda"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ 4. Comparar ============================ -->
+    <section id="seccion-comparar" class="seccion" data-seccion="comparar" hidden>
+      <h2>Comparar condiciones</h2>
+      <p class="introduccion">Cada configuración medida en esta sesión (la última lectura de cada una). La barra es la lectura I y la franja clara es la banda ± U del analizador real: si dos franjas se traslapan, la diferencia puede ser del instrumento y no de la condición.</p>
+      <p class="nota" id="comparar-vacio">Todavía no hay lecturas. Mide en la sección Analizador.</p>
+      <div id="comparar-graficas" class="rejilla-dos"></div>
+      <div class="tarjeta" id="comparar-tabla-tarjeta" hidden>
+        <h3>Tabla de lecturas</h3>
+        <table class="tabla" id="tabla-comparar">
+          <thead>
+            <tr><th>Medición</th><th>Condición</th><th>I ± U (µA)</th><th>Límite (µA)</th><th>% del límite</th><th>Veredicto</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== 5. Historial y reporte ===================== -->
+    <section id="seccion-historial" class="seccion" data-seccion="historial" hidden>
+      <h2>Historial y reporte</h2>
+      <p class="nota">El historial de lecturas y el reporte final (PDF y correo) se construyen en la Fase 3.</p>
+    </section>
+  </main>
+
+  <footer class="aviso">Herramienta educativa. Complementa la práctica con el analizador real; no sirve para certificar equipos.</footer>
+</body>
+</html>

@@ -1,0 +1,231 @@
+/*
+ * ============================================================================
+ * Título: Hoja de estilos del Analizador transparente
+ * Descripción: Apariencia sobria de la página: fondo claro, azul oscuro
+ *   #14365F como color principal y rojo SOLO para la corriente de fuga.
+ *   Tipografía del sistema (sin fuentes externas). Diseño para pantallas de
+ *   computador de 1280 px o más.
+ * Módulo: M1 – Interfaz de usuario (adaptador) y M6 – Visualizador
+ * Autores: Yustin Rico, David Cardona, Santiago González
+ * Creado: 2026-11-13 · Modificado: 2026-11-13
+ * ============================================================================
+ */
+
+/* ---------- Colores y medidas con nombre ---------- */
+:root {
+  --azul-principal: #14365F;
+  --azul-claro: #E6EDF5;
+  --rojo-fuga: #C62828;
+  --rojo-fuga-banda: #F3C4C4;
+  --fondo: #F5F7FA;
+  --superficie: #FFFFFF;
+  --texto: #1B1F24;
+  --texto-secundario: #4A5562;
+  --borde: #D3DAE3;
+  --gris-cable: #5B6573;
+  --gris-inactivo: #B5BEC9;
+  --verde-cumple: #1E6B3A;
+  --ambar-no-cumple: #8A5300;
+  --radio: 8px;
+  --ancho-minimo: 1280px;
+  --ancho-contenido: 1240px;
+  --alto-aviso: 40px;
+}
+
+/* ---------- Base ---------- */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-width: var(--ancho-minimo);
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  padding-bottom: var(--alto-aviso);
+}
+
+h2 { color: var(--azul-principal); margin: 0 0 12px; font-size: 1.6rem; }
+h3 { color: var(--azul-principal); margin: 0 0 10px; font-size: 1.15rem; }
+h4 { margin: 14px 0 6px; font-size: 1rem; }
+
+/* ---------- Encabezado y navegación ---------- */
+.encabezado { background: var(--azul-principal); color: #FFFFFF; }
+.encabezado__contenido {
+  max-width: var(--ancho-contenido);
+  margin: 0 auto;
+  padding: 14px 0 0;
+}
+.encabezado__titulo { margin: 0; font-size: 1.5rem; }
+.encabezado__subtitulo { margin: 2px 0 12px; opacity: 0.85; }
+
+.navegacion { display: flex; gap: 4px; }
+.navegacion__boton {
+  font: inherit;
+  padding: 10px 18px;
+  border: none;
+  border-radius: var(--radio) var(--radio) 0 0;
+  background: transparent;
+  color: #FFFFFF;
+  cursor: pointer;
+}
+.navegacion__boton:hover:not(:disabled) { background: rgba(255, 255, 255, 0.12); }
+.navegacion__boton[aria-current="page"] { background: var(--fondo); color: var(--azul-principal); font-weight: 600; }
+.navegacion__boton:disabled { opacity: 0.45; cursor: not-allowed; }
+.navegacion__boton:focus-visible, .boton:focus-visible, .opcion input:focus-visible { outline: 3px solid #7FA7D6; outline-offset: 2px; }
+
+/* ---------- Contenido principal ---------- */
+.principal { max-width: var(--ancho-contenido); margin: 0 auto; padding: 24px 0; }
+.seccion { display: block; }
+.seccion[hidden] { display: none; }
+.introduccion { max-width: 900px; color: var(--texto-secundario); }
+
+.tarjeta {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+.rejilla-dos { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.rejilla-dos > .tarjeta { margin-bottom: 0; }
+.seccion > .rejilla-dos { margin-bottom: 16px; }
+
+.nota { color: var(--texto-secundario); font-size: 0.9rem; margin: 6px 0; }
+.nota--aviso { color: var(--ambar-no-cumple); }
+.mensaje-error {
+  background: #FFF4E5;
+  border: 1px solid var(--ambar-no-cumple);
+  color: var(--ambar-no-cumple);
+  padding: 12px 16px;
+  border-radius: var(--radio);
+}
+
+/* ---------- Fichas y tablas ---------- */
+.ficha { display: grid; grid-template-columns: 180px 1fr; gap: 6px 12px; margin: 0; }
+.ficha dt { font-weight: 600; color: var(--texto-secundario); }
+.ficha dd { margin: 0; }
+
+.tabla { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.tabla th, .tabla td { padding: 8px 10px; border-bottom: 1px solid var(--borde); text-align: left; }
+.tabla th { background: var(--azul-claro); color: var(--azul-principal); font-weight: 600; }
+.tabla--compacta th, .tabla--compacta td { padding: 4px 8px; text-align: center; }
+.tabla .columna-destacada { font-weight: 700; }
+
+/* ---------- Botones ---------- */
+.boton {
+  font: inherit;
+  padding: 10px 18px;
+  border-radius: var(--radio);
+  border: 1px solid var(--azul-principal);
+  background: var(--superficie);
+  color: var(--azul-principal);
+  cursor: pointer;
+}
+.boton--principal { background: var(--azul-principal); color: #FFFFFF; }
+.boton--principal:hover { background: #0E2747; }
+.boton--grande { width: 100%; font-size: 1.15rem; font-weight: 600; padding: 12px; margin-top: 8px; }
+
+/* ---------- Prueba guiada ---------- */
+.pasos { display: flex; gap: 8px; list-style: none; padding: 0; margin: 0 0 16px; counter-reset: paso; }
+.pasos li {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: var(--radio);
+  border: 1px solid var(--borde);
+  background: var(--superficie);
+  color: var(--texto-secundario);
+}
+.pasos li[data-estado="actual"] { border-color: var(--azul-principal); color: var(--azul-principal); font-weight: 600; box-shadow: inset 0 -3px 0 var(--azul-principal); }
+.pasos li[data-estado="completado"] { color: var(--verde-cumple); }
+.pasos li[data-estado="bloqueado"] { opacity: 0.6; }
+.paso-actual { max-width: 900px; }
+.paso-bloque { border-left: 4px solid var(--azul-claro); padding-left: 14px; margin-bottom: 14px; }
+
+/* ---------- Analizador ---------- */
+.analizador {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  grid-template-areas:
+    "controles lectura"
+    "controles circuito"
+    "explicacion explicacion";
+  gap: 16px;
+}
+.analizador > .tarjeta { margin-bottom: 0; }
+.controles { grid-area: controles; }
+.lectura { grid-area: lectura; }
+.circuito { grid-area: circuito; }
+.explicacion { grid-area: explicacion; }
+
+.grupo { border: 1px solid var(--borde); border-radius: var(--radio); margin: 0 0 12px; padding: 8px 12px 10px; }
+.grupo legend { font-weight: 600; color: var(--azul-principal); padding: 0 4px; }
+.opcion { display: block; padding: 4px 0; cursor: pointer; }
+.opcion--deshabilitada { color: var(--gris-inactivo); cursor: not-allowed; }
+
+.lectura__etiqueta { margin: 0; color: var(--texto-secundario); }
+.lectura__valor {
+  margin: 4px 0 10px;
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: var(--azul-principal);
+  font-variant-numeric: tabular-nums;
+}
+.lectura__detalle { display: grid; grid-template-columns: 170px 1fr; gap: 4px 12px; margin: 0 0 10px; }
+.lectura__detalle dt { color: var(--texto-secundario); }
+.lectura__detalle dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.lectura__comparacion { max-width: 420px; }
+.veredicto--cumple { color: var(--verde-cumple); }
+.veredicto--no-cumple { color: var(--ambar-no-cumple); }
+
+.circuito__svg { width: 100%; height: auto; display: block; }
+.formula p { margin: 4px 0; font-family: ui-monospace, Consolas, monospace; font-size: 0.95rem; }
+
+/* ---------- Dibujo del circuito (M6) ---------- */
+.cable { fill: none; stroke: var(--gris-cable); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.cable--inactivo { stroke: var(--gris-inactivo); stroke-dasharray: 4 4; }
+.chasis { fill: #F7F9FC; stroke: var(--azul-principal); stroke-width: 2; }
+.caja-componente { fill: var(--superficie); stroke: var(--gris-cable); stroke-width: 2; }
+.contacto-conmutador { fill: var(--superficie); stroke: var(--gris-cable); stroke-width: 2; }
+.placa-capacitor { stroke: var(--texto); stroke-width: 3; }
+.texto-circuito { font-size: 13px; fill: var(--texto); }
+.texto-circuito--titulo { font-weight: 600; fill: var(--azul-principal); }
+.texto-circuito--pequeno { font-size: 11px; fill: var(--texto-secundario); }
+.texto-circuito--valor { font-size: 12px; font-weight: 700; fill: var(--texto); }
+.camino-corriente { fill: none; stroke: var(--rojo-fuga); stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 10 8; }
+.camino-corriente--principal { stroke-width: 4; }
+.camino-corriente--minimo { stroke-width: 1.5; opacity: 0.7; }
+
+/* ---------- Comparar (barras) ---------- */
+.grafica-barras { width: 100%; height: auto; display: block; }
+.barra { fill: var(--rojo-fuga); }
+.banda-incertidumbre { fill: var(--rojo-fuga-banda); }
+.eje { stroke: var(--borde); stroke-width: 1; }
+.texto-grafica { font-size: 13px; fill: var(--texto); }
+.texto-grafica--secundario { fill: var(--texto-secundario); font-size: 12px; }
+.fila-grafica:hover .banda-incertidumbre { fill: #EBA9A9; }
+.leyenda-barras { display: flex; gap: 18px; font-size: 0.9rem; color: var(--texto-secundario); margin: 4px 0 10px; }
+.muestra { display: inline-block; width: 22px; height: 10px; vertical-align: middle; margin-right: 6px; border-radius: 2px; }
+.muestra--barra { background: var(--rojo-fuga); }
+.muestra--banda { background: var(--rojo-fuga-banda); }
+
+/* ---------- Aviso fijo ---------- */
+.aviso {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--alto-aviso);
+  line-height: var(--alto-aviso);
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--texto-secundario);
+  background: var(--superficie);
+  border-top: 1px solid var(--borde);
+}
+
+/* ---------- Movimiento reducido (accesibilidad) ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .camino-corriente { stroke-dasharray: none; }
+}
