@@ -5,6 +5,15 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Cambiado (reporte y correo)
+- El PDF se descarga directo, sin el diálogo de imprimir: nuevo generador propio `js/adaptadores/pdf.js` (PDF 1.4 escrito a mano, sin librerías; fuentes estándar Helvetica y Symbol; codificación WinAnsi para tildes, ñ, µ y ±). Mismo contenido que el reporte en pantalla (encabezado, datos, tabla con salto de página y encabezado repetido, incertidumbre y aviso), con pie «Página n de m». Archivo `reporte_seguridad_electrica_AAAA-MM-DD.pdf` (Blob + enlace con download). Se quita la ayuda sobre «Destino».
+- Se quita por completo el aviso «¿Quieres salir del sitio web?» (beforeunload). En su lugar, nota visible en Historial y reporte: «Tus lecturas se borran al cerrar la pestaña. Descarga tu reporte antes de cerrar.»
+- Nuevo botón «Copiar resumen» (navigator.clipboard.writeText) con el mismo resumen del correo, para quien usa correo web. Debajo de «Enviar por correo»: «Abre tu programa de correo. Si usas correo web, usa «Copiar resumen».»
+- La pantalla y el PDF usan la misma función `contenidoDelReporte` (M10), así no pueden diferir.
+
+### Agregado (pruebas)
+- `tests/pdf.test.js`: el archivo empieza con %PDF-, la tabla xref apunta a cada objeto, los /Length son exactos, contiene todas las lecturas, salta de página repitiendo el encabezado, escribe bien tildes/ñ/µ/±/paréntesis y nombra el archivo con la fecha local (71 pruebas en verde).
+
 ### Corregido (después de la Fase 3)
 - Texto de la incertidumbre (Comparar y reporte): se quita «con 95 % de confianza», porque con una sola fuente rectangular k = 2 no equivale a 95 %. El texto nuevo explica U según la GUM (u = exactitud/√3, U = 2·u) a partir de la exactitud del ESA620. Sin cambios en cálculos ni pruebas.
 - El botón «Enviar por correo» ya no dispara el aviso «¿Quieres salir del sitio web?»; el aviso sigue saliendo al cerrar o recargar la pestaña.

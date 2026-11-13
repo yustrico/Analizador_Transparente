@@ -233,7 +233,17 @@ h4 { margin: 14px 0 6px; font-size: 1rem; }
 .boton:disabled { opacity: 0.5; cursor: not-allowed; }
 a.boton { display: inline-block; text-decoration: none; }
 .barra-reporte__acciones { display: flex; gap: 24px; align-items: flex-start; margin-bottom: 6px; }
-.accion-reporte { max-width: 300px; }
+.accion-reporte { max-width: 260px; }
+.nota-importante {
+  max-width: 900px;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  font-weight: 600;
+  color: var(--azul-principal);
+  background: var(--azul-claro);
+  border-left: 4px solid var(--azul-principal);
+  border-radius: var(--radio);
+}
 .accion-reporte .nota { margin-top: 6px; font-size: 0.82rem; }
 .reporte h2 { margin-bottom: 0; }
 .reporte .ficha { margin: 14px 0 8px; }
@@ -260,7 +270,7 @@ a.boton { display: inline-block; text-decoration: none; }
   .camino-corriente { stroke-dasharray: none; }
 }
 
-/* ---------- Impresión: solo el reporte (Guardar como PDF) ---------- */
+/* ---------- Impresión (Ctrl+P): solo el reporte; el PDF se descarga con el botón ---------- */
 @media print {
   @page { margin: 15mm; }
   body { min-width: 0; background: #FFFFFF; padding: 0; font-size: 11pt; }

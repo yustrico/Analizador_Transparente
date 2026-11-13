@@ -19,9 +19,12 @@ import { calcularMedicion, corrientePorFaradio_A_F, capacitanciaDeFuga_F } from 
 import { evaluarMedicion, VEREDICTO_CUMPLE } from "../nucleo/evaluador_limites.js";
 import { crearVisualizador, describirPartesDelCircuito, formatearCorriente_uA } from "./visualizador.js";
 import {
-  crearHistorial, activarAvisoAlCerrar, guardarAvancePrueba, leerAvancePrueba, filaDeRegistro, nombreCortoCondicion, textoLectura, textoPorcentaje, NOMBRES_MEDICION,
+  crearHistorial, guardarAvancePrueba, leerAvancePrueba, filaDeRegistro, nombreCortoCondicion, textoLectura, textoPorcentaje, NOMBRES_MEDICION,
 } from "./historial.js";
-import { generarReporte, construirEnlaceCorreo, limpiarNombre, TEXTO_INCERTIDUMBRE } from "./reporte.js";
+import {
+  generarReporte, crearPdfReporte, nombreArchivoReporte, armarResumenCorreo, construirEnlaceCorreo, limpiarNombre, TEXTO_INCERTIDUMBRE,
+} from "./reporte.js";
+import { descargarPdf } from "./pdf.js";
 
 /* ------------------------------------------------------------------------ */
 /* Constantes                                                               */
@@ -39,6 +42,11 @@ const PASO_CORRIENTES_FUGA = "corrientes_fuga";
 /** Milisegundos por segundo y tiempo máximo para generar el reporte (ES09: ≤ 3 s). */
 const MILISEGUNDOS_POR_SEGUNDO = 1000;
 const TIEMPO_MAXIMO_REPORTE_S = 3;
+
+/** Mensajes de los botones del reporte. */
+const MENSAJE_RESUMEN_COPIADO = "Resumen copiado: pégalo en tu correo y adjunta el PDF";
+const MENSAJE_COPIA_FALLIDA = "No se pudo copiar (el navegador no dio permiso). Usa «Enviar por correo» o copia los datos del reporte a mano.";
+const MENSAJE_PDF_FALLIDO = "No se pudo crear el PDF. Recarga la página e inténtalo de nuevo.";
 
 /** Conversiones de unidades para mostrar los valores. */
 const PICOFARADIOS_POR_FARADIO = 1e12;
@@ -952,8 +960,12 @@ function generarYMostrarReporte(estado) {
     fecha: new Date(),
   };
   campoNombre.value = datos.nombre;
+  // Se guardan los datos para que el PDF y el resumen copiado sean iguales a lo que se ve
+  estado.datosReporte = datos;
   generarReporte(elemento("reporte-contenido"), datos);
   elemento("enlace-correo").href = construirEnlaceCorreo(datos);
+  elemento("estado-pdf").textContent = "";
+  elemento("estado-copia").textContent = "";
   cambiarVistaHistorial(true);
   window.scrollTo(0, 0);
   // El tiempo se toma en el siguiente cuadro, cuando el reporte ya está dibujado
@@ -963,6 +975,39 @@ function generarYMostrarReporte(estado) {
     elemento("reporte-tiempo").textContent =
       `Reporte generado en ${Math.round(duracion_ms)} ms (meta ES09: ≤ ${TIEMPO_MAXIMO_REPORTE_S} s, ${cumple ? "cumple" : "no cumple"}).`;
   });
+}
+
+/**
+ * Crea el PDF del reporte (M10) y lo descarga directo con el nombre
+ * reporte_seguridad_electrica_AAAA-MM-DD.pdf. Si algo falla, lo dice en
+ * pantalla sin romper la página.
+ * @param {object} estado - Estado de la interfaz (con los datos del reporte generado).
+ */
+function descargarReporte(estado) {
+  const mensaje = elemento("estado-pdf");
+  try {
+    const nombreArchivo = nombreArchivoReporte(estado.datosReporte.fecha);
+    descargarPdf(crearPdfReporte(estado.datosReporte), nombreArchivo);
+    mensaje.textContent = `Descargado: ${nombreArchivo} (búscalo en tu carpeta de Descargas).`;
+  } catch (error) {
+    mensaje.textContent = `${MENSAJE_PDF_FALLIDO} (${error.message})`;
+  }
+}
+
+/**
+ * Copia al portapapeles el mismo resumen del correo, para pegarlo en un
+ * correo web (Outlook web, Gmail). El navegador solo lo permite en páginas
+ * seguras (https o el servidor local) y después de un clic.
+ * @param {object} estado - Estado de la interfaz (con los datos del reporte generado).
+ */
+async function copiarResumen(estado) {
+  const mensaje = elemento("estado-copia");
+  try {
+    await navigator.clipboard.writeText(armarResumenCorreo(estado.datosReporte).cuerpo);
+    mensaje.textContent = MENSAJE_RESUMEN_COPIADO;
+  } catch {
+    mensaje.textContent = MENSAJE_COPIA_FALLIDA;
+  }
 }
 
 /**
@@ -982,9 +1027,8 @@ function configurarHistorial(estado) {
       generarYMostrarReporte(estado);
     }
   });
-  elemento("boton-imprimir").addEventListener("click", () => window.print());
-  // Abrir el correo no cierra la página: no debe salir el aviso de "¿salir del sitio?"
-  elemento("enlace-correo").addEventListener("click", () => estado.avisoAlCerrar.omitirSiguienteAviso());
+  elemento("boton-descargar-pdf").addEventListener("click", () => descargarReporte(estado));
+  elemento("boton-copiar-resumen").addEventListener("click", () => copiarResumen(estado));
   elemento("boton-volver-historial").addEventListener("click", () => cambiarVistaHistorial(false));
 }
 
@@ -1002,8 +1046,8 @@ export function iniciarInterfaz(parametros) {
     secuencia: recuperarSecuencia(),
     visualizador: crearVisualizador(elemento("svg-circuito"), parametros),
     historial: crearHistorial(),
+    datosReporte: null,
   };
-  estado.avisoAlCerrar = activarAvisoAlCerrar(estado.historial);
   mostrarEquipo(parametros);
   configurarNavegacion(estado);
   elemento("boton-siguiente-paso").addEventListener("click", () => avanzarPaso(estado));

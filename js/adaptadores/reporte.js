@@ -3,11 +3,12 @@
  * Título: Reporte final de la práctica
  * Descripción: Arma el reporte del estudiante con su nombre (opcional), la
  *   fecha, el equipo y TODAS las lecturas que hizo, más la explicación de la
- *   incertidumbre y el aviso de que es una herramienta educativa. El reporte
- *   se guarda como PDF con el diálogo de impresión del navegador
- *   (window.print) y se puede enviar por correo con un enlace mailto: que
- *   abre el programa de correo del propio estudiante. NADA se envía a un
- *   servidor: el reporte es del estudiante.
+ *   incertidumbre y el aviso de que es una herramienta educativa. El mismo
+ *   contenido se muestra en pantalla y se descarga como archivo PDF (con el
+ *   generador propio de pdf.js, sin diálogo de imprimir). El resumen se
+ *   puede enviar con un enlace mailto: (programa de correo del estudiante)
+ *   o copiar para pegarlo en un correo web. NADA se envía a un servidor: el
+ *   reporte es del estudiante.
  * Módulo: M10 – Reporte (adaptador)
  * Autores: Yustin Rico, David Cardona, Santiago González
  * Creado: 2026-11-13 · Modificado: 2026-11-13
@@ -16,12 +17,25 @@
 
 import { VEREDICTO_CUMPLE } from "../nucleo/evaluador_limites.js";
 import { filaDeRegistro, textoLectura, textoPorcentaje, NOMBRES_MEDICION, nombreCortoCondicion } from "./historial.js";
+import { crearDocumentoPdf } from "./pdf.js";
 
 /** Explicación de la incertidumbre (se usa en Comparar y en el reporte). */
 export const TEXTO_INCERTIDUMBRE = "La incertidumbre (U) indica cuánto podría diferir la lectura del analizador real. Se calcula con la exactitud que declara el fabricante del ESA620, ±(1 % de la lectura + 1 µA), según la guía GUM (JCGM 100:2008): u = exactitud/√3 y U = 2·u. Ejemplo: 14.73 ± 1.32 µA significa que el analizador real podría mostrar entre 13.41 y 16.05 µA.";
 
 /** Aviso obligatorio del reporte. */
 const TEXTO_AVISO = "Herramienta educativa, no certifica equipos. Complementa la práctica con el analizador real.";
+
+/** Títulos del reporte (iguales en pantalla y en el PDF). */
+const TITULO_REPORTE = "Reporte de práctica: prueba de seguridad eléctrica";
+const SUBTITULO_REPORTE = "Analizador transparente (simulador educativo de IEC 60601-1)";
+const TITULO_LECTURAS = "Lecturas de la práctica";
+const TITULO_INCERTIDUMBRE = "Cómo leer la incertidumbre";
+
+/** Pie de cada página del PDF. */
+const PIE_PDF = "Analizador transparente · Herramienta educativa, no certifica equipos";
+
+/** Inicio del nombre del archivo PDF (luego va la fecha AAAA-MM-DD). */
+const PREFIJO_ARCHIVO_PDF = "reporte_seguridad_electrica_";
 
 /** Largo máximo del nombre del estudiante (caracteres). */
 export const LARGO_MAXIMO_NOMBRE = 60;
@@ -40,15 +54,18 @@ const SALTO_CORREO = "\r\n";
 const CARACTERES_DE_CONTROL = /[\u0000-\u001F\u007F]/g;
 const ESPACIOS_REPETIDOS = /\s+/g;
 
-/** Columnas de la tabla del reporte: [título, campo de filaDeRegistro]. */
+/** Columna "#" (número de lectura): [título, fracción del ancho de la página en el PDF]. */
+const COLUMNA_NUMERO = Object.freeze(["#", 0.04]);
+
+/** Columnas de la tabla del reporte: [título, campo de filaDeRegistro, fracción del ancho en el PDF]. */
 const COLUMNAS_REPORTE = Object.freeze([
-  ["Hora", "hora"],
-  ["Medición", "medicion"],
-  ["Condición", "condicion"],
-  ["Lectura ± incertidumbre (µA)", "lectura"],
-  ["Límite (µA)", "limite"],
-  ["% del límite", "porcentaje"],
-  ["Veredicto", "veredicto"],
+  ["Hora", "hora", 0.14],
+  ["Medición", "medicion", 0.17],
+  ["Condición", "condicion", 0.19],
+  ["Lectura ± incertidumbre (µA)", "lectura", 0.16],
+  ["Límite (µA)", "limite", 0.08],
+  ["% del límite", "porcentaje", 0.09],
+  ["Veredicto", "veredicto", 0.13],
 ]);
 
 /**
@@ -100,6 +117,36 @@ function textoMayorPorcentaje(registro) {
 }
 
 /**
+ * Arma el contenido del reporte (datos generales y filas de la tabla). Es el
+ * mismo para la pantalla y para el PDF, así los dos nunca se diferencian.
+ * @param {{nombre: string, registros: object[], parametros: object, fecha: Date}} datos - Datos del reporte.
+ * @returns {{datosGenerales: [string, string][], columnas: string[], filas: string[][]}} Contenido.
+ */
+export function contenidoDelReporte(datos) {
+  const { nombre, registros, parametros, fecha } = datos;
+  const resumen = resumir(registros);
+  const datosGenerales = [
+    ["Estudiante", nombre || NOMBRE_VACIO],
+    ["Fecha y hora", fecha.toLocaleString(IDIOMA_FECHAS, FORMATO_FECHA)],
+    ["Equipo", parametros.equipo.nombre],
+    ["Clasificación", `Clase ${parametros.equipo.clase}, parte aplicada ${parametros.equipo.parte_aplicada}`],
+    ["Normas", `${parametros.equipo.norma_general} y ${parametros.equipo.norma_particular}`],
+    ["Resumen", textoResumen(resumen)],
+  ];
+  // La lectura más cerca de su límite solo existe si hay lecturas
+  if (resumen.mayor !== null) {
+    datosGenerales.push(["Más cerca del límite", textoMayorPorcentaje(resumen.mayor)]);
+  }
+  const columnas = [COLUMNA_NUMERO[0], ...COLUMNAS_REPORTE.map(([titulo]) => titulo)];
+  // Una fila de texto por lectura, en orden
+  const filas = registros.map((registro, indice) => {
+    const textos = filaDeRegistro(registro);
+    return [String(indice + 1), ...COLUMNAS_REPORTE.map(([, campo]) => textos[campo])];
+  });
+  return { datosGenerales, columnas, filas };
+}
+
+/**
  * Crea un elemento HTML con texto (siempre textContent) y lo agrega a un padre.
  * @param {string} etiqueta - Nombre del elemento.
  * @param {string} texto - Texto.
@@ -118,90 +165,105 @@ function agregar(etiqueta, texto, padre, clase) {
 }
 
 /**
- * Agrega a una lista de definiciones (dl) un par término–valor.
- * @param {HTMLElement} lista - Elemento dl.
- * @param {string} termino - Término.
- * @param {string} valor - Valor.
- */
-function agregarDato(lista, termino, valor) {
-  agregar("dt", termino, lista);
-  agregar("dd", valor, lista);
-}
-
-/**
  * Crea la tabla con todas las lecturas.
- * @param {object[]} registros - Registros del historial, en orden.
+ * @param {string[]} columnas - Títulos de las columnas.
+ * @param {string[][]} filas - Texto de cada celda.
  * @returns {HTMLTableElement} Tabla.
  */
-function crearTablaLecturas(registros) {
+function crearTablaLecturas(columnas, filas) {
   const tabla = document.createElement("table");
   tabla.className = "tabla tabla--reporte";
   const filaEncabezado = tabla.createTHead().insertRow();
-  agregar("th", "#", filaEncabezado);
   // Un encabezado por columna
-  for (const [titulo] of COLUMNAS_REPORTE) {
+  for (const titulo of columnas) {
     agregar("th", titulo, filaEncabezado);
   }
   const cuerpo = tabla.createTBody();
-  // Una fila por lectura
-  for (const [indice, registro] of registros.entries()) {
+  // Una fila por lectura, celda por celda
+  for (const celdas of filas) {
     const fila = cuerpo.insertRow();
-    const datos = filaDeRegistro(registro);
-    agregar("td", String(indice + 1), fila);
-    for (const [, campo] of COLUMNAS_REPORTE) {
-      agregar("td", datos[campo], fila);
+    for (const texto of celdas) {
+      agregar("td", texto, fila);
     }
   }
   return tabla;
 }
 
 /**
- * Dibuja el reporte dentro de un contenedor (borra lo que hubiera antes).
+ * Dibuja el reporte en pantalla dentro de un contenedor (borra lo que hubiera antes).
  * @param {HTMLElement} contenedor - Elemento donde va el reporte.
  * @param {{nombre: string, registros: object[], parametros: object, fecha: Date}} datos - Datos del reporte.
  */
 export function generarReporte(contenedor, datos) {
-  const { nombre, registros, parametros, fecha } = datos;
-  const resumen = resumir(registros);
+  const contenido = contenidoDelReporte(datos);
   contenedor.replaceChildren();
 
   // Encabezado del reporte
-  agregar("h2", "Reporte de práctica: prueba de seguridad eléctrica", contenedor);
-  agregar("p", "Analizador transparente (simulador educativo de IEC 60601-1)", contenedor, "nota");
+  agregar("h2", TITULO_REPORTE, contenedor);
+  agregar("p", SUBTITULO_REPORTE, contenedor, "nota");
 
-  // Datos generales
-  const datosGenerales = document.createElement("dl");
-  datosGenerales.className = "ficha";
-  agregarDato(datosGenerales, "Estudiante", nombre || NOMBRE_VACIO);
-  agregarDato(datosGenerales, "Fecha y hora", fecha.toLocaleString(IDIOMA_FECHAS, FORMATO_FECHA));
-  agregarDato(datosGenerales, "Equipo", parametros.equipo.nombre);
-  agregarDato(datosGenerales, "Clasificación", `Clase ${parametros.equipo.clase}, parte aplicada ${parametros.equipo.parte_aplicada}`);
-  agregarDato(datosGenerales, "Normas", `${parametros.equipo.norma_general} y ${parametros.equipo.norma_particular}`);
-  agregarDato(datosGenerales, "Resumen", textoResumen(resumen));
-  if (resumen.mayor !== null) {
-    agregarDato(datosGenerales, "Más cerca del límite", textoMayorPorcentaje(resumen.mayor));
+  // Datos generales (lista término–valor)
+  const listaDatos = document.createElement("dl");
+  listaDatos.className = "ficha";
+  for (const [termino, valor] of contenido.datosGenerales) {
+    agregar("dt", termino, listaDatos);
+    agregar("dd", valor, listaDatos);
   }
-  contenedor.appendChild(datosGenerales);
+  contenedor.appendChild(listaDatos);
 
   // Tabla de lecturas
-  agregar("h3", "Lecturas de la práctica", contenedor);
-  contenedor.appendChild(crearTablaLecturas(registros));
+  agregar("h3", TITULO_LECTURAS, contenedor);
+  contenedor.appendChild(crearTablaLecturas(contenido.columnas, contenido.filas));
 
   // Incertidumbre y aviso
-  agregar("h3", "Cómo leer la incertidumbre", contenedor);
+  agregar("h3", TITULO_INCERTIDUMBRE, contenedor);
   agregar("p", TEXTO_INCERTIDUMBRE, contenedor);
   agregar("p", TEXTO_AVISO, contenedor, "reporte__aviso");
 }
 
 /**
- * Crea el enlace mailto: con un resumen CORTO en el cuerpo (los navegadores y
- * programas de correo cortan los enlaces largos) y la indicación de adjuntar
- * el PDF. No lleva destinatario: el estudiante lo escribe en su correo.
- * Todo el texto se codifica con encodeURIComponent.
+ * Crea el archivo PDF del reporte con el mismo contenido de la pantalla:
+ * encabezado, datos del estudiante y del equipo, tabla de lecturas (con
+ * salto de página y encabezado repetido), incertidumbre y aviso.
  * @param {{nombre: string, registros: object[], parametros: object, fecha: Date}} datos - Datos del reporte.
- * @returns {string} Enlace mailto:.
+ * @returns {Uint8Array} Bytes del archivo PDF.
  */
-export function construirEnlaceCorreo(datos) {
+export function crearPdfReporte(datos) {
+  const contenido = contenidoDelReporte(datos);
+  const fracciones = [COLUMNA_NUMERO[1], ...COLUMNAS_REPORTE.map(([, , fraccion]) => fraccion)];
+  const columnas = contenido.columnas.map((titulo, indice) => ({ titulo, fraccion: fracciones[indice] }));
+  const documento = crearDocumentoPdf({ titulo: TITULO_REPORTE, pie: PIE_PDF, fecha: datos.fecha });
+
+  documento.titulo(TITULO_REPORTE);
+  documento.subtitulo(SUBTITULO_REPORTE);
+  documento.listaDatos(contenido.datosGenerales);
+  documento.seccion(TITULO_LECTURAS);
+  documento.tabla(columnas, contenido.filas);
+  documento.seccion(TITULO_INCERTIDUMBRE);
+  documento.parrafo(TEXTO_INCERTIDUMBRE);
+  documento.aviso(TEXTO_AVISO);
+  return documento.generar();
+}
+
+/**
+ * Nombre del archivo PDF con la fecha LOCAL del estudiante, por ejemplo
+ * "reporte_seguridad_electrica_2026-11-13.pdf".
+ * @param {Date} fecha - Fecha del reporte.
+ * @returns {string} Nombre del archivo.
+ */
+export function nombreArchivoReporte(fecha) {
+  const dosCifras = (valor) => String(valor).padStart(2, "0");
+  return `${PREFIJO_ARCHIVO_PDF}${fecha.getFullYear()}-${dosCifras(fecha.getMonth() + 1)}-${dosCifras(fecha.getDate())}.pdf`;
+}
+
+/**
+ * Arma el asunto y el cuerpo CORTO del correo (los navegadores y programas
+ * de correo cortan los enlaces largos), con la indicación de adjuntar el PDF.
+ * El mismo cuerpo es el que copia el botón «Copiar resumen».
+ * @param {{nombre: string, registros: object[], parametros: object, fecha: Date}} datos - Datos del reporte.
+ * @returns {{asunto: string, cuerpo: string}} Asunto y cuerpo del correo.
+ */
+export function armarResumenCorreo(datos) {
   const { nombre, registros, parametros, fecha } = datos;
   const resumen = resumir(registros);
   const fechaTexto = fecha.toLocaleString(IDIOMA_FECHAS, FORMATO_FECHA);
@@ -218,5 +280,17 @@ export function construirEnlaceCorreo(datos) {
     lineas.push(`Más cerca del límite: ${textoMayorPorcentaje(resumen.mayor)}`);
   }
   lineas.push("", "Adjunto el reporte completo en PDF (botón «Descargar reporte (PDF)» de la herramienta).", TEXTO_AVISO);
-  return `mailto:?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(lineas.join(SALTO_CORREO))}`;
+  return { asunto, cuerpo: lineas.join(SALTO_CORREO) };
+}
+
+/**
+ * Crea el enlace mailto: con el resumen. No lleva destinatario: el
+ * estudiante lo escribe en su correo. Todo el texto se codifica con
+ * encodeURIComponent.
+ * @param {{nombre: string, registros: object[], parametros: object, fecha: Date}} datos - Datos del reporte.
+ * @returns {string} Enlace mailto:.
+ */
+export function construirEnlaceCorreo(datos) {
+  const { asunto, cuerpo } = armarResumenCorreo(datos);
+  return `mailto:?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
 }

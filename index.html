@@ -189,6 +189,7 @@
     <!-- ===================== 5. Historial y reporte ===================== -->
     <section id="seccion-historial" class="seccion" data-seccion="historial" hidden>
       <h2 class="no-imprimir">Historial y reporte</h2>
+      <p class="nota-importante no-imprimir" id="nota-borrado">Tus lecturas se borran al cerrar la pestaña. Descarga tu reporte antes de cerrar.</p>
 
       <!-- Vista 1: historial de lecturas y botón para finalizar -->
       <div id="historial-vista">
@@ -215,23 +216,27 @@
         </div>
       </div>
 
-      <!-- Vista 2: reporte final (lo único que se imprime) -->
+      <!-- Vista 2: reporte final (se descarga como PDF) -->
       <div id="reporte-vista" hidden>
         <div class="tarjeta barra-reporte no-imprimir">
           <div class="barra-reporte__acciones">
             <div class="accion-reporte">
-              <button type="button" class="boton boton--principal" id="boton-imprimir">Descargar reporte (PDF)</button>
-              <p class="nota">En la ventana que se abre, en Destino elige «Guardar como PDF» y presiona Guardar.</p>
+              <button type="button" class="boton boton--principal" id="boton-descargar-pdf">Descargar reporte (PDF)</button>
+              <p class="nota" id="estado-pdf" aria-live="polite"></p>
             </div>
             <div class="accion-reporte">
               <a class="boton" id="enlace-correo" href="mailto:">Enviar por correo</a>
-              <p class="nota">Adjunta el PDF que descargaste; el correo no lo adjunta solo.</p>
+              <p class="nota">Abre tu programa de correo. Si usas correo web, usa «Copiar resumen».</p>
+            </div>
+            <div class="accion-reporte">
+              <button type="button" class="boton" id="boton-copiar-resumen">Copiar resumen</button>
+              <p class="nota" id="estado-copia" aria-live="polite"></p>
             </div>
             <div class="accion-reporte">
               <button type="button" class="boton" id="boton-volver-historial">Volver al historial</button>
             </div>
           </div>
-          <p class="nota">El correo se abre en tu propio programa de correo; la herramienta no envía nada a ningún servidor.</p>
+          <p class="nota">El PDF se crea en tu navegador y el correo lo envías tú desde tu propio programa o correo web: la herramienta no envía nada a ningún servidor.</p>
           <p class="nota" id="reporte-tiempo"></p>
         </div>
         <article class="tarjeta reporte" id="reporte-contenido"></article>
