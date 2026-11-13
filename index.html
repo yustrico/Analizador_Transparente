@@ -129,6 +129,7 @@
         <div class="tarjeta lectura" aria-live="polite">
           <p class="lectura__etiqueta" id="lectura-etiqueta">Lectura</p>
           <p class="lectura__valor" id="lectura-valor">— µA</p>
+          <p class="lectura__subtitulo">lectura ± incertidumbre del analizador</p>
           <dl class="lectura__detalle">
             <dt>Límite aplicable</dt><dd id="lectura-limite">—</dd>
             <dt>% del límite usado</dt><dd id="lectura-porcentaje">—</dd>
@@ -161,7 +162,7 @@
           <h4>Fórmula usada</h4>
           <ul id="explicacion-simbolos" class="simbolos"></ul>
           <div id="explicacion-formula" class="formula"><p class="nota">—</p></div>
-          <h4>Banda ± U</h4>
+          <h4>Margen de incertidumbre (± U)</h4>
           <p id="explicacion-banda"></p>
         </div>
       </div>
@@ -170,14 +171,15 @@
     <!-- ============================ 4. Comparar ============================ -->
     <section id="seccion-comparar" class="seccion" data-seccion="comparar" hidden>
       <h2>Comparar condiciones</h2>
-      <p class="introduccion">Cada configuración medida en esta sesión (la última lectura de cada una). La barra es la lectura I y la franja clara es la banda ± U del analizador real: si dos franjas se traslapan, la diferencia puede ser del instrumento y no de la condición.</p>
+      <p class="introduccion" id="comparar-incertidumbre"></p>
+      <p class="introduccion">Cada configuración medida en esta sesión (la última lectura de cada una). La barra es la lectura y la franja clara es el margen de incertidumbre del analizador: si dos franjas se traslapan, la diferencia puede ser del instrumento y no de la condición.</p>
       <p class="nota" id="comparar-vacio">Todavía no hay lecturas. Mide en la sección Analizador.</p>
       <div id="comparar-graficas" class="rejilla-dos"></div>
       <div class="tarjeta" id="comparar-tabla-tarjeta" hidden>
         <h3>Tabla de lecturas</h3>
         <table class="tabla" id="tabla-comparar">
           <thead>
-            <tr><th>Medición</th><th>Condición</th><th>I ± U (µA)</th><th>Límite (µA)</th><th>% del límite</th><th>Veredicto</th></tr>
+            <tr><th>Medición</th><th>Condición</th><th>Lectura ± incertidumbre (µA)</th><th>Límite (µA)</th><th>% del límite</th><th>Veredicto</th></tr>
           </thead>
           <tbody></tbody>
         </table>
@@ -186,8 +188,46 @@
 
     <!-- ===================== 5. Historial y reporte ===================== -->
     <section id="seccion-historial" class="seccion" data-seccion="historial" hidden>
-      <h2>Historial y reporte</h2>
-      <p class="nota">El historial de lecturas y el reporte final (PDF y correo) se construyen en la Fase 3.</p>
+      <h2 class="no-imprimir">Historial y reporte</h2>
+
+      <!-- Vista 1: historial de lecturas y botón para finalizar -->
+      <div id="historial-vista">
+        <p class="introduccion">Todas las lecturas de esta práctica, en el orden en que las hiciste. Se guardan solo en este navegador (no se envían a ningún servidor) y se borran al cerrar la pestaña. Puedes pausar la práctica sin límite de tiempo.</p>
+        <p class="nota" id="historial-vacio">Todavía no hay lecturas. Mide en la sección Analizador.</p>
+        <div class="tarjeta" id="historial-tabla-tarjeta" hidden>
+          <table class="tabla" id="tabla-historial">
+            <thead>
+              <tr><th>#</th><th>Hora</th><th>Medición</th><th>Condición</th><th>Lectura ± incertidumbre (µA)</th><th>Límite (µA)</th><th>% del límite</th><th>Veredicto</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="tarjeta finalizar">
+          <h3>Finalizar práctica</h3>
+          <p>Genera tu reporte para guardarlo en PDF o enviarlo por correo. Después puedes seguir midiendo y volver a generarlo.</p>
+          <p class="nota" id="finalizar-resumen"></p>
+          <button type="button" class="boton boton--principal" id="boton-finalizar">Finalizar práctica</button>
+          <div class="finalizar__nombre" id="panel-nombre" hidden>
+            <label for="campo-nombre">Tu nombre (opcional, máximo 60 caracteres)</label>
+            <input type="text" id="campo-nombre" maxlength="60" autocomplete="name" spellcheck="false">
+            <button type="button" class="boton boton--principal" id="boton-generar-reporte">Generar reporte</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vista 2: reporte final (lo único que se imprime) -->
+      <div id="reporte-vista" hidden>
+        <div class="tarjeta barra-reporte no-imprimir">
+          <div class="barra-reporte__botones">
+            <button type="button" class="boton boton--principal" id="boton-imprimir">Guardar como PDF</button>
+            <a class="boton" id="enlace-correo" href="mailto:">Enviar por correo</a>
+            <button type="button" class="boton" id="boton-volver-historial">Volver al historial</button>
+          </div>
+          <p class="nota">Para enviarlo con el PDF: primero «Guardar como PDF» (en el diálogo elige «Guardar como PDF» como impresora), luego «Enviar por correo» y adjunta el archivo. El correo se abre en tu propio programa de correo.</p>
+          <p class="nota" id="reporte-tiempo"></p>
+        </div>
+        <article class="tarjeta reporte" id="reporte-contenido"></article>
+      </div>
     </section>
   </main>
 

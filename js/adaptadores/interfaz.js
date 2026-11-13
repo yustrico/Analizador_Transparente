@@ -18,6 +18,10 @@ import { PASOS_PRUEBA, crearEstadoInicial, obtenerPasoActual, completarPaso, pas
 import { calcularMedicion, corrientePorFaradio_A_F, capacitanciaDeFuga_F } from "../nucleo/motor_calculo.js";
 import { evaluarMedicion, VEREDICTO_CUMPLE } from "../nucleo/evaluador_limites.js";
 import { crearVisualizador, describirPartesDelCircuito, formatearCorriente_uA } from "./visualizador.js";
+import {
+  crearHistorial, activarAvisoAlCerrar, filaDeRegistro, nombreCortoCondicion, textoLectura, textoPorcentaje, NOMBRES_MEDICION,
+} from "./historial.js";
+import { generarReporte, construirEnlaceCorreo, limpiarNombre, TEXTO_INCERTIDUMBRE } from "./reporte.js";
 
 /* ------------------------------------------------------------------------ */
 /* Constantes                                                               */
@@ -32,9 +36,9 @@ const SECCIONES_BLOQUEADAS_POR_PRUEBA = Object.freeze(["analizador", "comparar"]
 /** Paso de la prueba guiada que desbloquea el Analizador. */
 const PASO_CORRIENTES_FUGA = "corrientes_fuga";
 
-/** Decimales de la lectura "I ± U" y del % del límite. */
-const DECIMALES_LECTURA = 2;
-const DECIMALES_PORCENTAJE = 1;
+/** Milisegundos por segundo y tiempo máximo para generar el reporte (ES09: ≤ 3 s). */
+const MILISEGUNDOS_POR_SEGUNDO = 1000;
+const TIEMPO_MAXIMO_REPORTE_S = 3;
 
 /** Conversiones de unidades para mostrar los valores. */
 const PICOFARADIOS_POR_FARADIO = 1e12;
@@ -48,7 +52,6 @@ const DECIMALES_REACTANCIA = 1;
 const DECIMALES_CORRIENTE_POR_FARADIO = 2;
 
 /** Nombres para mostrar. */
-const NOMBRES_MEDICION = Object.freeze({ contacto: "Corriente de contacto", paciente: "Corriente de paciente CF" });
 const NOMBRES_ESTADO = Object.freeze({ normal: "condición normal", primer_defecto: "primer defecto" });
 const ETIQUETAS_AISLAMIENTO = Object.freeze({
   red_tierra: "Red – tierra",
@@ -135,32 +138,6 @@ function ocultarError() {
  */
 function describirCondicion(condicion) {
   return `Polaridad ${condicion.polaridad} · tierra ${condicion.tierra} · neutro ${condicion.neutro}`;
-}
-
-/**
- * Nombre corto de una condición para tablas y gráficas, por ejemplo "Tierra abierta (pol. invertida)".
- * @param {{polaridad: string, tierra: string, neutro: string}} condicion - Condición de prueba.
- * @returns {string} Nombre corto.
- */
-function nombreCortoCondicion(condicion) {
-  let falla = "Normal";
-  if (condicion.tierra === "abierta") {
-    falla = "Tierra abierta";
-  } else if (condicion.neutro === "abierto") {
-    falla = "Neutro abierto";
-  }
-  return `${falla} (pol. ${condicion.polaridad})`;
-}
-
-/**
- * Texto "I ± U" de una lectura, con 2 decimales fijos como en una pantalla de
- * analizador (por eso 0.0000383 µA se ve como 0.00). El valor exacto aparece
- * en la fórmula y en el circuito.
- * @param {{corriente_uA: number, incertidumbre_uA: number}} resultado - Resultado evaluado.
- * @returns {string} Por ejemplo "14.73 ± 1.32".
- */
-function textoLectura(resultado) {
-  return `${resultado.corriente_uA.toFixed(DECIMALES_LECTURA)} ± ${resultado.incertidumbre_uA.toFixed(DECIMALES_LECTURA)}`;
 }
 
 /* ------------------------------------------------------------------------ */
@@ -464,7 +441,7 @@ function mostrarLectura(resultado) {
   elemento("lectura-etiqueta").textContent = `${NOMBRES_MEDICION[resultado.tipoMedicion]} · ${describirCondicion(resultado.condicion)}`;
   elemento("lectura-valor").textContent = `${textoLectura(resultado)} µA`;
   elemento("lectura-limite").textContent = `${resultado.limite_uA} µA (parte CF, ${NOMBRES_ESTADO[resultado.estadoCondicion]})`;
-  elemento("lectura-porcentaje").textContent = `${resultado.porcentajeDelLimite.toFixed(DECIMALES_PORCENTAJE)} %`;
+  elemento("lectura-porcentaje").textContent = textoPorcentaje(resultado.porcentajeDelLimite);
   const veredicto = elemento("lectura-veredicto");
   const cumple = resultado.veredicto === VEREDICTO_CUMPLE;
   veredicto.textContent = cumple ? `✓ ${resultado.veredicto}` : `✗ ${resultado.veredicto}`;
@@ -663,14 +640,32 @@ function configurarAnalizador(estado) {
 /* ------------------------------------------------------------------------ */
 
 /**
- * Guarda una lectura de la sesión y actualiza la sección Comparar.
- * (En la Fase 3 este registro pasa al módulo de historial, M8.)
+ * Guarda una lectura en el historial (M8) y actualiza Comparar e Historial.
  * @param {object} estado - Estado de la interfaz.
  * @param {object} resultado - Resultado evaluado.
  */
 function registrarLectura(estado, resultado) {
-  estado.lecturas.push(Object.freeze({ ...resultado, hora: new Date() }));
+  estado.historial.agregar(resultado);
   mostrarComparacion(estado);
+  mostrarHistorial(estado);
+  // Con una lectura nueva, el reporte anterior queda desactualizado: se vuelve al historial
+  cambiarVistaHistorial(false);
+}
+
+/**
+ * Escribe en una fila de tabla las columnas de un registro (mismo formato en todas las tablas).
+ * @param {HTMLTableRowElement} fila - Fila de la tabla.
+ * @param {object} registro - Registro del historial.
+ * @param {string[]} campos - Campos de filaDeRegistro, en el orden de las columnas.
+ */
+function llenarFila(fila, registro, campos) {
+  const datos = filaDeRegistro(registro);
+  // Una celda por campo
+  for (const campo of campos) {
+    const esVeredicto = campo === "veredicto";
+    const claseVeredicto = registro.veredicto === VEREDICTO_CUMPLE ? "veredicto--cumple" : "veredicto--no-cumple";
+    crearConTexto("td", datos[campo], fila, esVeredicto ? claseVeredicto : "");
+  }
 }
 
 /**
@@ -710,14 +705,7 @@ function mostrarTablaComparar(filas) {
   cuerpo.replaceChildren();
   // Una fila por configuración
   for (const lectura of filas) {
-    const fila = document.createElement("tr");
-    crearConTexto("td", NOMBRES_MEDICION[lectura.tipoMedicion], fila);
-    crearConTexto("td", nombreCortoCondicion(lectura.condicion), fila);
-    crearConTexto("td", textoLectura(lectura), fila);
-    crearConTexto("td", String(lectura.limite_uA), fila);
-    crearConTexto("td", `${lectura.porcentajeDelLimite.toFixed(DECIMALES_PORCENTAJE)} %`, fila);
-    crearConTexto("td", lectura.veredicto, fila, lectura.veredicto === VEREDICTO_CUMPLE ? "veredicto--cumple" : "veredicto--no-cumple");
-    cuerpo.appendChild(fila);
+    llenarFila(cuerpo.insertRow(), lectura, ["medicion", "condicion", "lectura", "limite", "porcentaje", "veredicto"]);
   }
 }
 
@@ -726,7 +714,7 @@ function mostrarTablaComparar(filas) {
  * @param {object} estado - Estado de la interfaz.
  */
 function mostrarComparacion(estado) {
-  const filas = ultimaLecturaPorConfiguracion(estado.lecturas);
+  const filas = ultimaLecturaPorConfiguracion(estado.historial.obtenerRegistros());
   const hayLecturas = filas.length > 0;
   elemento("comparar-vacio").hidden = hayLecturas;
   elemento("comparar-tabla-tarjeta").hidden = !hayLecturas;
@@ -877,7 +865,7 @@ function crearTarjetaGrafica(titulo, filas) {
   const leyenda = document.createElement("div");
   leyenda.className = "leyenda-barras";
   // Dos muestras de la leyenda: la barra y la banda
-  for (const [claseMuestra, texto] of [["muestra muestra--barra", "Lectura I"], ["muestra muestra--banda", "Banda ± U del analizador"]]) {
+  for (const [claseMuestra, texto] of [["muestra muestra--barra", "Lectura"], ["muestra muestra--banda", "Margen de incertidumbre del analizador"]]) {
     const item = document.createElement("span");
     crearConTexto("span", "", item, claseMuestra);
     item.append(texto);
@@ -886,6 +874,96 @@ function crearTarjetaGrafica(titulo, filas) {
   tarjeta.appendChild(leyenda);
   tarjeta.appendChild(dibujarGraficaBarras(filas));
   return tarjeta;
+}
+
+/* ------------------------------------------------------------------------ */
+/* Sección 5: Historial y reporte                                           */
+/* ------------------------------------------------------------------------ */
+
+/**
+ * Muestra la vista del historial o la del reporte (nunca las dos).
+ * @param {boolean} mostrarReporte - true para ver el reporte; false para ver el historial.
+ */
+function cambiarVistaHistorial(mostrarReporte) {
+  elemento("historial-vista").hidden = mostrarReporte;
+  elemento("reporte-vista").hidden = !mostrarReporte;
+}
+
+/**
+ * Llena la tabla del historial y el resumen antes de finalizar.
+ * @param {object} estado - Estado de la interfaz.
+ */
+function mostrarHistorial(estado) {
+  const registros = estado.historial.obtenerRegistros();
+  const hayLecturas = registros.length > 0;
+  elemento("historial-vacio").hidden = hayLecturas;
+  elemento("historial-tabla-tarjeta").hidden = !hayLecturas;
+
+  const cuerpo = elemento("tabla-historial").querySelector("tbody");
+  cuerpo.replaceChildren();
+  // Una fila por lectura, en orden de llegada
+  for (const [indice, registro] of registros.entries()) {
+    const fila = cuerpo.insertRow();
+    crearConTexto("td", String(indice + 1), fila);
+    llenarFila(fila, registro, ["hora", "medicion", "condicion", "lectura", "limite", "porcentaje", "veredicto"]);
+  }
+
+  // Antes de generar el reporte se revisa cuántas lecturas hay
+  const configuracionesPosibles = ORDEN_MEDICIONES.length * ORDEN_CONDICIONES.length;
+  const configuracionesMedidas = ultimaLecturaPorConfiguracion(registros).length;
+  elemento("finalizar-resumen").textContent = hayLecturas
+    ? `Llevas ${registros.length} lecturas de ${configuracionesMedidas} configuraciones distintas (hay ${configuracionesPosibles} posibles). El reporte incluye todas las lecturas.`
+    : "Necesitas al menos una lectura para generar el reporte.";
+  elemento("boton-finalizar").disabled = !hayLecturas;
+}
+
+/**
+ * Genera el reporte (M10) y mide cuánto tarda, desde el clic hasta que se
+ * dibuja en pantalla (ES09: ≤ 3 s).
+ * @param {object} estado - Estado de la interfaz.
+ */
+function generarYMostrarReporte(estado) {
+  const inicio_ms = performance.now();
+  const campoNombre = elemento("campo-nombre");
+  const datos = {
+    nombre: limpiarNombre(campoNombre.value),
+    registros: estado.historial.obtenerRegistros(),
+    parametros: estado.parametros,
+    fecha: new Date(),
+  };
+  campoNombre.value = datos.nombre;
+  generarReporte(elemento("reporte-contenido"), datos);
+  elemento("enlace-correo").href = construirEnlaceCorreo(datos);
+  cambiarVistaHistorial(true);
+  window.scrollTo(0, 0);
+  // El tiempo se toma en el siguiente cuadro, cuando el reporte ya está dibujado
+  window.requestAnimationFrame(() => {
+    const duracion_ms = performance.now() - inicio_ms;
+    const cumple = duracion_ms <= TIEMPO_MAXIMO_REPORTE_S * MILISEGUNDOS_POR_SEGUNDO;
+    elemento("reporte-tiempo").textContent =
+      `Reporte generado en ${Math.round(duracion_ms)} ms (meta ES09: ≤ ${TIEMPO_MAXIMO_REPORTE_S} s, ${cumple ? "cumple" : "no cumple"}).`;
+  });
+}
+
+/**
+ * Conecta los botones del historial y del reporte.
+ * @param {object} estado - Estado de la interfaz.
+ */
+function configurarHistorial(estado) {
+  // "Finalizar práctica" pide el nombre (opcional)
+  elemento("boton-finalizar").addEventListener("click", () => {
+    elemento("panel-nombre").hidden = false;
+    elemento("campo-nombre").focus();
+  });
+  elemento("boton-generar-reporte").addEventListener("click", () => generarYMostrarReporte(estado));
+  // Enter en el campo del nombre también genera el reporte
+  elemento("campo-nombre").addEventListener("keydown", (evento) => {
+    if (evento.key === "Enter") {
+      generarYMostrarReporte(estado);
+    }
+  });
+  elemento("boton-imprimir").addEventListener("click", () => window.print());
+  elemento("boton-volver-historial").addEventListener("click", () => cambiarVistaHistorial(false));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -901,12 +979,18 @@ export function iniciarInterfaz(parametros) {
     parametros,
     secuencia: crearEstadoInicial(),
     visualizador: crearVisualizador(elemento("svg-circuito"), parametros),
-    lecturas: [],
+    historial: crearHistorial(),
   };
+  activarAvisoAlCerrar(estado.historial);
   mostrarEquipo(parametros);
   configurarNavegacion(estado);
   elemento("boton-siguiente-paso").addEventListener("click", () => avanzarPaso(estado));
   mostrarPasoActual(estado);
   configurarAnalizador(estado);
+  elemento("comparar-incertidumbre").textContent = TEXTO_INCERTIDUMBRE;
+  configurarHistorial(estado);
+  // Si la página se recargó, muestra las lecturas que ya había en esta pestaña
+  mostrarComparacion(estado);
+  mostrarHistorial(estado);
   mostrarSeccion(estado, SECCION_INICIAL);
 }

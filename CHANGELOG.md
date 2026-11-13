@@ -5,6 +5,15 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Agregado (Fase 3)
+- M8 `historial.js`: registro de cada lectura (medición, condición, lectura ± incertidumbre, límite, % del límite, veredicto, hora) en memoria y en sessionStorage (sobrevive a recargar la pestaña; nada sale del navegador). Aviso del navegador antes de cerrar la pestaña si hay lecturas. Formato único de fila para Historial, Comparar y reporte.
+- Sección Historial: tabla con todas las lecturas y botón «Finalizar práctica», que pide el nombre (opcional, máximo 60 caracteres, texto plano) y genera el reporte.
+- M10 `reporte.js`: reporte con estudiante, fecha y hora, equipo (R12, Clase I, CF), resumen, tabla de todas las lecturas, explicación de la incertidumbre y aviso «Herramienta educativa, no certifica equipos». «Guardar como PDF» con window.print() y hoja de estilos @media print que solo imprime el reporte. «Enviar por correo» con mailto: (resumen corto, sin destinatario, pide adjuntar el PDF; todo con encodeURIComponent).
+- Medición de ES09 en pantalla: tiempo desde el clic en «Generar reporte» hasta que el reporte está dibujado.
+
+### Cambiado (textos de incertidumbre)
+- «I ± U (µA)» pasa a «Lectura ± incertidumbre (µA)» en las tablas; leyenda de Comparar: «Lectura» y «Margen de incertidumbre del analizador»; frase que explica la incertidumbre con un ejemplo debajo del título de Comparar; subtítulo «lectura ± incertidumbre del analizador» bajo la lectura grande; «Banda ± U» pasa a «Margen de incertidumbre (± U)».
+
 ### Cambiado
 - Analizador más fácil de entender (pedido tras una prueba con un compañero):
   - Etiquetas del circuito con nombre: «C_L: fuga fase–chasis», «C_N: fuga neutro–chasis», «C_AP: aislamiento de electrodos» y «MD: cuerpo humano simulado (1 kΩ)». Cada parte del dibujo muestra su explicación al pasar el mouse (`<title>` de SVG).
