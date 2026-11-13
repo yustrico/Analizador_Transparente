@@ -1,0 +1,27 @@
+{
+  "equipo": {
+    "nombre": "Electrocardiógrafo Mindray BeneHeart R12",
+    "clase": "I",
+    "parte_aplicada": "CF a prueba de desfibrilación",
+    "norma_general": "IEC 60601-1",
+    "norma_particular": "IEC 60601-2-25"
+  },
+  "red": { "V_rms": 120, "f_Hz": 60 },
+  "capacitancias_F": { "C_L": 325.7e-12, "C_N": 325.7e-12, "C_AP": 28.0e-12 },
+  "delta_paciente_tierra_abierta_A": 0.83e-6,
+  "R_PE_ohm": 0.0026,
+  "R_MD_ohm": 1000,
+  "exactitud_analizador": { "porcentaje_lectura": 1.0, "piso_uA": 1.0, "k": 2 },
+  "limites_uA": {
+    "contacto": { "normal": 100, "primer_defecto": 500 },
+    "paciente_B": { "normal": 100, "primer_defecto": 500 },
+    "paciente_BF": { "normal": 100, "primer_defecto": 500 },
+    "paciente_CF": { "normal": 10, "primer_defecto": 50 }
+  },
+  "pasos_previos_medidos": {
+    "inspeccion_visual": "Sin hallazgos (carcasa, contaminación, cableado, etiquetas, piezas: Bien)",
+    "resistencia_tierra_ohm": { "valor": "< 0.015", "limite": 0.2 },
+    "aislamiento_Mohm": { "red_tierra": "> 100 (OL)", "partes_aplicadas_tierra": 94.7, "red_partes_aplicadas": "> 100 (OL)" }
+  },
+  "fuente": "Calibrado con mediciones reales del Fluke ESA620 sobre el R12 serie FN-84011415 (3 repeticiones por condición)"
+}
