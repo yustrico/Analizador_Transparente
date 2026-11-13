@@ -5,10 +5,10 @@
  *   fecha, el equipo y TODAS las lecturas que hizo, más la explicación de la
  *   incertidumbre y el aviso de que es una herramienta educativa. El mismo
  *   contenido se muestra en pantalla y se descarga como archivo PDF (con el
- *   generador propio de pdf.js, sin diálogo de imprimir). El resumen se
- *   puede enviar con un enlace mailto: (programa de correo del estudiante)
- *   o copiar para pegarlo en un correo web. NADA se envía a un servidor: el
- *   reporte es del estudiante.
+ *   generador propio de pdf.js, sin diálogo de imprimir). Un resumen
+ *   corto se copia al portapapeles para pegarlo en el correo del
+ *   estudiante, que adjunta el PDF. NADA se envía a un servidor: el reporte
+ *   es del estudiante.
  * Módulo: M10 – Reporte (adaptador)
  * Autores: Yustin Rico, David Cardona, Santiago González
  * Creado: 2026-11-13 · Modificado: 2026-11-13
@@ -47,8 +47,8 @@ const NOMBRE_VACIO = "(sin nombre)";
 const IDIOMA_FECHAS = "es-CO";
 const FORMATO_FECHA = Object.freeze({ dateStyle: "long", timeStyle: "short" });
 
-/** Salto de línea para el cuerpo del correo (CRLF, el que esperan los programas de correo). */
-const SALTO_CORREO = "\r\n";
+/** Salto de línea del resumen (CRLF, el de Windows y de los programas de correo). */
+const SALTO_RESUMEN = "\r\n";
 
 /** Caracteres de control (saltos de línea, tabulaciones...) que no se aceptan en el nombre. */
 const CARACTERES_DE_CONTROL = /[\u0000-\u001F\u007F]/g;
@@ -257,21 +257,18 @@ export function nombreArchivoReporte(fecha) {
 }
 
 /**
- * Arma el asunto y el cuerpo CORTO del correo (los navegadores y programas
- * de correo cortan los enlaces largos), con la indicación de adjuntar el PDF.
- * El mismo cuerpo es el que copia el botón «Copiar resumen».
+ * Arma el resumen corto del reporte que el botón «Copiar resumen» pone en el
+ * portapapeles. El estudiante lo pega en su correo y adjunta el PDF.
  * @param {{nombre: string, registros: object[], parametros: object, fecha: Date}} datos - Datos del reporte.
- * @returns {{asunto: string, cuerpo: string}} Asunto y cuerpo del correo.
+ * @returns {string} Resumen en varias líneas.
  */
-export function armarResumenCorreo(datos) {
+export function armarResumen(datos) {
   const { nombre, registros, parametros, fecha } = datos;
   const resumen = resumir(registros);
-  const fechaTexto = fecha.toLocaleString(IDIOMA_FECHAS, FORMATO_FECHA);
-  const asunto = `Reporte de seguridad eléctrica (R12) – ${nombre || "práctica"} – ${fechaTexto}`;
   const lineas = [
     "Reporte de práctica – Analizador transparente",
     `Estudiante: ${nombre || NOMBRE_VACIO}`,
-    `Fecha: ${fechaTexto}`,
+    `Fecha: ${fecha.toLocaleString(IDIOMA_FECHAS, FORMATO_FECHA)}`,
     `Equipo: ${parametros.equipo.nombre} (Clase ${parametros.equipo.clase}, parte aplicada CF)`,
     `Lecturas: ${textoResumen(resumen)}`,
   ];
@@ -280,17 +277,5 @@ export function armarResumenCorreo(datos) {
     lineas.push(`Más cerca del límite: ${textoMayorPorcentaje(resumen.mayor)}`);
   }
   lineas.push("", "Adjunto el reporte completo en PDF (botón «Descargar reporte (PDF)» de la herramienta).", TEXTO_AVISO);
-  return { asunto, cuerpo: lineas.join(SALTO_CORREO) };
-}
-
-/**
- * Crea el enlace mailto: con el resumen. No lleva destinatario: el
- * estudiante lo escribe en su correo. Todo el texto se codifica con
- * encodeURIComponent.
- * @param {{nombre: string, registros: object[], parametros: object, fecha: Date}} datos - Datos del reporte.
- * @returns {string} Enlace mailto:.
- */
-export function construirEnlaceCorreo(datos) {
-  const { asunto, cuerpo } = armarResumenCorreo(datos);
-  return `mailto:?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+  return lineas.join(SALTO_RESUMEN);
 }

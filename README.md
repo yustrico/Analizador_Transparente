@@ -12,7 +12,7 @@ Autores: Yustin Rico, David Cardona y Santiago González.
 - Calcula la **corriente de contacto** y la **corriente de paciente CF** en cuatro condiciones (normal, polaridad invertida, tierra abierta, neutro abierto), con la incertidumbre que tendría el analizador real.
 - Compara cada lectura con el límite de IEC 60601-1 y dice si cumple.
 - Dibuja el circuito y anima el camino de la corriente.
-- Genera un reporte final para guardar como PDF o enviar por correo.
+- Genera un reporte final que se descarga en PDF y un resumen que se copia al portapapeles para pegarlo en el correo.
 
 Todo corre en el navegador: sin servidor propio, sin base de datos, sin cuentas y sin enviar datos a ningún lado.
 

@@ -22,7 +22,7 @@ import {
   crearHistorial, guardarAvancePrueba, leerAvancePrueba, filaDeRegistro, nombreCortoCondicion, textoLectura, textoPorcentaje, NOMBRES_MEDICION,
 } from "./historial.js";
 import {
-  generarReporte, crearPdfReporte, nombreArchivoReporte, armarResumenCorreo, construirEnlaceCorreo, limpiarNombre, TEXTO_INCERTIDUMBRE,
+  generarReporte, crearPdfReporte, nombreArchivoReporte, armarResumen, limpiarNombre, TEXTO_INCERTIDUMBRE,
 } from "./reporte.js";
 import { descargarPdf } from "./pdf.js";
 
@@ -45,7 +45,7 @@ const TIEMPO_MAXIMO_REPORTE_S = 3;
 
 /** Mensajes de los botones del reporte. */
 const MENSAJE_RESUMEN_COPIADO = "Resumen copiado: pégalo en tu correo y adjunta el PDF";
-const MENSAJE_COPIA_FALLIDA = "No se pudo copiar (el navegador no dio permiso). Usa «Enviar por correo» o copia los datos del reporte a mano.";
+const MENSAJE_COPIA_FALLIDA = "No se pudo copiar (el navegador no dio permiso). Copia los datos del reporte a mano.";
 const MENSAJE_PDF_FALLIDO = "No se pudo crear el PDF. Recarga la página e inténtalo de nuevo.";
 
 /** Conversiones de unidades para mostrar los valores. */
@@ -963,7 +963,6 @@ function generarYMostrarReporte(estado) {
   // Se guardan los datos para que el PDF y el resumen copiado sean iguales a lo que se ve
   estado.datosReporte = datos;
   generarReporte(elemento("reporte-contenido"), datos);
-  elemento("enlace-correo").href = construirEnlaceCorreo(datos);
   elemento("estado-pdf").textContent = "";
   elemento("estado-copia").textContent = "";
   cambiarVistaHistorial(true);
@@ -995,15 +994,15 @@ function descargarReporte(estado) {
 }
 
 /**
- * Copia al portapapeles el mismo resumen del correo, para pegarlo en un
- * correo web (Outlook web, Gmail). El navegador solo lo permite en páginas
+ * Copia al portapapeles el resumen del reporte, para pegarlo en cualquier
+ * correo (Outlook, Gmail, el de la universidad). El navegador solo lo permite en páginas
  * seguras (https o el servidor local) y después de un clic.
  * @param {object} estado - Estado de la interfaz (con los datos del reporte generado).
  */
 async function copiarResumen(estado) {
   const mensaje = elemento("estado-copia");
   try {
-    await navigator.clipboard.writeText(armarResumenCorreo(estado.datosReporte).cuerpo);
+    await navigator.clipboard.writeText(armarResumen(estado.datosReporte));
     mensaje.textContent = MENSAJE_RESUMEN_COPIADO;
   } catch {
     mensaje.textContent = MENSAJE_COPIA_FALLIDA;

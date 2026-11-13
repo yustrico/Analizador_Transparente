@@ -19,7 +19,7 @@ SÍ:
 - Solo **computador**: Chrome y Edge en Windows.
 - **Sin servidor propio, sin base de datos y sin cuentas.** Todo corre en el navegador. Se publica gratis en GitHub Pages.
 - 5 secciones (sección 6), un solo equipo (R12), dos tipos de medición (**corriente de contacto** y **corriente de paciente CF**) y cuatro condiciones.
-- Reporte final imprimible a PDF + botón de correo (mailto).
+- Reporte final descargable en PDF + botón para copiar resumen al portapapeles.
 
 NO (trabajo futuro: no lo construyas):
 - Versión para celular; otros equipos; predecir antes de medir (RF09); ayuda contextual avanzada (RF10).
@@ -39,8 +39,8 @@ Modular tipo **hexagonal**:
 | M4 Motor de cálculo | js/nucleo/motor_calculo.js | Núcleo | Corriente de contacto y de paciente por condición + incertidumbre U |
 | M5 Evaluador de límites | js/nucleo/evaluador_limites.js | Núcleo | Límite IEC 60601-1 aplicable y veredicto |
 | M6 Visualizador | js/adaptadores/visualizador.js | Adaptador | Circuito en SVG (red MD, conmutadores L/N/PE, chasis, parte aplicada) y animación del camino de la corriente |
-| M8 Historial | js/adaptadores/historial.js | Adaptador | Registro de lecturas en memoria (y sessionStorage); aviso antes de cerrar la pestaña |
-| M10 Reporte | js/adaptadores/reporte.js | Adaptador | Reporte final imprimible (window.print → PDF) y enlace mailto |
+| M8 Historial | js/adaptadores/historial.js | Adaptador | Registro de lecturas en memoria (y sessionStorage); nota visible de que las lecturas se borran al cerrar la pestaña (sin aviso beforeunload) |
+| M10 Reporte | js/adaptadores/reporte.js | Adaptador | Reporte final en PDF (generador propio js/adaptadores/pdf.js, descarga directa) y copiar resumen al portapapeles |
 
 Regla: el núcleo NO importa nada de los adaptadores. Los adaptadores sí usan el núcleo.
 
@@ -114,8 +114,8 @@ Estilo:
 5. **Historial y reporte** (M8 + M10):
    - tabla de lecturas (condición, medición, I, U, límite, veredicto, hora);
    - botón "Finalizar práctica" → pide el nombre (máximo 60 caracteres; texto plano) → vista de reporte;
-   - "Guardar como PDF" con window.print() y una hoja de estilo @media print;
-   - "Enviar por correo" con un enlace mailto: con asunto y resumen en el cuerpo (sin adjunto; el estudiante adjunta el PDF si quiere).
+   - "Descargar reporte (PDF)": descarga directa del archivo reporte_seguridad_electrica_AAAA-MM-DD.pdf, creado por el generador propio js/adaptadores/pdf.js (sin librerías; Blob + enlace con download);
+   - "Copiar resumen" copia el resumen al portapapeles (navigator.clipboard.writeText); el estudiante lo pega en su correo y adjunta el PDF. (Antes era un enlace mailto: se quitó porque en Windows abre una lista de programas y no sirve con correo web.)
    - Sin límite de tiempo: la práctica se puede pausar.
 
 ## 7. Textos de explicación (úsalos tal cual; puedes ajustar redacción menor)
@@ -132,9 +132,9 @@ Estilo:
 ```
 index.html · css/estilos.css · js/main.js
 js/nucleo/{secuencia,modelo_equipo,motor_calculo,evaluador_limites}.js
-js/adaptadores/{interfaz,visualizador,historial,reporte}.js
+js/adaptadores/{interfaz,visualizador,historial,reporte,pdf}.js
 datos/parametros_r12.json
-tests/{motor_calculo,evaluador_limites,secuencia,modelo_equipo,es02_validacion}.test.js
+tests/{motor_calculo,evaluador_limites,secuencia,modelo_equipo,es02_validacion,pdf}.test.js
 tools/sri.mjs (calcula los hashes SHA-384 de los JS y CSS y los escribe en index.html)
 docs/ (nuestros documentos + manual_usuario.md, solucion_problemas.md, mantenimiento.md, verificacion.md)
 README.md · LICENSE (MIT) · CHANGELOG.md · CLAUDE.md · .gitignore
@@ -152,7 +152,7 @@ JavaScript moderno con módulos ES (import/export), sin frameworks ni dependenci
 ## 9. Seguridad (obligatoria)
 - Content-Security-Policy en una meta etiqueta de index.html: `default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'` (frame-ancestors no funciona en meta; GitHub Pages no permite cabeceras propias, así que no se incluye). Por eso NO uses scripts ni estilos en línea ni atributos onclick.
 - Integridad de subrecursos (SRI): atributos integrity (sha384) en los script y link, generados por tools/sri.mjs antes de cada versión.
-- Nunca uses innerHTML con texto del usuario (el nombre): usa textContent. Sin eval ni new Function. Codifica el mailto con encodeURIComponent.
+- Nunca uses innerHTML con texto del usuario (el nombre): usa textContent. Sin eval ni new Function.
 - 0 peticiones de red fuera de los archivos propios: sin CDN, fuentes, analítica ni APIs (ES13).
 - HTTPS: lo da GitHub Pages (activar "Enforce HTTPS").
 - Commits firmados: los configuramos nosotros (llave SSH de firma en GitHub y `git config commit.gpgsign true`). Tú solo recuérdanos verificarlo; no generes llaves.
@@ -177,7 +177,7 @@ JavaScript moderno con módulos ES (import/export), sin frameworks ni dependenci
 - **Fase 0 – Estructura**: crea la estructura de carpetas, README (qué es, cómo correrlo, cómo probarlo), LICENSE, .gitignore, CHANGELOG y package.json con un script `"test": "node --test"` (sin dependencias). Commit.
 - **Fase 1 – Núcleo + pruebas** (lo más importante): M3, M4, M5 y M2 con sus pruebas. Primero escribe las pruebas de la sección 5 y luego el código hasta que pasen. Muéstranos la tabla "esperado vs. obtenido vs. error %" y los E_n de ES02. EXPLÍCANOS el motor de cálculo paso a paso.
 - **Fase 2 – Interfaz y visualizador**: M1 (5 secciones) y M6 (SVG animado). Explícanos cómo se conecta la interfaz con el núcleo.
-- **Fase 3 – Historial y reporte**: M8 y M10 (PDF + mailto).
+- **Fase 3 – Historial y reporte**: M8 y M10 (PDF + copiar resumen al portapapeles).
 - **Fase 4 – Seguridad y rendimiento**: CSP, tools/sri.mjs, revisión de innerHTML/eval, presupuesto de peso (ES05) y detener la animación en reposo.
 - **Fase 5 – Lanzamiento y documentación**: docs/manual_usuario.md (paso a paso con capturas sugeridas), docs/solucion_problemas.md, docs/mantenimiento.md (cada cuánto revisar: navegadores, parámetros y versión), docs/verificacion.md (tabla ES01–ES15 con columnas Meta, Cómo se mide, Valor medido, ¿Cumple?), versión v1.0.0 en el CHANGELOG e instrucciones para publicar en GitHub Pages.
 

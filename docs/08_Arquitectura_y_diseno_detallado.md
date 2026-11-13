@@ -33,7 +33,7 @@ Justificación: cumple RNF04 (sin instalación, fuera del laboratorio), RNF05 (P
     - Elementos: un archivo JavaScript por módulo (por ejemplo motor.js) y sus funciones.
   - Subsistema 2, Datos: parametros_r12.json (D1 + D2).
   - Subsistema 3, Historial (D3): memoria del navegador.
-  - Subsistema 4, Reporte: vista imprimible → PDF + mailto.
+  - Subsistema 4, Reporte: PDF descargable (generador propio) + copiar resumen al portapapeles.
 
 ## 4. Fichas de módulos
 | Módulo | Tipo | Qué hace | Recibe | Entrega | Requerimientos | Especificaciones |
@@ -45,7 +45,7 @@ Justificación: cumple RNF04 (sin instalación, fuera del laboratorio), RNF05 (P
 | M5 Evaluador de límites | Núcleo | Límite IEC 60601-1 aplicable y veredicto | I, U, Medición, Condición | Resultado | RF06, RF07 | — |
 | M6 Visualizador | Adaptador | Dibuja la red MD y los conmutadores L/N/PE en SVG y anima el camino de la corriente | Corriente por rama, Condición | Dibujo SVG | RF05 | ES15 (CPU) |
 | M8 Historial | Adaptador | Guarda las lecturas de la sesión | Resultado | Lista de registros | RF11 | ES14 (RAM) |
-| M10 Reporte | Adaptador | Arma el reporte final, lo deja guardar como PDF y prepara el correo | Lista de registros, nombre | Vista imprimible; enlace mailto | RF11, RNF09 | ES09 |
+| M10 Reporte | Adaptador | Arma el reporte final, lo descarga como PDF y prepara el resumen para el correo | Lista de registros, nombre | Archivo PDF; copiar resumen al portapapeles | RF11, RNF09 | ES09 |
 | M7 Evaluación | Trabajo futuro | Predecir antes de medir | — | — | RF09 | — |
 | M9 Módulo físico | Trabajo futuro | Medición real a baja tensión | — | — | — | — |
 
@@ -69,9 +69,9 @@ Justificación: cumple RNF04 (sin instalación, fuera del laboratorio), RNF05 (P
 | M5 Evaluador | M1 Interfaz | Fundamental | Información (Resultado) | Límite equivocado → comparación con la tabla de la norma (RF07) |
 | M4 Motor | M6 Visualizador | Fundamental | Información (corriente por rama) | Dibujo distinto al cálculo → ambos usan la misma salida de M4 |
 | M6 Visualizador | M1 Interfaz | Incidental | Rendimiento (animación SVG) | Uso alto de CPU o lentitud → ES15 y ES03 |
-| M5 Evaluador | M8 Historial | Fundamental | Información (Registro) | Pérdida al cerrar la pestaña → aviso antes de cerrar |
+| M5 Evaluador | M8 Historial | Fundamental | Información (Registro) | Pérdida al cerrar la pestaña → nota visible «descarga tu reporte antes de cerrar» |
 | M8 Historial | M10 Reporte | Fundamental | Información (lista de registros) | Reporte incompleto → revisar el número de lecturas antes de generar |
-| M10 Reporte | Correo del estudiante | Fundamental | Información (resumen mailto) | Datos personales → solo el nombre que escribe el estudiante; 0 envíos a servidores (ES13) |
+| M10 Reporte | Correo del estudiante | Fundamental | Información (copiar resumen al portapapeles) | Datos personales → solo el nombre que escribe el estudiante; 0 envíos a servidores (ES13) |
 | GitHub Pages | Aplicación | Fundamental | Información (archivos HTTPS) | Archivos alterados → HTTPS + hashes SRI + commits firmados |
 
 ## 7. Seguridad mínima (no se alcanzó a preguntar; se adopta y documenta)

@@ -205,7 +205,7 @@
         </div>
         <div class="tarjeta finalizar">
           <h3>Finalizar práctica</h3>
-          <p>Genera tu reporte para guardarlo en PDF o enviarlo por correo. Después puedes seguir midiendo y volver a generarlo.</p>
+          <p>Genera tu reporte para descargarlo en PDF y copiar su resumen. Después puedes seguir midiendo y volver a generarlo.</p>
           <p class="nota" id="finalizar-resumen"></p>
           <button type="button" class="boton boton--principal" id="boton-finalizar">Finalizar práctica</button>
           <div class="finalizar__nombre" id="panel-nombre" hidden>
@@ -225,10 +225,6 @@
               <p class="nota" id="estado-pdf" aria-live="polite"></p>
             </div>
             <div class="accion-reporte">
-              <a class="boton" id="enlace-correo" href="mailto:">Enviar por correo</a>
-              <p class="nota">Abre tu programa de correo. Si usas correo web, usa «Copiar resumen».</p>
-            </div>
-            <div class="accion-reporte">
               <button type="button" class="boton" id="boton-copiar-resumen">Copiar resumen</button>
               <p class="nota" id="estado-copia" aria-live="polite"></p>
             </div>
@@ -236,7 +232,8 @@
               <button type="button" class="boton" id="boton-volver-historial">Volver al historial</button>
             </div>
           </div>
-          <p class="nota">El PDF se crea en tu navegador y el correo lo envías tú desde tu propio programa o correo web: la herramienta no envía nada a ningún servidor.</p>
+          <p class="instruccion-envio">Para enviarlo: pega el resumen en tu correo (Outlook, Gmail o el de la universidad) y adjunta el PDF.</p>
+          <p class="nota">El PDF y el resumen se crean en tu navegador: la herramienta no envía nada a ningún servidor.</p>
           <p class="nota" id="reporte-tiempo"></p>
         </div>
         <article class="tarjeta reporte" id="reporte-contenido"></article>

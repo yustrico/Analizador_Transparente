@@ -5,6 +5,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Quitado (cierre de la Fase 3)
+- Botón «Enviar por correo» (enlace mailto:). Motivo: en Windows, si no hay un programa de correo configurado, abre una lista de programas, y si el estudiante elige un navegador no pasa nada; además no sirve para quien usa correo web. Quedan solo «Descargar reporte (PDF)» y «Copiar resumen», con la indicación «Para enviarlo: pega el resumen en tu correo (Outlook, Gmail o el de la universidad) y adjunta el PDF.»
+- Documentos actualizados (CLAUDE.md, docs/02 RF11, docs/03 ES09, docs/08, README): donde decía mailto ahora dice «copiar resumen al portapapeles»; CLAUDE.md también refleja el PDF propio y la nota en lugar del aviso al cerrar.
+
 ### Cambiado (reporte y correo)
 - El PDF se descarga directo, sin el diálogo de imprimir: nuevo generador propio `js/adaptadores/pdf.js` (PDF 1.4 escrito a mano, sin librerías; fuentes estándar Helvetica y Symbol; codificación WinAnsi para tildes, ñ, µ y ±). Mismo contenido que el reporte en pantalla (encabezado, datos, tabla con salto de página y encabezado repetido, incertidumbre y aviso), con pie «Página n de m». Archivo `reporte_seguridad_electrica_AAAA-MM-DD.pdf` (Blob + enlace con download). Se quita la ayuda sobre «Destino».
 - Se quita por completo el aviso «¿Quieres salir del sitio web?» (beforeunload). En su lugar, nota visible en Historial y reporte: «Tus lecturas se borran al cerrar la pestaña. Descarga tu reporte antes de cerrar.»
