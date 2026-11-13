@@ -5,6 +5,15 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [1.0.0] - 2026-11-13
+Primera versión publicada en GitHub Pages: https://yustrico.github.io/Analizador_Transparente/
+
+### Agregado (Fase 5: lanzamiento y documentación)
+- `docs/verificacion.md`: tabla ES01–ES15 (meta, cómo se mide, valor medido, ¿cumple?) con los datos de cada medición.
+- `docs/protocolo_prueba_usuarios.md`: sesión del 18/11 (tareas para ES11, cuestionario SUS en español con el cálculo para ES10, hoja de dispositivos para ES08 y registro de RAM/CPU para ES14–ES15).
+- `docs/manual_usuario.md`, `docs/solucion_problemas.md` y `docs/mantenimiento.md`.
+- Verificación de la versión publicada (CSP, SRI, carga del JSON, PDF y copiar resumen) en Chrome y Edge.
+
 ### Agregado (Fase 4: seguridad y rendimiento)
 - Política de seguridad de contenido (CSP) en una meta etiqueta de index.html, exactamente la de CLAUDE.md: solo archivos del propio sitio; bloquea scripts, estilos y eventos en línea.
 - Integridad de subrecursos (SRI, SHA-384): `tools/sri.mjs` (`npm run sri`) escribe la huella del CSS, de main.js y, con `<link rel="modulepreload">`, de cada módulo JS (el integrity del `<script>` solo cubre main.js). `--comprobar` (`npm run sri:comprobar`) revisa sin escribir.

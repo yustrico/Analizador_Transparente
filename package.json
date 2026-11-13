@@ -1,6 +1,6 @@
 {
   "name": "analizador-transparente",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Simulador web educativo de la prueba de seguridad eléctrica (IEC 60601-1) del electrocardiógrafo Mindray BeneHeart R12",
   "private": true,
   "type": "module",

@@ -5,6 +5,8 @@ Simulador web para aprender la prueba de seguridad eléctrica (IEC 60601-1) del 
 Proyecto de Diseño Biomédico 1 — Universidad Autónoma de Occidente (UAO), Cali, 2026.
 Autores: Yustin Rico, David Cardona y Santiago González.
 
+**Usarla:** https://yustrico.github.io/Analizador_Transparente/ (Chrome o Edge en computador) · Versión 1.0.0
+
 > **Herramienta educativa.** Complementa la práctica con el analizador real; no sirve para certificar equipos. No es dispositivo médico (Decreto 4725 de 2005).
 
 ## Qué hace
@@ -56,6 +58,14 @@ tests/            Pruebas unitarias, validación contra el ESA620 (ES01, ES02), 
 tools/            sri.mjs (huellas SRI) y peso.mjs (presupuesto de peso ES05)
 docs/             Documentos del proyecto, manual y verificación
 ```
+
+## Documentación
+- [Manual de usuario](docs/manual_usuario.md)
+- [Solución de problemas](docs/solucion_problemas.md)
+- [Mantenimiento](docs/mantenimiento.md)
+- [Verificación de especificaciones ES01–ES15](docs/verificacion.md)
+- [Protocolo de prueba con usuarios (18/11/2026)](docs/protocolo_prueba_usuarios.md)
+- [Registro de cambios](CHANGELOG.md)
 
 ## Licencia
 MIT. Ver [LICENSE](LICENSE).
