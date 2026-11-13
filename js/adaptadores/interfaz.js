@@ -19,7 +19,7 @@ import { calcularMedicion, corrientePorFaradio_A_F, capacitanciaDeFuga_F } from 
 import { evaluarMedicion, VEREDICTO_CUMPLE } from "../nucleo/evaluador_limites.js";
 import { crearVisualizador, describirPartesDelCircuito, formatearCorriente_uA } from "./visualizador.js";
 import {
-  crearHistorial, activarAvisoAlCerrar, filaDeRegistro, nombreCortoCondicion, textoLectura, textoPorcentaje, NOMBRES_MEDICION,
+  crearHistorial, activarAvisoAlCerrar, guardarAvancePrueba, leerAvancePrueba, filaDeRegistro, nombreCortoCondicion, textoLectura, textoPorcentaje, NOMBRES_MEDICION,
 } from "./historial.js";
 import { generarReporte, construirEnlaceCorreo, limpiarNombre, TEXTO_INCERTIDUMBRE } from "./reporte.js";
 
@@ -325,6 +325,25 @@ function mostrarPasoActual(estado) {
 }
 
 /**
+ * Recupera el avance de la prueba guiada guardado en esta pestaña. Antes de
+ * usarlo lo valida con M2; si está dañado, la prueba empieza desde el paso 1.
+ * @returns {Readonly<{pasosCompletados: number}>} Estado de la secuencia.
+ */
+function recuperarSecuencia() {
+  const pasosGuardados = leerAvancePrueba();
+  if (pasosGuardados === null) {
+    return crearEstadoInicial();
+  }
+  const estadoGuardado = Object.freeze({ pasosCompletados: pasosGuardados });
+  try {
+    obtenerPasoActual(estadoGuardado);
+    return estadoGuardado;
+  } catch {
+    return crearEstadoInicial();
+  }
+}
+
+/**
  * Atiende el botón del paso: completa el paso actual (M2) y avanza.
  * @param {object} estado - Estado de la interfaz.
  */
@@ -333,6 +352,7 @@ function avanzarPaso(estado) {
   try {
     if (paso !== null) {
       estado.secuencia = completarPaso(estado.secuencia, paso.id);
+      guardarAvancePrueba(estado.secuencia.pasosCompletados);
     }
     mostrarPasoActual(estado);
     // El paso 4 (o la prueba ya completa) lleva a la sección Analizador
@@ -963,6 +983,8 @@ function configurarHistorial(estado) {
     }
   });
   elemento("boton-imprimir").addEventListener("click", () => window.print());
+  // Abrir el correo no cierra la página: no debe salir el aviso de "¿salir del sitio?"
+  elemento("enlace-correo").addEventListener("click", () => estado.avisoAlCerrar.omitirSiguienteAviso());
   elemento("boton-volver-historial").addEventListener("click", () => cambiarVistaHistorial(false));
 }
 
@@ -977,11 +999,11 @@ function configurarHistorial(estado) {
 export function iniciarInterfaz(parametros) {
   const estado = {
     parametros,
-    secuencia: crearEstadoInicial(),
+    secuencia: recuperarSecuencia(),
     visualizador: crearVisualizador(elemento("svg-circuito"), parametros),
     historial: crearHistorial(),
   };
-  activarAvisoAlCerrar(estado.historial);
+  estado.avisoAlCerrar = activarAvisoAlCerrar(estado.historial);
   mostrarEquipo(parametros);
   configurarNavegacion(estado);
   elemento("boton-siguiente-paso").addEventListener("click", () => avanzarPaso(estado));

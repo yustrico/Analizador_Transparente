@@ -5,6 +5,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Corregido (después de la Fase 3)
+- Texto de la incertidumbre (Comparar y reporte): se quita «con 95 % de confianza», porque con una sola fuente rectangular k = 2 no equivale a 95 %. El texto nuevo explica U según la GUM (u = exactitud/√3, U = 2·u) a partir de la exactitud del ESA620. Sin cambios en cálculos ni pruebas.
+- El botón «Enviar por correo» ya no dispara el aviso «¿Quieres salir del sitio web?»; el aviso sigue saliendo al cerrar o recargar la pestaña.
+- El avance de la prueba guiada se guarda en sessionStorage: al recargar no hay que repetir los pasos (si el dato guardado está dañado, se valida con M2 y la prueba empieza en el paso 1).
+
+### Cambiado
+- El botón del PDF se llama «Descargar reporte (PDF)» y explica cómo elegir «Guardar como PDF»; junto al correo se indica que hay que adjuntar el PDF a mano.
+
 ### Agregado (Fase 3)
 - M8 `historial.js`: registro de cada lectura (medición, condición, lectura ± incertidumbre, límite, % del límite, veredicto, hora) en memoria y en sessionStorage (sobrevive a recargar la pestaña; nada sale del navegador). Aviso del navegador antes de cerrar la pestaña si hay lecturas. Formato único de fila para Historial, Comparar y reporte.
 - Sección Historial: tabla con todas las lecturas y botón «Finalizar práctica», que pide el nombre (opcional, máximo 60 caracteres, texto plano) y genera el reporte.

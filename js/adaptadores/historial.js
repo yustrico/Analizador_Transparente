@@ -6,7 +6,8 @@
  *   registros viven en la memoria de la página y se copian en sessionStorage
  *   para que no se pierdan si la página se recarga. sessionStorage es del
  *   propio navegador: NADA se envía a un servidor. Se borra al cerrar la
- *   pestaña, por eso se avisa antes de cerrarla si hay lecturas.
+ *   pestaña, por eso se avisa antes de cerrarla si hay lecturas. También
+ *   guarda cuántos pasos de la prueba guiada se completaron.
  *   También da el formato de una fila (texto de cada columna), que usan el
  *   historial, la sección Comparar y el reporte, para que se vean iguales.
  * Módulo: M8 – Historial (adaptador)
@@ -17,6 +18,12 @@
 
 /** Nombre con el que se guardan los registros en sessionStorage (con versión del formato). */
 const CLAVE_ALMACEN = "analizador_transparente.historial.v1";
+
+/** Nombre con el que se guarda el avance de la prueba guiada. */
+const CLAVE_AVANCE_PRUEBA = "analizador_transparente.avance_prueba.v1";
+
+/** Tiempo durante el cual el botón de correo puede saltarse el aviso de salida (ms). */
+const VENTANA_OMITIR_AVISO_MS = 1000;
 
 /** Decimales de la lectura y del % del límite. */
 const DECIMALES_LECTURA = 2;
@@ -203,13 +210,74 @@ export function crearHistorial(almacen = obtenerAlmacenDeSesion()) {
 /**
  * Pide confirmación al cerrar o recargar la pestaña si hay lecturas.
  * (El navegador muestra su propio mensaje; no se puede personalizar.)
+ *
+ * Un enlace mailto: también dispara el evento "beforeunload" aunque la
+ * página no se cierre (el navegador solo abre el programa de correo). Por eso
+ * se devuelve omitirSiguienteAviso(): el botón de correo la llama justo antes
+ * de abrir el correo, y el aviso se salta UNA vez. Si el evento no llega en
+ * ese momento, el permiso vence solo, para que cerrar la pestaña después
+ * siga mostrando el aviso.
  * @param {{cantidad: Function}} historial - Historial de la práctica.
+ * @returns {{omitirSiguienteAviso: Function}} Función para saltar el aviso una vez.
  */
 export function activarAvisoAlCerrar(historial) {
+  let omitirAviso = false;
+  let temporizador = null;
+
   window.addEventListener("beforeunload", (evento) => {
+    if (omitirAviso) {
+      omitirAviso = false;
+      return;
+    }
     if (historial.cantidad() > 0) {
       evento.preventDefault();
       evento.returnValue = "";
     }
   });
+
+  return {
+    /** Salta el próximo aviso (solo durante un instante). */
+    omitirSiguienteAviso() {
+      omitirAviso = true;
+      window.clearTimeout(temporizador);
+      temporizador = window.setTimeout(() => {
+        omitirAviso = false;
+      }, VENTANA_OMITIR_AVISO_MS);
+    },
+  };
+}
+
+/**
+ * Guarda cuántos pasos de la prueba guiada se completaron, para no repetirlos
+ * si la página se recarga.
+ * @param {number} pasosCompletados - Pasos completados (0 a 4).
+ */
+export function guardarAvancePrueba(pasosCompletados) {
+  const almacen = obtenerAlmacenDeSesion();
+  if (almacen === null) {
+    return;
+  }
+  try {
+    almacen.setItem(CLAVE_AVANCE_PRUEBA, String(pasosCompletados));
+  } catch {
+    // Sin almacén disponible: el avance queda solo en memoria
+  }
+}
+
+/**
+ * Lee el avance guardado de la prueba guiada. La interfaz lo valida con M2
+ * antes de usarlo.
+ * @returns {number|null} Pasos completados, o null si no hay nada guardado.
+ */
+export function leerAvancePrueba() {
+  const almacen = obtenerAlmacenDeSesion();
+  if (almacen === null) {
+    return null;
+  }
+  try {
+    const guardado = almacen.getItem(CLAVE_AVANCE_PRUEBA);
+    return guardado === null ? null : Number(guardado);
+  } catch {
+    return null;
+  }
 }

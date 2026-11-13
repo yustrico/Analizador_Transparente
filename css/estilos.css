@@ -232,7 +232,9 @@ h4 { margin: 14px 0 6px; font-size: 1rem; }
 }
 .boton:disabled { opacity: 0.5; cursor: not-allowed; }
 a.boton { display: inline-block; text-decoration: none; }
-.barra-reporte__botones { display: flex; gap: 10px; margin-bottom: 6px; }
+.barra-reporte__acciones { display: flex; gap: 24px; align-items: flex-start; margin-bottom: 6px; }
+.accion-reporte { max-width: 300px; }
+.accion-reporte .nota { margin-top: 6px; font-size: 0.82rem; }
 .reporte h2 { margin-bottom: 0; }
 .reporte .ficha { margin: 14px 0 8px; }
 .tabla--reporte { font-size: 0.92rem; }

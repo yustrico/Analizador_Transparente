@@ -18,7 +18,7 @@ import { VEREDICTO_CUMPLE } from "../nucleo/evaluador_limites.js";
 import { filaDeRegistro, textoLectura, textoPorcentaje, NOMBRES_MEDICION, nombreCortoCondicion } from "./historial.js";
 
 /** Explicación de la incertidumbre (se usa en Comparar y en el reporte). */
-export const TEXTO_INCERTIDUMBRE = "La incertidumbre es cuánto se puede equivocar el analizador real (±1 % de la lectura + 1 µA). Ejemplo: 14.73 ± 1.32 µA significa que el valor real está entre 13.41 y 16.05 µA, con 95 % de confianza.";
+export const TEXTO_INCERTIDUMBRE = "La incertidumbre (U) indica cuánto podría diferir la lectura del analizador real. Se calcula con la exactitud que declara el fabricante del ESA620, ±(1 % de la lectura + 1 µA), según la guía GUM (JCGM 100:2008): u = exactitud/√3 y U = 2·u. Ejemplo: 14.73 ± 1.32 µA significa que el analizador real podría mostrar entre 13.41 y 16.05 µA.";
 
 /** Aviso obligatorio del reporte. */
 const TEXTO_AVISO = "Herramienta educativa, no certifica equipos. Complementa la práctica con el analizador real.";
@@ -217,6 +217,6 @@ export function construirEnlaceCorreo(datos) {
   if (resumen.mayor !== null) {
     lineas.push(`Más cerca del límite: ${textoMayorPorcentaje(resumen.mayor)}`);
   }
-  lineas.push("", "Adjunto el reporte completo en PDF (botón «Guardar como PDF» de la herramienta).", TEXTO_AVISO);
+  lineas.push("", "Adjunto el reporte completo en PDF (botón «Descargar reporte (PDF)» de la herramienta).", TEXTO_AVISO);
   return `mailto:?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(lineas.join(SALTO_CORREO))}`;
 }
