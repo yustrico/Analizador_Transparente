@@ -17,7 +17,7 @@
 import { PASOS_PRUEBA, crearEstadoInicial, obtenerPasoActual, completarPaso, pasoDisponible } from "../nucleo/secuencia.js";
 import { calcularMedicion, corrientePorFaradio_A_F, capacitanciaDeFuga_F } from "../nucleo/motor_calculo.js";
 import { evaluarMedicion, VEREDICTO_CUMPLE } from "../nucleo/evaluador_limites.js";
-import { crearVisualizador, formatearCorriente_uA } from "./visualizador.js";
+import { crearVisualizador, describirPartesDelCircuito, formatearCorriente_uA } from "./visualizador.js";
 
 /* ------------------------------------------------------------------------ */
 /* Constantes                                                               */
@@ -68,7 +68,7 @@ const ORDEN_CONDICIONES = Object.freeze([
 const TEXTOS_EXPLICACION = Object.freeze({
   contactoNormal: "La fuga capacitiva del equipo (≈ 14.7 µA) se va casi toda por el conductor de protección (≈ 0.003 Ω), que está en paralelo con la persona (1 kΩ). Por divisor de corriente casi nada pasa por la persona: ≈ 0 µA. El analizador real muestra ≈ 0.1 µA por su resolución.",
   contactoPolaridadInvertida: "En este equipo los capacitores de fuga de fase y de neutro son casi iguales, por eso invertir la polaridad casi no cambia la lectura.",
-  contactoTierraAbierta: "Sin conductor de protección, la fuga de la capacitancia entre fase y chasis no tiene un camino de baja resistencia: circula por la persona. I = V·2πf·C ≈ 14.7 µA. Es primer defecto: límite 500 µA.",
+  contactoTierraAbierta: "Sin conductor de protección, la fuga de la capacitancia entre fase y chasis no tiene un camino de baja resistencia: circula por la persona. I = V·2πf·C (V: tensión de la red; f: frecuencia; C: capacitancia de fuga entre fase y chasis) ≈ 14.7 µA. Es primer defecto: límite 500 µA.",
   contactoNeutroAbierto: "Con el neutro abierto ambos lados de la red quedan a tensión de fase y la fuga total aumenta, pero la tierra sigue conectada y se la lleva: ≈ 0 µA por la persona.",
   pacienteNormal: "Es la corriente que cruza la barrera de aislamiento de la parte aplicada (≈ 28 pF): ≈ 1.3 µA. Como los electrodos pueden quedar cerca del corazón (CF), el límite es 10 µA.",
   pacientePolaridadInvertida: "Invertir la polaridad casi no cambia la lectura.",
@@ -419,10 +419,28 @@ function limpiarLectura() {
   veredicto.textContent = "—";
   veredicto.className = "";
   elemento("tabla-limites-lectura").querySelector("tbody").replaceChildren();
+  elemento("lectura-limites-contacto").hidden = true;
+  elemento("lectura-comparacion").hidden = true;
   elemento("lectura-pendiente").hidden = false;
   elemento("explicacion-texto").replaceChildren();
   crearConTexto("p", "La explicación aparece después de medir.", elemento("explicacion-texto"), "nota");
+  elemento("explicacion-simbolos").replaceChildren();
   elemento("explicacion-formula").replaceChildren();
+}
+
+/**
+ * Llena el cuadro "¿Qué es cada parte?" debajo del circuito, con las mismas
+ * explicaciones que aparecen al pasar el mouse por el dibujo (M6).
+ * @param {object} parametros - Parámetros validados (M3).
+ */
+function mostrarPartesDelCircuito(parametros) {
+  const lista = elemento("lista-partes");
+  lista.replaceChildren();
+  // Una línea por cada parte que va en el cuadro
+  for (const parte of describirPartesDelCircuito(parametros).filter((descripcion) => descripcion.enCuadro)) {
+    crearConTexto("dt", parte.nombre, lista);
+    crearConTexto("dd", parte.explicacion, lista);
+  }
 }
 
 /**
@@ -452,7 +470,11 @@ function mostrarLectura(resultado) {
   veredicto.textContent = cumple ? `✓ ${resultado.veredicto}` : `✗ ${resultado.veredicto}`;
   veredicto.className = cumple ? "veredicto--cumple" : "veredicto--no-cumple";
 
-  // Fila con los límites equivalentes para partes B, BF y CF (RF07)
+  // Contacto: el límite es igual para B, BF y CF, basta una frase.
+  // Paciente: tabla con los límites equivalentes para partes B, BF y CF (RF07)
+  const esContacto = resultado.tipoMedicion === "contacto";
+  elemento("lectura-limites-contacto").hidden = !esContacto;
+  elemento("lectura-comparacion").hidden = esContacto;
   const fila = document.createElement("tr");
   for (const tipoDeParte of ["B", "BF", "CF"]) {
     crearConTexto("td", `${resultado.limitesPorTipoDeParte_uA[tipoDeParte]} µA`, fila, tipoDeParte === "CF" ? "columna-destacada" : "");
@@ -484,52 +506,94 @@ function textosDeExplicacion(resultado) {
 }
 
 /**
- * Arma las líneas de la fórmula usada, con los números reemplazados.
+ * Significado de cada sigla de las fórmulas, con su nombre completo y su valor.
+ * Se muestra ANTES de la fórmula, para que la primera vez que el estudiante
+ * vea una sigla ya sepa qué es.
+ * @param {object} parametros - Parámetros validados (M3).
+ * @param {number} [capacitanciaActiva_F] - Capacitancia usada en contacto (para X_C), en F.
+ * @returns {Record<string, string>} Texto de cada sigla.
+ */
+function significadoDeSiglas(parametros, capacitanciaActiva_F) {
+  const capacitancia_pF = (nombre) =>
+    (parametros.capacitancias_F[nombre] * PICOFARADIOS_POR_FARADIO).toFixed(DECIMALES_CAPACITANCIA);
+  const { V_rms, f_Hz } = parametros.red;
+  const corrientePorFaradio = corrientePorFaradio_A_F(parametros).toFixed(DECIMALES_CORRIENTE_POR_FARADIO);
+  const significados = {
+    I: "I (corriente que pasa por la MD, el cuerpo humano simulado: es lo que lee el analizador)",
+    VF: `V·2πf (tensión de la red V = ${V_rms} V, por 2π, por la frecuencia f = ${f_Hz} Hz) = ${corrientePorFaradio} A/F`,
+    C_L: `C_L (capacitancia de fuga entre fase y chasis) = ${capacitancia_pF("C_L")} pF`,
+    C_N: `C_N (capacitancia de fuga entre neutro y chasis) = ${capacitancia_pF("C_N")} pF`,
+    C_AP: `C_AP (capacitancia del aislamiento entre la red y los electrodos) = ${capacitancia_pF("C_AP")} pF`,
+    R_PE: `R_PE (resistencia del conductor de protección, PE) = ${parametros.R_PE_ohm} Ω`,
+    R_MD: `R_MD (resistencia de la MD, el cuerpo humano simulado) = ${parametros.R_MD_ohm} Ω`,
+    DELTA: `ΔI (aumento de corriente medido en el laboratorio con la tierra abierta; término empírico) = ${formatearCorriente_uA(parametros.delta_paciente_tierra_abierta_A * MICROAMPERIOS_POR_AMPERIO)} µA`,
+    U: `U (incertidumbre expandida del analizador real, k = ${parametros.exactitud_analizador.k})`,
+  };
+  // X_C solo tiene sentido cuando hay una capacitancia de contacto
+  if (capacitanciaActiva_F !== undefined) {
+    const reactancia_Mohm = 1 / (2 * Math.PI * f_Hz * capacitanciaActiva_F) / OHMIOS_POR_MEGAOHMIO;
+    significados.X_C = `X_C (reactancia capacitiva: cuánto se opone el capacitor a la corriente alterna) = 1/(2πf·C) ≈ ${reactancia_Mohm.toFixed(DECIMALES_REACTANCIA)} MΩ`;
+  }
+  return significados;
+}
+
+/**
+ * Arma la fórmula usada: primero el significado de las siglas y después las
+ * líneas de la fórmula con los números reemplazados.
  * @param {object} resultado - Resultado evaluado (incluye ramas del motor).
  * @param {object} parametros - Parámetros validados (M3).
- * @returns {string[]} Líneas de la fórmula.
+ * @returns {{simbolos: string[], lineas: string[]}} Siglas explicadas y líneas de la fórmula.
  */
-function lineasDeFormula(resultado, parametros) {
+function formulaUsada(resultado, parametros) {
   const { condicion } = resultado;
   const corrientePorFaradio = corrientePorFaradio_A_F(parametros).toFixed(DECIMALES_CORRIENTE_POR_FARADIO);
+  const corriente = formatearCorriente_uA(resultado.corriente_uA);
   const lineas = [];
+  let siglasUsadas;
+  let significados;
 
   if (resultado.tipoMedicion === "contacto") {
     const capacitancia_F = capacitanciaDeFuga_F(condicion, parametros);
     const capacitancia_pF = (capacitancia_F * PICOFARADIOS_POR_FARADIO).toFixed(DECIMALES_CAPACITANCIA);
-    let nombreC = condicion.polaridad === "normal" ? "C_L" : "C_N";
+    significados = significadoDeSiglas(parametros, capacitancia_F);
+    let siglasC = [condicion.polaridad === "normal" ? "C_L" : "C_N"];
     if (condicion.neutro === "abierto") {
-      nombreC = "C_L + C_N";
+      siglasC = ["C_L", "C_N"];
     }
+    const nombreC = siglasC.length > 1 ? `(${siglasC.join(" + ")})` : siglasC[0];
     if (condicion.tierra === "cerrada") {
       // Divisor de corriente entre el PE y la persona
-      lineas.push(`I = V·2πf · C · R_PE / (R_PE + R_MD),   con C = ${nombreC}`);
-      lineas.push(`I = ${corrientePorFaradio} A/F × ${capacitancia_pF} pF × ${parametros.R_PE_ohm} Ω / (${parametros.R_PE_ohm} Ω + ${parametros.R_MD_ohm} Ω) = ${formatearCorriente_uA(resultado.corriente_uA)} µA`);
+      siglasUsadas = ["I", "VF", ...siglasC, "R_PE", "R_MD", "U"];
+      lineas.push(`I = V·2πf · ${nombreC} · R_PE / (R_PE + R_MD)`);
+      lineas.push(`I = ${corrientePorFaradio} A/F × ${capacitancia_pF} pF × ${parametros.R_PE_ohm} Ω / (${parametros.R_PE_ohm} Ω + ${parametros.R_MD_ohm} Ω) = ${corriente} µA`);
     } else {
       // Toda la fuga por la persona (aproximación X_C ≫ R_MD)
-      const reactancia_Mohm = 1 / (2 * Math.PI * parametros.red.f_Hz * capacitancia_F) / OHMIOS_POR_MEGAOHMIO;
-      lineas.push(`I ≈ V·2πf · C,   con C = ${nombreC}`);
-      lineas.push(`I = ${corrientePorFaradio} A/F × ${capacitancia_pF} pF = ${formatearCorriente_uA(resultado.corriente_uA)} µA`);
-      lineas.push(`Se desprecia R_MD porque X_C = 1/(2πf·C) ≈ ${reactancia_Mohm.toFixed(DECIMALES_REACTANCIA)} MΩ ≫ ${parametros.R_MD_ohm / OHMIOS_POR_KILOOHMIO} kΩ.`);
+      siglasUsadas = ["I", "VF", ...siglasC, "X_C", "R_MD", "U"];
+      lineas.push(`I ≈ V·2πf · ${nombreC}`);
+      lineas.push(`I = ${corrientePorFaradio} A/F × ${capacitancia_pF} pF = ${corriente} µA`);
+      lineas.push(`Se desprecia R_MD porque X_C ≫ R_MD (${parametros.R_MD_ohm / OHMIOS_POR_KILOOHMIO} kΩ).`);
     }
   } else {
+    significados = significadoDeSiglas(parametros);
     const capacitanciaAP_pF = (parametros.capacitancias_F.C_AP * PICOFARADIOS_POR_FARADIO).toFixed(DECIMALES_CAPACITANCIA);
     const barrera = formatearCorriente_uA(resultado.ramas.barreraAislamiento_uA);
     if (condicion.tierra === "abierta") {
       // Se suma el término empírico medido en el laboratorio
-      const delta = formatearCorriente_uA(parametros.delta_paciente_tierra_abierta_A * MICROAMPERIOS_POR_AMPERIO);
-      lineas.push("I = V·2πf · C_AP + ΔI   (ΔI: aumento medido en el laboratorio, término empírico)");
-      lineas.push(`I = ${corrientePorFaradio} A/F × ${capacitanciaAP_pF} pF + ${delta} µA = ${barrera} µA + ${delta} µA = ${formatearCorriente_uA(resultado.corriente_uA)} µA`);
+      const delta = formatearCorriente_uA(resultado.ramas.terminoEmpirico_uA);
+      siglasUsadas = ["I", "VF", "C_AP", "DELTA", "U"];
+      lineas.push("I = V·2πf · C_AP + ΔI");
+      lineas.push(`I = ${corrientePorFaradio} A/F × ${capacitanciaAP_pF} pF + ${delta} µA = ${barrera} µA + ${delta} µA = ${corriente} µA`);
     } else {
+      siglasUsadas = ["I", "VF", "C_AP", "U"];
       lineas.push("I = V·2πf · C_AP");
-      lineas.push(`I = ${corrientePorFaradio} A/F × ${capacitanciaAP_pF} pF = ${formatearCorriente_uA(resultado.corriente_uA)} µA`);
+      lineas.push(`I = ${corrientePorFaradio} A/F × ${capacitanciaAP_pF} pF = ${corriente} µA`);
     }
   }
 
   // Incertidumbre del analizador real
   const exactitud = parametros.exactitud_analizador;
   lineas.push(`U = ${exactitud.k} · (${exactitud.porcentaje_lectura} % · I + ${exactitud.piso_uA} µA) / √3 = ${formatearCorriente_uA(resultado.incertidumbre_uA)} µA`);
-  return lineas;
+  return { simbolos: siglasUsadas.map((sigla) => significados[sigla]), lineas };
 }
 
 /**
@@ -544,10 +608,17 @@ function mostrarExplicacion(resultado, parametros) {
   for (const parrafo of textosDeExplicacion(resultado)) {
     crearConTexto("p", parrafo, contenedorTexto);
   }
+  const { simbolos, lineas } = formulaUsada(resultado, parametros);
+  const listaSimbolos = elemento("explicacion-simbolos");
+  listaSimbolos.replaceChildren();
+  // Primero, qué significa cada sigla
+  for (const simbolo of simbolos) {
+    crearConTexto("li", simbolo, listaSimbolos);
+  }
   const contenedorFormula = elemento("explicacion-formula");
   contenedorFormula.replaceChildren();
-  // Una línea por cada paso de la fórmula
-  for (const linea of lineasDeFormula(resultado, parametros)) {
+  // Después, una línea por cada paso de la fórmula
+  for (const linea of lineas) {
     crearConTexto("p", linea, contenedorFormula);
   }
 }
@@ -583,6 +654,7 @@ function configurarAnalizador(estado) {
   }
   elemento("boton-medir").addEventListener("click", () => medir(estado));
   elemento("explicacion-banda").textContent = TEXTOS_EXPLICACION.bandaIncertidumbre;
+  mostrarPartesDelCircuito(estado.parametros);
   alCambiarControles(estado);
 }
 
@@ -828,7 +900,7 @@ export function iniciarInterfaz(parametros) {
   const estado = {
     parametros,
     secuencia: crearEstadoInicial(),
-    visualizador: crearVisualizador(elemento("svg-circuito")),
+    visualizador: crearVisualizador(elemento("svg-circuito"), parametros),
     lecturas: [],
   };
   mostrarEquipo(parametros);

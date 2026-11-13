@@ -134,7 +134,8 @@
             <dt>% del límite usado</dt><dd id="lectura-porcentaje">—</dd>
             <dt>Veredicto</dt><dd id="lectura-veredicto">—</dd>
           </dl>
-          <div class="lectura__comparacion">
+          <p class="nota" id="lectura-limites-contacto" hidden>Para la corriente de contacto el límite es el mismo para B, BF y CF.</p>
+          <div class="lectura__comparacion" id="lectura-comparacion">
             <p class="nota">Mismo caso con otros tipos de parte aplicada:</p>
             <table class="tabla tabla--compacta" id="tabla-limites-lectura">
               <thead><tr><th>B</th><th>BF</th><th>CF</th></tr></thead>
@@ -146,14 +147,19 @@
 
         <div class="tarjeta circuito">
           <h3>Circuito: así circula la corriente</h3>
-          <svg id="svg-circuito" class="circuito__svg" viewBox="0 0 780 380" role="img" aria-labelledby="circuito-descripcion"></svg>
-          <p class="nota" id="circuito-descripcion">Red de 120 V, conmutadores de polaridad, neutro y tierra, chasis del R12, parte aplicada y red de medición MD (la persona). En rojo, el camino de la corriente de fuga.</p>
+          <svg id="svg-circuito" class="circuito__svg" viewBox="0 0 860 380" role="img" aria-labelledby="circuito-descripcion"></svg>
+          <p class="nota" id="circuito-descripcion">Red de 120 V, conmutadores de polaridad, neutro y tierra, chasis del R12, parte aplicada y MD (cuerpo humano simulado). En rojo, el camino de la corriente de fuga. Pasa el mouse sobre cada parte para ver qué es.</p>
+          <div class="partes-circuito">
+            <h4>¿Qué es cada parte?</h4>
+            <dl class="ficha ficha--partes" id="lista-partes"></dl>
+          </div>
         </div>
 
         <div class="tarjeta explicacion">
           <h3>¿Por qué da este valor?</h3>
           <div id="explicacion-texto"><p class="nota">La explicación aparece después de medir.</p></div>
           <h4>Fórmula usada</h4>
+          <ul id="explicacion-simbolos" class="simbolos"></ul>
           <div id="explicacion-formula" class="formula"><p class="nota">—</p></div>
           <h4>Banda ± U</h4>
           <p id="explicacion-banda"></p>

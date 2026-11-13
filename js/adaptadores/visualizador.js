@@ -237,17 +237,114 @@ const TEXTOS_FIJOS = Object.freeze([
   ["Chasis metálico del R12 (Clase I)", 450, 46, CLASE_TITULO, "middle"],
   ["Circuito", 378, 156, CLASE_PEQUENO, "end"],
   ["interno", 378, 170, CLASE_PEQUENO, "end"],
-  ["C_L", 518, 79, CLASE_TEXTO, "start"],
-  ["C_N", 518, 271, CLASE_TEXTO, "start"],
-  ["C_AP", 552, 140, CLASE_TEXTO, "middle"],
+  ["C_L: fuga fase–chasis", 484, 80, CLASE_PEQUENO, "end"],
+  ["C_N: fuga neutro–chasis", 484, 271, CLASE_PEQUENO, "end"],
+  ["C_AP: aislamiento", 490, 132, CLASE_PEQUENO, "middle"],
+  ["de electrodos", 490, 145, CLASE_PEQUENO, "middle"],
   ["Parte aplicada", 660, 156, CLASE_TITULO, "middle"],
   ["CF (electrodos)", 660, 172, CLASE_PEQUENO, "middle"],
   ["Punta de contacto", 655, 92, CLASE_PEQUENO, "middle"],
-  ["MD 1 kΩ", 660, 253, CLASE_TEXTO, "middle"],
-  ["(persona)", 660, 268, CLASE_PEQUENO, "middle"],
-  ["Conductor de protección (PE)", 430, 322, CLASE_PEQUENO, "end"],
+  ["MD", 660, 260, CLASE_TITULO, "middle"],
+  ["MD: cuerpo humano", 708, 251, CLASE_PEQUENO, "start"],
+  ["simulado (1 kΩ)", 708, 265, CLASE_PEQUENO, "start"],
+  ["Conductor de protección (PE)", 416, 322, CLASE_PEQUENO, "end"],
   ["Tierra de la instalación", 250, 360, CLASE_PEQUENO, "middle"],
 ]);
+
+/**
+ * Zonas invisibles sobre cada parte del dibujo. Al pasar el mouse por una
+ * zona aparece la explicación de esa parte (elemento <title> de SVG).
+ * Se dibujan en este orden: las zonas grandes (chasis) primero, para que las
+ * pequeñas que están adentro queden encima y respondan primero.
+ */
+const ZONAS_DE_AYUDA = Object.freeze([
+  { parte: "chasis", x: 326, y: 36, width: 248, height: 268 },
+  { parte: "red", x: 28, y: 28, width: 64, height: 40 },
+  { parte: "red", x: 32, y: 132, width: 56, height: 56 },
+  { parte: "fase", x: 36, y: 80, width: 114, height: 20 },
+  { parte: "fase", x: 50, y: 96, width: 20, height: 36 },
+  { parte: "neutro", x: 36, y: 220, width: 59, height: 20 },
+  { parte: "neutro", x: 50, y: 188, width: 20, height: 32 },
+  { parte: "interruptorNeutro", x: 90, y: 204, width: 52, height: 72 },
+  { parte: "polaridad", x: 146, y: 58, width: 88, height: 212 },
+  { parte: "circuitoInterno", x: 338, y: 130, width: 82, height: 60 },
+  { parte: "capacitanciaL", x: 372, y: 62, width: 150, height: 22 },
+  { parte: "capacitanciaN", x: 372, y: 254, width: 150, height: 24 },
+  { parte: "capacitanciaAP", x: 436, y: 120, width: 126, height: 56 },
+  { parte: "parteAplicada", x: 598, y: 133, width: 124, height: 54 },
+  { parte: "puntaContacto", x: 574, y: 82, width: 176, height: 24 },
+  { parte: "puntaContacto", x: 730, y: 100, width: 20, height: 118 },
+  { parte: "md", x: 616, y: 231, width: 200, height: 48 },
+  { parte: "conductorProteccion", x: 272, y: 302, width: 176, height: 36 },
+  { parte: "tierraInstalacion", x: 36, y: 338, width: 640, height: 30 },
+]);
+
+/** Conversión de faradios a picofaradios, para mostrar las capacitancias. */
+const PICOFARADIOS_POR_FARADIO = 1e12;
+const DECIMALES_CAPACITANCIA = 1;
+
+/**
+ * Nombre y explicación sencilla de cada parte del circuito. La usan los
+ * <title> del dibujo y el cuadro "¿Qué es cada parte?" de la interfaz, así
+ * las dos explicaciones nunca se contradicen. Los valores salen del JSON.
+ * @param {object} parametros - Parámetros validados (M3).
+ * @returns {Readonly<{id: string, nombre: string, explicacion: string, enCuadro: boolean}[]>}
+ *   Partes en el orden del cuadro; enCuadro indica si van en el cuadro (las demás solo en el dibujo).
+ */
+export function describirPartesDelCircuito(parametros) {
+  const capacitancia_pF = (nombre) =>
+    (parametros.capacitancias_F[nombre] * PICOFARADIOS_POR_FARADIO).toFixed(DECIMALES_CAPACITANCIA);
+  const { V_rms, f_Hz } = parametros.red;
+  return Object.freeze([
+    { id: "fase", nombre: "L (fase)", enCuadro: true,
+      explicacion: `El conductor que trae la tensión de la red (${V_rms} V respecto a tierra). Por él sale la corriente.` },
+    { id: "neutro", nombre: "N (neutro)", enCuadro: true,
+      explicacion: "El conductor de regreso. Está unido a tierra en la instalación, así que su tensión es casi 0 V." },
+    { id: "polaridad", nombre: "Conmutador de polaridad", enCuadro: true,
+      explicacion: "Intercambia L y N a la entrada del equipo. En «invertida», la fase llega al equipo por el lado que debería ser el neutro." },
+    { id: "interruptorNeutro", nombre: "Interruptor de neutro", enCuadro: true,
+      explicacion: "Abre el neutro para simular un cable de neutro roto (primer defecto). Entonces los dos lados del equipo quedan a la tensión de la fase." },
+    { id: "conductorProteccion", nombre: "Conductor de protección (PE)", enCuadro: true,
+      explicacion: `El cable de tierra que une el chasis metálico con la tierra de la instalación (≈ ${parametros.R_PE_ohm} Ω). Al abrirlo se simula la tierra rota (primer defecto).` },
+    { id: "capacitanciaL", nombre: `C_L (${capacitancia_pF("C_L")} pF)`, enCuadro: true,
+      explicacion: "Capacitancia de fuga entre la fase y el chasis. No es una pieza que se pueda ver: es el acople natural, a través del aislamiento, entre los cables con tensión y la carcasa metálica. Por ahí se «escapa» la corriente de fuga." },
+    { id: "capacitanciaN", nombre: `C_N (${capacitancia_pF("C_N")} pF)`, enCuadro: true,
+      explicacion: "Capacitancia de fuga entre el neutro y el chasis. Es igual que C_L, pero del lado del neutro. En el R12 las dos son casi iguales." },
+    { id: "capacitanciaAP", nombre: `C_AP (${capacitancia_pF("C_AP")} pF)`, enCuadro: true,
+      explicacion: "Capacitancia del aislamiento entre la red y los electrodos. Es la barrera que separa la parte aplicada de la red; una corriente muy pequeña la cruza hacia el paciente." },
+    { id: "parteAplicada", nombre: "Parte aplicada CF", enCuadro: true,
+      explicacion: "Los electrodos de ECG y el cable de paciente: lo que toca al paciente. Es tipo CF porque puede quedar cerca del corazón, por eso tiene los límites más estrictos." },
+    { id: "md", nombre: "MD (cuerpo humano simulado)", enCuadro: true,
+      explicacion: "Es el circuito que usa el analizador para imitar el cuerpo humano (IEC 60601-1). Aquí se simplifica como una resistencia de 1 kΩ; el real también tiene una red de 10 kΩ y 0,015 µF que imita cómo responde el cuerpo a la frecuencia." },
+    { id: "red", nombre: "Red eléctrica", enCuadro: false,
+      explicacion: `La red de ${V_rms} V y ${f_Hz} Hz, como un tomacorriente en Colombia.` },
+    { id: "chasis", nombre: "Chasis del R12", enCuadro: false,
+      explicacion: "La carcasa metálica del equipo. El R12 es Clase I: su protección contra el choque depende de que el chasis esté unido a tierra por el conductor de protección." },
+    { id: "circuitoInterno", nombre: "Circuito interno", enCuadro: false,
+      explicacion: "La fuente de alimentación y la electrónica del equipo, conectadas entre L y N." },
+    { id: "puntaContacto", nombre: "Punta de contacto", enCuadro: false,
+      explicacion: "Punta del analizador que toca el chasis, como lo haría la mano de una persona. Se usa en la medición de corriente de contacto." },
+    { id: "tierraInstalacion", nombre: "Tierra de la instalación", enCuadro: false,
+      explicacion: "El punto de referencia (0 V) al que regresa la corriente de fuga." },
+  ]);
+}
+
+/**
+ * Dibuja las zonas invisibles con la explicación de cada parte (<title> de SVG).
+ * @param {Element} padre - Grupo SVG (va encima de todo el dibujo).
+ * @param {object} parametros - Parámetros validados (M3).
+ */
+function dibujarZonasDeAyuda(padre, parametros) {
+  const partesPorId = new Map(describirPartesDelCircuito(parametros).map((parte) => [parte.id, parte]));
+  // Una zona por cada rectángulo de ayuda
+  for (const { parte, ...rectangulo } of ZONAS_DE_AYUDA) {
+    const descripcion = partesPorId.get(parte);
+    const grupo = crearElementoSvg("g", { class: "parte-circuito" }, padre);
+    const titulo = crearElementoSvg("title", {}, grupo);
+    titulo.textContent = `${descripcion.nombre}: ${descripcion.explicacion}`;
+    crearElementoSvg("rect", { ...rectangulo, class: "zona-ayuda" }, grupo);
+  }
+}
 
 /** Posición de los textos que cambian: estado de los conmutadores y corriente por rama. */
 const POSICION_ESTADO_NEUTRO = Object.freeze([115, 270]);
@@ -350,15 +447,18 @@ function construirCaminos(medicion) {
 /**
  * Crea el visualizador sobre un elemento <svg> vacío.
  * @param {SVGSVGElement} svg - Elemento SVG de la página.
+ * @param {object} parametros - Parámetros validados (M3), para las explicaciones de cada parte.
  * @returns {{mostrarCondicion: Function, mostrarCamino: Function, borrarCamino: Function, establecerVisible: Function}}
  *   Funciones para actualizar el dibujo.
  */
-export function crearVisualizador(svg) {
+export function crearVisualizador(svg, parametros) {
   const grupoFijo = crearElementoSvg("g", {}, svg);
   const grupoConmutadores = crearElementoSvg("g", {}, svg);
   const grupoCamino = crearElementoSvg("g", {}, svg);
   const grupoValores = crearElementoSvg("g", {}, svg);
+  const grupoAyuda = crearElementoSvg("g", {}, svg);
   dibujarPartesFijas(grupoFijo);
+  dibujarZonasDeAyuda(grupoAyuda, parametros);
 
   const preferenciaMovimiento = window.matchMedia("(prefers-reduced-motion: reduce)");
   const animacion = { idCuadro: null, ultimoTiempo: null, desplazamiento: 0, visible: false, caminos: [] };

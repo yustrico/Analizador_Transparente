@@ -5,6 +5,15 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Cambiado
+- Analizador más fácil de entender (pedido tras una prueba con un compañero):
+  - Etiquetas del circuito con nombre: «C_L: fuga fase–chasis», «C_N: fuga neutro–chasis», «C_AP: aislamiento de electrodos» y «MD: cuerpo humano simulado (1 kΩ)». Cada parte del dibujo muestra su explicación al pasar el mouse (`<title>` de SVG).
+  - Nuevo cuadro «¿Qué es cada parte?» debajo del circuito (L, N, polaridad, neutro, PE, C_L, C_N, C_AP con sus pF, parte aplicada CF y MD). El dibujo y el cuadro usan la misma lista de explicaciones.
+  - «Fórmula usada» explica cada sigla con su nombre completo y su valor antes de la fórmula.
+  - Corriente de contacto: la tabla B/BF/CF se reemplaza por la frase «el límite es el mismo para B, BF y CF»; la tabla queda solo para la corriente de paciente.
+  - Más espacio al final de la página para que el aviso fijo no tape el contenido.
+  - Sin cambios en los cálculos ni en las pruebas.
+
 ### Agregado
 - Fase 2 (interfaz y visualizador):
   - `index.html` y `css/estilos.css`: 5 secciones en una sola página (Equipo, Prueba guiada, Analizador, Comparar, Historial), aviso educativo fijo, sin scripts ni estilos en línea.
