@@ -65,7 +65,7 @@ Fuga a tierra: C_L y el factor empírico k_N = 0.8418 se calibraron con la polar
 Nota honesta (docs/03 §6): C_L, C_N, C_AP y el término de 0.83 µA se ajustaron con estas mismas mediciones, así que ES02 muestra que el simulador calibrado reproduce lo que el estudiante verá en el laboratorio; no es una predicción independiente.
 
 ### ES03 — Tiempo de carga con 30 usuarios reales
-**Método actual (desde el 13/11/2026):** 30 personas reales abren la página publicada al mismo tiempo en una ventana de incógnito. La herramienta mide en cada navegador el tiempo de carga con Navigation Timing (inicio de la navegación → `loadEventEnd`), lo muestra en «Historial y reporte», dentro del bloque plegable «Datos técnicos (para la prueba de carga ES03)» («Tiempo de carga de esta página: X ms»), y lo incluye, con el navegador y la fecha y hora, en «Copiar resumen» (desde el 14/11/2026 ya no va en el PDF). p95 por el método del rango más cercano y % de errores (quien no pudo cargar la página). Protocolo y tabla de 30 filas: `docs/protocolo_ES03_30_usuarios.md`. **Resultado: pendiente.**
+**Método actual (desde el 13/11/2026):** 30 personas reales abren la página publicada al mismo tiempo en una ventana de incógnito. La herramienta mide en cada navegador el tiempo de carga con Navigation Timing (inicio de la navegación → `loadEventEnd`), lo muestra en «Historial y reporte», dentro del bloque plegable «Datos técnicos (para las especificaciones ES03 y ES09)» («Tiempo de carga de esta página: X ms»), y lo incluye, con el navegador y la fecha y hora, en «Copiar resumen» (desde el 14/11/2026 ya no va en el PDF). p95 por el método del rango más cercano y % de errores (quien no pudo cargar la página). Protocolo y tabla de 30 filas: `docs/protocolo_ES03_30_usuarios.md`. **Resultado: pendiente.**
 
 Comprobación de la medición (13/11/2026, perfil nuevo sin caché, con CSP): Chrome 157 mostró 138 ms y Edge 157 85 ms en localhost, exactamente iguales a Navigation Timing leído directamente; una recarga se marca como «recarga».
 
@@ -113,7 +113,7 @@ Resultado: Chrome 157.0.8103.51 y Edge 157.0.4341.57 con 0 errores ni avisos en 
 
 ### ES09 — Generación del reporte
 - En pantalla, con 36 lecturas y 10 generaciones (localhost, el mismo código publicado). En Chrome: 33, 14, 15, 10, 14, 12, 18, 13, 12, 16 ms (media 15.7 ± 6.5 ms). En Edge: 37, 12, 13, 11, 12, 9, 14, 10, 4, 13 ms (media 13.5 ± 8.7 ms). **Máximo 37 ms.**
-- La página muestra en pantalla el tiempo de cada generación («Reporte generado en … ms»).
+- Dónde se lee: pestaña **5. Historial y reporte**, al final, en el bloque cerrado **«Datos técnicos (para las especificaciones ES03 y ES09)»**: después de cada «Generar reporte» aparece «Reporte generado en … ms (meta ES09: ≤ 3 s, …)». Desde el 14/11/2026 ya no se muestra en la vista del reporte.
 - Archivo PDF con 36 lecturas, 10 veces en Node: 6.1 a 29.0 ms (máximo 29 ms). La descarga completa (clic → archivo en Descargas) tomó unos 0.3 s.
 
 ### ES12 — Licencias
@@ -144,5 +144,5 @@ Resultado: Chrome 157.0.8103.51 y Edge 157.0.4341.57 con 0 errores ni avisos en 
 | ES04 | `npx lighthouse https://yustrico.github.io/Analizador_Transparente/ --preset=desktop --only-categories=performance` × 5; tomar la mediana del LCP |
 | ES05 | `npm run peso`; o F12 → Red → «Desactivar caché» → recargar → el total «transferido» |
 | ES06, ES13 | F12 → Consola (sin errores) y Red (solo archivos de yustrico.github.io) durante una práctica completa en Chrome y en Edge |
-| ES09 | Generar el reporte 10 veces y leer «Reporte generado en … ms» |
+| ES09 | Generar el reporte 10 veces y, en Historial y reporte, abrir «Datos técnicos (para las especificaciones ES03 y ES09)» y leer «Reporte generado en … ms» |
 | ES08, ES10, ES11, ES14, ES15 | `docs/protocolo_prueba_usuarios.md` |

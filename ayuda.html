@@ -21,7 +21,7 @@
   <meta name="description" content="Manual de usuario del Analizador transparente: cómo hacer la práctica de seguridad eléctrica del electrocardiógrafo Mindray BeneHeart R12.">
   <link rel="icon" href="data:,">
   <!-- Integridad (SRI): la huella SHA-384 la escribe tools/sri.mjs -->
-  <link rel="stylesheet" href="css/estilos.css?v=cff0e17395" integrity="sha384-z/Dhc5XPYTffnwALzYDYd8yDuC+7HbP0ajs0CCbffTlxARxPhP5OcCyEoWmUU/8z">
+  <link rel="stylesheet" href="css/estilos.css?v=23935c02ff" integrity="sha384-I5NcAv+ri20s447U2m1sWj3gBHjRTxJ7/BLvTWoDXRI/v2kCnwSYuj4jOy6nCkL8">
 </head>
 <body>
   <header class="encabezado">
@@ -107,7 +107,7 @@
 
       <h3>Paso 5 — Genera tu reporte (pestaña «5. Historial y reporte»)</h3>
       <ol>
-        <li>Revisa la tabla con todas tus lecturas, en orden y con la hora. (Al final de la pestaña hay un bloque cerrado, «Datos técnicos (para la prueba de carga ES03)», con el tiempo que tardó la página en abrir; solo se usa para verificar la especificación ES03 y también va en «Copiar resumen».)</li>
+        <li>Revisa la tabla con todas tus lecturas, en orden y con la hora. (Al final de la pestaña hay un bloque cerrado, «Datos técnicos (para las especificaciones ES03 y ES09)», con el tiempo que tardó la página en abrir y, después de generar el reporte, el tiempo que tardó en generarse; solo se usan para verificar las especificaciones ES03 y ES09. El tiempo de carga también va en «Copiar resumen».)</li>
         <li>Presiona <strong>«Finalizar práctica»</strong> y escribe tu nombre (opcional, máximo 60 caracteres). Presiona <strong>«Generar reporte»</strong>.</li>
         <li>Presiona <strong>«Descargar reporte (PDF)»</strong>: se descarga el archivo <code>reporte_seguridad_electrica_AAAA-MM-DD.pdf</code> a tu carpeta de <strong>Descargas</strong>.</li>
         <li>Presiona <strong>«Copiar resumen»</strong>: se copia un resumen corto.</li>
@@ -132,7 +132,10 @@
         <li><strong>Qué tan cerca del límite:</strong> una corriente pequeña puede estar más cerca de su límite que una grande: compara la corriente de paciente CF (límite 10 µA) con la de contacto (límite 100 µA).</li>
       </ul>
 
-      <h2>7. Si algo no funciona</h2>
+      <h2>7. Origen de los datos</h2>
+      <p>Los valores del simulador están calibrados con mediciones reales del Fluke ESA620 sobre el electrocardiógrafo Mindray BeneHeart R12 serie FN-84011415 (3 repeticiones por condición). El detalle de las mediciones y de la calibración está en el documento <em>docs/06_Datos_ECG_R12_calibracion.md</em> del repositorio del proyecto.</p>
+
+      <h2>8. Si algo no funciona</h2>
       <table class="tabla">
         <thead><tr><th>Problema</th><th>Qué hacer</th></tr></thead>
         <tbody>

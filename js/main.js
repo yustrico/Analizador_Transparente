@@ -12,7 +12,7 @@
  */
 
 import { cargarParametros } from "./nucleo/modelo_equipo.js?v=80a1494303";
-import { iniciarInterfaz, mostrarError } from "./adaptadores/interfaz.js?v=e9837cb557";
+import { iniciarInterfaz, mostrarError } from "./adaptadores/interfaz.js?v=1f186481b6";
 
 /** Ruta del archivo de parámetros, relativa a index.html. */
 const RUTA_PARAMETROS = "datos/parametros_r12.json?v=5bd676506d";

@@ -84,7 +84,7 @@ El manual del R12 no fija un límite propio para la resistencia de aislamiento. 
 
 - Fuente: **IEC 62353:2014, Tabla 2** (*Medical electrical equipment – Recurrent test and test after repair of medical electrical equipment*), verificada con EBME (ebme.co.uk) y con el manual del analizador Testboy TV 470.
 - Corrección (14/11/2026): una versión anterior de esta tabla traía «Figura 12, 14 y 16». Esos números eran de las figuras del artículo de EBME, no de la norma, y se quitaron de la tabla, del JSON, de la pantalla y de las pruebas.
-- En IEC 62353 la medición de aislamiento es **opcional**; la norma la da como referencia. Por eso la herramienta la muestra con el texto: "Valores mínimos esperados de IEC 62353:2014 (Tabla 2) para equipos Clase I con parte CF. En esta norma la medición de aislamiento es opcional y el manual del R12 no fija un límite propio."
+- En IEC 62353 la medición de aislamiento es **opcional**; la norma la da como referencia. Por eso la herramienta la muestra con el texto: "Mínimos de referencia de la norma IEC 62353 (pruebas periódicas de equipos médicos) para equipos Clase I con parte CF. Esta medición es opcional en esa norma y el manual del R12 no fija un límite propio." (Actualizado el 14/11/2026: la edición 2014 y la Tabla 2 quedan solo en este documento, no en la pantalla.)
 - En `datos/parametros_r12.json` cada par de `pasos_previos_medidos.aislamiento_Mohm` trae `valor` y `minimo` (MΩ). El veredicto lo calcula M5 (`evaluarAislamiento`): "> 100 (OL)" se toma como "al menos 100 MΩ".
 
 ## 8. Fuga a tierra y factor empírico k_N (agregado el 14/11/2026)

@@ -5,6 +5,13 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Cambiado (14/11/2026, séptima ronda: textos, sin cambios en cálculos)
+- Ficha del equipo: «Clase (protección eléctrica): Clase I»; una sola fila «Parte aplicada: Tipo CF a prueba de desfibrilación (electrodos de ECG y cable de paciente)»; Normas solo con «IEC 60601-1» e «IEC 60601-2-25». Debajo, el bloque cerrado «¿Qué dicen estas normas?» (IEC 60601-1, IEC 60601-2-25, IEC 62353 y Clase I, que no es la clase de riesgo del Decreto 4725).
+- Se quita de la ficha «Fuente de los datos: …»; pasa a la sección «Origen de los datos» de ayuda.html y del manual (sigue en docs/06).
+- Prueba guiada: se quita «Estás repasando un paso ya completado. Tu avance no cambia.» (el ✓ y el borde del paso ya lo indican).
+- Paso 3: nota «Mínimos de referencia de la norma IEC 62353 (pruebas periódicas de equipos médicos)…»; «2014» y «Tabla 2» quedan solo en docs/06.
+- Historial y reporte: «Reporte generado en X ms» sale de la vista del reporte y pasa al bloque cerrado, que se llama «Datos técnicos (para las especificaciones ES03 y ES09)». docs/verificacion.md dice dónde se lee ES09.
+
 ### Cambiado (14/11/2026, sexta ronda: evitar fallas en la página publicada)
 - `tools/sri.mjs` agrega a cada URL de CSS y JS (link, script y modulepreload, en index.html y ayuda.html) un parámetro de versión con los primeros 10 caracteres de su huella (`css/estilos.css?v=…`). Los `import` entre módulos llevan la misma URL versionada que su modulepreload, para que cada módulo se descargue una sola vez y con su integrity; la versión se calcula de abajo hacia arriba (primero lo importado). La ruta del JSON en main.js también lleva su versión. Motivo: durante un despliegue la página publicada se vio sin CSS ni JS porque el navegador usó archivos viejos en caché y el SRI los bloqueó.
 - `tests/sri.test.js` revisa también las versiones y que cada import pida exactamente una URL precargada en index.html.

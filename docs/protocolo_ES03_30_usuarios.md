@@ -9,7 +9,7 @@ Cada navegador mide su propia carga con la API estándar **Navigation Timing**: 
 
 Dónde encontrarlo:
 - En el texto de **«Copiar resumen»** (pestaña **5. Historial y reporte**, después de «Finalizar práctica» → «Generar reporte»), con el navegador y la fecha y hora. **Es la forma principal de entregarlo.**
-- En pantalla: al final de la pestaña **5. Historial y reporte**, en el bloque plegable **«Datos técnicos (para la prueba de carga ES03)»** (está cerrado; hay que hacer clic para abrirlo):
+- En pantalla: al final de la pestaña **5. Historial y reporte**, en el bloque plegable **«Datos técnicos (para las especificaciones ES03 y ES09)»** (está cerrado; hay que hacer clic para abrirlo):
 
 > Tiempo de carga de esta página: 412 ms (Google Chrome 157 · 18/11/26, 10:00:03 a. m. · carga normal)
 
@@ -37,7 +37,7 @@ El PDF **no** lo incluye (desde el 14/11/2026), porque no es parte de la prácti
    2. Pestaña **3. Analizador** → **Medir**.
    3. Pestaña **5. Historial y reporte** → **Finalizar práctica** → en el nombre escriban su **código** (U01…) → **Generar reporte**.
    4. **Copiar resumen** → péguenlo en el formulario o el chat.
-   - Si algo falla en estos pasos, basta con abrir, al final de la pestaña 5, el bloque «Datos técnicos (para la prueba de carga ES03)» y copiar a mano la línea «Tiempo de carga de esta página: … ms (…)».
+   - Si algo falla en estos pasos, basta con abrir, al final de la pestaña 5, el bloque «Datos técnicos (para las especificaciones ES03 y ES09)» y copiar a mano la línea «Tiempo de carga de esta página: … ms (…)».
 6. Cerrar la ventana de incógnito.
 
 ## 4. Qué cuenta como válido y qué como error

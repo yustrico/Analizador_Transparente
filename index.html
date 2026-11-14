@@ -21,10 +21,10 @@
   <meta name="description" content="Simulador educativo de la prueba de seguridad eléctrica (IEC 60601-1) del electrocardiógrafo Mindray BeneHeart R12.">
   <link rel="icon" href="data:,">
   <!-- Integridad (SRI): las huellas SHA-384 las escribe tools/sri.mjs; correrlo después de cambiar JS o CSS -->
-  <link rel="stylesheet" href="css/estilos.css?v=cff0e17395" integrity="sha384-z/Dhc5XPYTffnwALzYDYd8yDuC+7HbP0ajs0CCbffTlxARxPhP5OcCyEoWmUU/8z">
+  <link rel="stylesheet" href="css/estilos.css?v=23935c02ff" integrity="sha384-I5NcAv+ri20s447U2m1sWj3gBHjRTxJ7/BLvTWoDXRI/v2kCnwSYuj4jOy6nCkL8">
   <!-- SRI: inicio (generado por tools/sri.mjs, no editar a mano) -->
   <link rel="modulepreload" href="js/adaptadores/historial.js?v=37beb88db5" integrity="sha384-N764jbU0sVhRC7ghKObyjTjXmaVMHHAPvVcAtTAhaCYpBXdSrwJZ+STKTxzDL19N">
-  <link rel="modulepreload" href="js/adaptadores/interfaz.js?v=e9837cb557" integrity="sha384-6YN8tVdL1Z4tKTWGUXv/lmbOKecqDEsG4kjl4EcuLmginX0taNPbAMBzPnJGCD7C">
+  <link rel="modulepreload" href="js/adaptadores/interfaz.js?v=1f186481b6" integrity="sha384-HxhkgbahKlrbNnTaFYjiop4J9/6ILUApc6fwbiq8NJzxcZz2ZvmD6tml2VynxDoK">
   <link rel="modulepreload" href="js/adaptadores/pdf.js?v=d9bb1aa981" integrity="sha384-2bsaqYFrn7TfsVHh4NNg/UZ/TKFo9l/ML73tb0/wKUH5vbk0/s9G8wDUJ7o3lAWD">
   <link rel="modulepreload" href="js/adaptadores/reporte.js?v=4ba5679c64" integrity="sha384-S6VnnGTlNhY5jwv/3OPmq6TgKo9RUpk24LK7p2TeLiVhXd007/EQnnL7sH9Q5s6+">
   <link rel="modulepreload" href="js/adaptadores/tiempo_carga.js?v=1c9699f3b9" integrity="sha384-HJaZ87n6slac+sCKpiv4PovGknwW6qIsYSbPkXqTEJSFVD0wGqJegnc9QHmWVjjg">
@@ -34,7 +34,7 @@
   <link rel="modulepreload" href="js/nucleo/motor_calculo.js?v=efa73aed55" integrity="sha384-76c67VUxXI/+Dx+nZ2FVjBDKPq9e8YkcvFPa3CAQQR4D8ItL4ouxZ+3uEIrZXUoc">
   <link rel="modulepreload" href="js/nucleo/secuencia.js?v=bffe121e07" integrity="sha384-v/4SHgduYquka0rL7HHdb+Z7SFxlx6UnWtzSicOu2HWYIDc2nw7ylTx8duc2u5qj">
   <!-- SRI: fin -->
-  <script type="module" src="js/main.js?v=2e6c4ba2f7" integrity="sha384-LmxLovcJZbcUBLAxJtrbqp6jW2x6bw9vo5//zS3tYWKQUwf+qjO94er1wiOgopW3"></script>
+  <script type="module" src="js/main.js?v=fafc7120f5" integrity="sha384-+vxxIPV5mRTCOv1ELRs+NGdBJ/BB3ecg4mu/j21uiSke3apWSf3C5ALMx3ePB3Fy"></script>
 </head>
 <body>
   <header class="encabezado">
@@ -67,12 +67,19 @@
           <h3>Ficha del equipo</h3>
           <dl class="ficha">
             <dt>Equipo</dt><dd id="ficha-nombre"></dd>
-            <dt>Clase</dt><dd id="ficha-clase"></dd>
+            <dt>Clase (protección eléctrica)</dt><dd id="ficha-clase"></dd>
             <dt>Parte aplicada</dt><dd id="ficha-parte"></dd>
-            <dt>Partes aplicadas</dt><dd>Electrodos de ECG y cable de paciente</dd>
             <dt>Normas</dt><dd id="ficha-normas"></dd>
           </dl>
-          <p class="nota" id="ficha-fuente"></p>
+          <details class="plegable">
+            <summary>¿Qué dicen estas normas?</summary>
+            <ul class="lista-simple plegable__lista">
+              <li><strong>IEC 60601-1:</strong> Norma general de seguridad de equipos electromédicos. De aquí salen los límites de corriente de contacto, de paciente y de fuga a tierra.</li>
+              <li><strong>IEC 60601-2-25:</strong> Norma particular para electrocardiógrafos; complementa a la general.</li>
+              <li><strong>IEC 62353:</strong> Norma para las pruebas periódicas y después de reparación de equipos ya en uso. De aquí salen los valores mínimos de resistencia de aislamiento del paso 3.</li>
+              <li><strong>Clase I:</strong> Según IEC 60601-1, equipo protegido contra choque eléctrico por el conductor de tierra. No es la clase de riesgo del Decreto 4725.</li>
+            </ul>
+          </details>
         </div>
         <div class="tarjeta">
           <h3>¿Por qué CF es la más estricta?</h3>
@@ -108,7 +115,6 @@
       <ol class="pasos" id="lista-pasos"></ol>
       <article class="tarjeta paso-actual" id="tarjeta-paso" aria-live="polite">
         <h3 id="paso-titulo"></h3>
-        <p class="nota nota-repaso" id="paso-repaso" hidden></p>
         <div class="paso-bloque">
           <h4>Propósito de seguridad</h4>
           <p id="paso-proposito"></p>
@@ -294,15 +300,15 @@
           </div>
           <p class="instruccion-envio">Para enviarlo: pega el resumen en tu correo (Outlook, Gmail o el de la universidad) y adjunta el PDF.</p>
           <p class="nota">El PDF y el resumen se crean en tu navegador: la herramienta no envía nada a ningún servidor.</p>
-          <p class="nota" id="reporte-tiempo"></p>
         </div>
         <article class="tarjeta reporte" id="reporte-contenido"></article>
       </div>
 
-      <!-- Dato técnico para la prueba ES03 (no es parte de la práctica) -->
+      <!-- Datos técnicos para verificar ES03 y ES09 (no son parte de la práctica) -->
       <details class="plegable no-imprimir">
-        <summary>Datos técnicos (para la prueba de carga ES03)</summary>
+        <summary>Datos técnicos (para las especificaciones ES03 y ES09)</summary>
         <p class="nota" id="tiempo-carga" aria-live="polite">Tiempo de carga de esta página: midiendo…</p>
+        <p class="nota" id="reporte-tiempo" aria-live="polite"></p>
       </details>
     </section>
   </main>

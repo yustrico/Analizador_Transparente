@@ -69,7 +69,7 @@ Debajo aparece la última lectura de cada configuración que hayas medido, en un
 📷 *Captura sugerida 5: la tabla y las barras con varias configuraciones medidas.*
 
 ### Paso 5 — Genera tu reporte (pestaña «5. Historial y reporte»)
-1. Revisa la tabla con todas tus lecturas, en orden y con la hora. (Al final de la pestaña hay un bloque cerrado, «Datos técnicos (para la prueba de carga ES03)», con el tiempo que tardó la página en abrir; solo se usa para verificar la especificación ES03 y también va en «Copiar resumen».)
+1. Revisa la tabla con todas tus lecturas, en orden y con la hora. (Al final de la pestaña hay un bloque cerrado, «Datos técnicos (para las especificaciones ES03 y ES09)», con el tiempo que tardó la página en abrir y, después de generar el reporte, el tiempo que tardó en generarse; solo se usan para verificar las especificaciones ES03 y ES09. El tiempo de carga también va en «Copiar resumen».)
 2. Presiona **«Finalizar práctica»** y escribe tu nombre (opcional, máximo 60 caracteres). Presiona **«Generar reporte»**.
 3. Presiona **«Descargar reporte (PDF)»**: se descarga el archivo `reporte_seguridad_electrica_AAAA-MM-DD.pdf` a tu carpeta de **Descargas**.
 4. Presiona **«Copiar resumen»**: se copia un resumen corto.
@@ -91,5 +91,8 @@ Después de generar el reporte puedes volver a medir y generarlo otra vez.
 - **Límites (IEC 60601-1):** corriente de contacto 100 µA (normal) y 500 µA (primer defecto); corriente de paciente CF 10 µA (normal) y 50 µA (primer defecto); corriente de fuga a tierra 5 mA (normal) y 10 mA (primer defecto), según la 3.ª edición de la norma. El manual del R12 indica 500/1000 µA porque usa la 2.ª edición de la norma.
 - **Qué tan cerca del límite:** una corriente pequeña puede estar más cerca de su límite que una grande: compara la corriente de paciente CF (límite 10 µA) con la de contacto (límite 100 µA).
 
-## 7. Si algo no funciona
+## 7. Origen de los datos
+Los valores del simulador están calibrados con mediciones reales del Fluke ESA620 sobre el electrocardiógrafo Mindray BeneHeart R12 serie FN-84011415 (3 repeticiones por condición). El detalle de las mediciones y de la calibración está en `docs/06_Datos_ECG_R12_calibracion.md`.
+
+## 8. Si algo no funciona
 Consulta [solucion_problemas.md](solucion_problemas.md).

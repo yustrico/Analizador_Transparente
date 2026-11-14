@@ -94,7 +94,7 @@ const TEXTOS_RESULTADO_PASO = Object.freeze({
   aislamientoIntro: "Resultado de la medición en el R12 del laboratorio: se midió la resistencia de aislamiento entre tres pares de puntos.",
   aislamientoCumple: "Cumple: todos los valores están por encima del mínimo esperado, así que el aislamiento es bueno y casi no deja pasar corriente. OL quiere decir que la resistencia superó el rango del analizador.",
   aislamientoNoCumple: "No cumple: al menos un valor está por debajo del mínimo esperado; el aislamiento podría estar dañado y dejar pasar más corriente de fuga.",
-  aislamientoNota: "Valores mínimos esperados de IEC 62353:2014 (Tabla 2) para equipos Clase I con parte CF. En esta norma la medición de aislamiento es opcional y el manual del R12 no fija un límite propio.",
+  aislamientoNota: "Mínimos de referencia de la norma IEC 62353 (pruebas periódicas de equipos médicos) para equipos Clase I con parte CF. Esta medición es opcional en esa norma y el manual del R12 no fija un límite propio.",
 });
 
 /** Unidades de los pasos 2 y 3. */
@@ -170,9 +170,8 @@ const GRUPOS_GLOSARIO = Object.freeze({
 /** Grupo que, además, explica por qué sube el límite al abrir la tierra o el neutro. */
 const GRUPO_CON_EJEMPLO_DE_LIMITE = "condiciones";
 
-/** Qué aporta cada norma, para la ficha del equipo. */
-const PAPEL_NORMA_GENERAL = "norma general; de aquí salen los límites";
-const PAPEL_NORMA_PARTICULAR = "norma particular para electrocardiógrafos";
+/** Partes aplicadas del R12 según su manual (ficha del equipo). */
+const PARTES_APLICADAS_R12 = "electrodos de ECG y cable de paciente";
 
 /* ------------------------------------------------------------------------ */
 /* Utilidades de la página                                                  */
@@ -244,15 +243,10 @@ function describirCondicion(condicion) {
 function mostrarEquipo(parametros) {
   const { equipo, limites_uA: limites } = parametros;
   elemento("ficha-nombre").textContent = equipo.nombre;
-  elemento("ficha-clase").textContent = equipo.clase;
-  elemento("ficha-parte").textContent = equipo.parte_aplicada;
-  // Cada norma en su propio renglón
-  elemento("ficha-normas").replaceChildren(
-    `${equipo.norma_general} (${PAPEL_NORMA_GENERAL})`,
-    document.createElement("br"),
-    `${equipo.norma_particular} (${PAPEL_NORMA_PARTICULAR})`,
-  );
-  elemento("ficha-fuente").textContent = `Fuente de los datos: ${parametros.fuente}.`;
+  elemento("ficha-clase").textContent = `Clase ${equipo.clase}`;
+  elemento("ficha-parte").textContent = `Tipo ${equipo.parte_aplicada} (${PARTES_APLICADAS_R12})`;
+  // Cada norma en su propio renglón (qué dice cada una va en «¿Qué dicen estas normas?»)
+  elemento("ficha-normas").replaceChildren(equipo.norma_general, document.createElement("br"), equipo.norma_particular);
 
   const cuerpo = elemento("tabla-limites-equipo").querySelector("tbody");
   cuerpo.replaceChildren();
@@ -495,9 +489,8 @@ function escribirResultadoPaso(claveDato, pasosPrevios) {
 /** Marca que se antepone a los pasos completados en la lista. */
 const MARCA_COMPLETADO = "✓";
 
-/** Textos de la tarjeta del paso en modo repaso y al terminar la prueba. */
+/** Textos de la tarjeta del paso al terminar la prueba y de su botón. */
 const TEXTOS_PRUEBA_GUIADA = Object.freeze({
-  repaso: "Estás repasando un paso ya completado. Tu avance no cambia.",
   completaTitulo: "Prueba guiada completa",
   completaTexto: "Ya recorriste los 4 pasos. Puedes abrir cualquiera de ellos para repasarlo, o medir todas las condiciones que quieras en el Analizador y compararlas.",
   botonSiguiente: "Entendido, siguiente paso",
@@ -562,14 +555,13 @@ function textoBotonPaso(secuencia, paso) {
 
 /**
  * Muestra la tarjeta del paso que se está viendo: primero el propósito y
- * luego el resultado. Si es un paso completado, avisa que es un repaso.
+ * luego el resultado. Un paso completado se reconoce por el ✓ y el borde en la lista.
  * @param {object} estado - Estado de la interfaz.
  */
 function mostrarPasoVisto(estado) {
   const paso = obtenerPasoVisto(estado.secuencia);
   const bloqueResultado = elemento("paso-bloque-resultado");
   const boton = elemento("boton-siguiente-paso");
-  const avisoRepaso = elemento("paso-repaso");
   mostrarListaPasos(estado);
   actualizarNavegacion(estado);
 
@@ -577,7 +569,6 @@ function mostrarPasoVisto(estado) {
   if (paso === null) {
     elemento("paso-titulo").textContent = TEXTOS_PRUEBA_GUIADA.completaTitulo;
     elemento("paso-proposito").textContent = TEXTOS_PRUEBA_GUIADA.completaTexto;
-    avisoRepaso.hidden = true;
     bloqueResultado.hidden = true;
     boton.textContent = TEXTOS_PRUEBA_GUIADA.botonAnalizador;
     return;
@@ -586,8 +577,6 @@ function mostrarPasoVisto(estado) {
   const numeroPaso = PASOS_PRUEBA.indexOf(paso) + 1;
   elemento("paso-titulo").textContent = `Paso ${numeroPaso} de ${PASOS_PRUEBA.length}: ${paso.titulo}`;
   elemento("paso-proposito").textContent = paso.proposito;
-  avisoRepaso.textContent = TEXTOS_PRUEBA_GUIADA.repaso;
-  avisoRepaso.hidden = !pasoCompletado(estado.secuencia, paso.id);
   // Los pasos 1 a 3 muestran su valor medido; el 4 lleva al Analizador
   bloqueResultado.hidden = paso.claveDatoMedido === null;
   if (paso.claveDatoMedido !== null) {
