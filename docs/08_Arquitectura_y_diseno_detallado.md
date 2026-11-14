@@ -42,7 +42,7 @@ Justificación: cumple RNF04 (sin instalación, fuera del laboratorio), RNF05 (P
 | M2 Secuencia | Núcleo | Orden fijo de la prueba y propósito de cada paso; no deja saltar pasos | Acción | Paso actual; Condición + Medición | RF01, RF02 | — |
 | M3 Modelo del equipo | Núcleo | Carga y valida los parámetros del R12 | parametros_r12.json | Parámetros | RR01, RR02 | — |
 | M4 Motor de cálculo | Núcleo | Corriente de contacto y de paciente por condición e incertidumbre U | Condición, Medición, Parámetros | I (µA), U (µA), corriente por rama | RF03, RF04, RNF02, RNF03 | ES01, ES02 |
-| M5 Evaluador de límites | Núcleo | Límite IEC 60601-1 aplicable y veredicto | I, U, Medición, Condición | Resultado | RF06, RF07 | — |
+| M5 Evaluador de límites | Núcleo | Límite IEC 60601-1 aplicable y veredicto; veredicto de los pasos 2 (resistencia de tierra) y 3 (aislamiento, mínimos de IEC 62353:2014 Tabla 2) | I, U, Medición, Condición | Resultado | RF06, RF07 | — |
 | M6 Visualizador | Adaptador | Dibuja la red MD y los conmutadores L/N/PE en SVG y anima el camino de la corriente | Corriente por rama, Condición | Dibujo SVG | RF05 | ES15 (CPU) |
 | M8 Historial | Adaptador | Guarda las lecturas de la sesión | Resultado | Lista de registros | RF11 | ES14 (RAM) |
 | M10 Reporte | Adaptador | Arma el reporte final, lo descarga como PDF y prepara el resumen para el correo | Lista de registros, nombre | Archivo PDF; copiar resumen al portapapeles | RF11, RNF09 | ES09 |

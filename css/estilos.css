@@ -7,7 +7,7 @@
  *   computador de 1280 px o más.
  * Módulo: M1 – Interfaz de usuario (adaptador) y M6 – Visualizador
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-13
+ * Creado: 2026-11-13 · Modificado: 2026-11-14
  * ============================================================================
  */
 
@@ -115,10 +115,14 @@ h4 { margin: 14px 0 6px; font-size: 1rem; }
 .tabla--compacta th, .tabla--compacta td { padding: 4px 8px; text-align: center; }
 .tabla .columna-destacada { font-weight: 700; }
 
-/* Bloque plegable con el significado de los términos (glosario) */
-.glosario { margin-top: 12px; border: 1px solid var(--borde); border-radius: var(--radio); padding: 6px 12px; }
-.glosario summary { cursor: pointer; font-weight: 600; color: var(--azul-principal); }
-.glosario__lista { margin: 8px 0 4px; }
+/* Bloque plegable (<details>): glosarios y datos técnicos */
+.plegable { margin-top: 12px; border: 1px solid var(--borde); border-radius: var(--radio); padding: 6px 12px; }
+.plegable summary { cursor: pointer; font-weight: 600; color: var(--azul-principal); }
+.plegable__lista { margin: 8px 0 4px; }
+.plegable--controles { margin: 0 0 12px; }
+
+/* Prueba guiada, paso 3: tabla de aislamiento con su mínimo y veredicto */
+.paso-resultado__tabla { margin: 8px 0; }
 
 /* Lista sin viñetas: un renglón por elemento ("Término: explicación") */
 .lista-simple { list-style: none; margin: 8px 0; padding: 0; }

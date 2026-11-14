@@ -37,7 +37,7 @@ Modular tipo **hexagonal**:
 | M2 Secuencia de la prueba | js/nucleo/secuencia.js | Núcleo | Orden fijo de los pasos, propósito de cada paso, no permite saltar pasos |
 | M3 Modelo del equipo | js/nucleo/modelo_equipo.js | Núcleo | Carga y VALIDA datos/parametros_r12.json (tipos y rangos) |
 | M4 Motor de cálculo | js/nucleo/motor_calculo.js | Núcleo | Corriente de contacto y de paciente por condición + incertidumbre U |
-| M5 Evaluador de límites | js/nucleo/evaluador_limites.js | Núcleo | Límite IEC 60601-1 aplicable y veredicto |
+| M5 Evaluador de límites | js/nucleo/evaluador_limites.js | Núcleo | Límite IEC 60601-1 aplicable y veredicto; veredicto de los pasos 2 y 3 (tierra y aislamiento) |
 | M6 Visualizador | js/adaptadores/visualizador.js | Adaptador | Circuito en SVG (red MD, conmutadores L/N/PE, chasis, parte aplicada) y animación del camino de la corriente |
 | M8 Historial | js/adaptadores/historial.js | Adaptador | Registro de lecturas en memoria (y sessionStorage); nota visible de que las lecturas se borran al cerrar la pestaña (sin aviso beforeunload) |
 | M10 Reporte | js/adaptadores/reporte.js | Adaptador | Reporte final en PDF (generador propio js/adaptadores/pdf.js, descarga directa) y copiar resumen al portapapeles |
@@ -60,7 +60,10 @@ datos/parametros_r12.json (todo en unidades SI):
   "pasos_previos_medidos": {
     "inspeccion_visual": "Sin hallazgos (carcasa, contaminación, cableado, etiquetas, piezas: Bien)",
     "resistencia_tierra_ohm": {"valor": "< 0.015", "limite": 0.2},
-    "aislamiento_Mohm": {"red_tierra": "> 100 (OL)", "partes_aplicadas_tierra": 94.7, "red_partes_aplicadas": "> 100 (OL)"}
+    "aislamiento_Mohm": {"red_tierra": {"valor": "> 100 (OL)", "minimo": 2, "figura_IEC_62353": 12},
+                         "partes_aplicadas_tierra": {"valor": 94.7, "minimo": 70, "figura_IEC_62353": 14},
+                         "red_partes_aplicadas": {"valor": "> 100 (OL)", "minimo": 70, "figura_IEC_62353": 16}},
+    "fuente_minimos_aislamiento": "IEC 62353:2014, Tabla 2: valores mínimos esperados de resistencia de aislamiento para equipos Clase I con parte aplicada CF"
   },
   "fuente": "Calibrado con mediciones reales del Fluke ESA620 sobre el R12 serie FN-84011415 (3 repeticiones por condición)"
 }

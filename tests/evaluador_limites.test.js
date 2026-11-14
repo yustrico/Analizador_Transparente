@@ -7,7 +7,7 @@
  *   BF y CF (RF07).
  * Módulo: M5 – Evaluador de límites (pruebas)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-13
+ * Creado: 2026-11-13 · Modificado: 2026-11-14
  * ============================================================================
  */
 
@@ -18,6 +18,7 @@ import { validarParametros } from "../js/nucleo/modelo_equipo.js";
 import { calcularMedicion } from "../js/nucleo/motor_calculo.js";
 import {
   clasificarCondicion, obtenerLimite_uA, obtenerLimitesPorTipoDeParte_uA, evaluarMedicion,
+  evaluarAislamiento, evaluarResistenciaTierra,
 } from "../js/nucleo/evaluador_limites.js";
 
 /** Parámetros reales del R12. */
@@ -97,4 +98,48 @@ test("Rechaza una medición sin corriente válida", () => {
   assert.throws(() => evaluarMedicion({ ...medicionBase, corriente_uA: -1 }, parametros), /corriente/);
   assert.throws(() => evaluarMedicion({ ...medicionBase, corriente_uA: Number.NaN }, parametros), /corriente/);
   assert.throws(() => evaluarMedicion(null, parametros), /medición/);
+});
+
+/* ---- Pasos 2 y 3 de la prueba guiada ---- */
+
+test("Aislamiento del R12: los tres pares cumplen el mínimo de IEC 62353 (2, 70 y 70 MΩ)", () => {
+  const aislamiento = parametros.pasos_previos_medidos.aislamiento_Mohm;
+  assert.equal(aislamiento.red_tierra.minimo, 2);
+  assert.equal(aislamiento.partes_aplicadas_tierra.minimo, 70);
+  assert.equal(aislamiento.red_partes_aplicadas.minimo, 70);
+  // Cada par medido en el laboratorio debe cumplir su mínimo
+  for (const par of Object.values(aislamiento)) {
+    assert.equal(evaluarAislamiento(par.valor, par.minimo), "Cumple");
+  }
+});
+
+test("Aislamiento: igual al mínimo cumple; por debajo no cumple", () => {
+  assert.equal(evaluarAislamiento(70, 70), "Cumple");
+  assert.equal(evaluarAislamiento(69.9, 70), "No cumple");
+  assert.equal(evaluarAislamiento(1.5, 2), "No cumple");
+});
+
+test("Aislamiento: entiende «> 100 (OL)» y «< 50» como cotas", () => {
+  assert.equal(evaluarAislamiento("> 100 (OL)", 70), "Cumple");
+  assert.equal(evaluarAislamiento("< 50", 70), "No cumple");
+  assert.equal(evaluarAislamiento("94.7", 70), "Cumple");
+});
+
+test("Aislamiento: rechaza valores que no permiten decidir o que no se entienden", () => {
+  assert.throws(() => evaluarAislamiento("> 50", 70), /no permite decidir/);
+  assert.throws(() => evaluarAislamiento("OL", 70), /No se entiende/);
+  assert.throws(() => evaluarAislamiento(-1, 70), /mayor o igual a cero/);
+  assert.throws(() => evaluarAislamiento(94.7, 0), /límite/);
+});
+
+test("Resistencia de tierra del R12: «< 0.015» Ω cumple el límite de 0.2 Ω", () => {
+  const tierra = parametros.pasos_previos_medidos.resistencia_tierra_ohm;
+  assert.equal(evaluarResistenciaTierra(tierra.valor, tierra.limite), "Cumple");
+});
+
+test("Resistencia de tierra: igual al límite cumple; por encima no cumple; «< 1» no permite decidir", () => {
+  assert.equal(evaluarResistenciaTierra(0.2, 0.2), "Cumple");
+  assert.equal(evaluarResistenciaTierra(0.25, 0.2), "No cumple");
+  assert.equal(evaluarResistenciaTierra("> 0.3", 0.2), "No cumple");
+  assert.throws(() => evaluarResistenciaTierra("< 1", 0.2), /no permite decidir/);
 });

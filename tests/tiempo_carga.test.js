@@ -4,10 +4,10 @@
  * Descripción: Comprueba que el tiempo de carga sale de Navigation Timing
  *   (loadEventEnd − startTime, en ms enteros), que se reconoce Chrome y
  *   Edge, que una carga sin terminar dice "no disponible", y que el dato va
- *   en el resumen copiado y en el reporte (pantalla y PDF).
+ *   en el resumen copiado pero no en el reporte ni en el PDF.
  * Módulo: M1 – Interfaz de usuario (pruebas; apoyo a ES03)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-13
+ * Creado: 2026-11-13 · Modificado: 2026-11-14
  * ============================================================================
  */
 
@@ -15,7 +15,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { nombreNavegador, resumirCarga, textoTiempoCarga, detalleCarga } from "../js/adaptadores/tiempo_carga.js";
-import { armarResumen, contenidoDelReporte } from "../js/adaptadores/reporte.js";
+import { armarResumen, contenidoDelReporte, crearPdfReporte } from "../js/adaptadores/reporte.js";
 import { validarParametros } from "../js/nucleo/modelo_equipo.js";
 
 const parametros = validarParametros(JSON.parse(await readFile(new URL("../datos/parametros_r12.json", import.meta.url), "utf8")));
@@ -52,13 +52,15 @@ test("Una recarga se identifica y una carga sin terminar dice «no disponible»"
   assert.equal(textoTiempoCarga(null), "Tiempo de carga de esta página: no disponible");
 });
 
-test("El tiempo de carga va en el resumen copiado y en el reporte (pantalla y PDF)", () => {
+test("El tiempo de carga va en el resumen copiado, pero no en el reporte ni en el PDF", () => {
   const cargaPagina = resumirCarga({ startTime: 0, loadEventEnd: 412, type: "navigate" }, ORIGEN_MS, "Microsoft Edge 157");
   const datos = { nombre: "E1", registros: [], parametros, fecha: new Date(ORIGEN_MS), cargaPagina };
   const resumen = armarResumen(datos);
   assert.ok(resumen.includes("Tiempo de carga de esta página: 412 ms"));
   assert.ok(resumen.includes("Navegador y hora de la carga: Microsoft Edge 157 · "));
-  const datosGenerales = new Map(contenidoDelReporte(datos).datosGenerales);
-  assert.equal(datosGenerales.get("Tiempo de carga de esta página"), "412 ms");
-  assert.match(datosGenerales.get("Navegador y hora de la carga"), /^Microsoft Edge 157 · /);
+  const textosDelReporte = contenidoDelReporte(datos).datosGenerales.flat().join(" ");
+  assert.ok(!textosDelReporte.includes("carga"), "El reporte no debe traer el tiempo de carga");
+  const textoPdf = new TextDecoder("latin1").decode(crearPdfReporte(datos));
+  assert.ok(!textoPdf.includes("Tiempo de carga"), "El PDF no debe traer el tiempo de carga");
+  assert.ok(!textoPdf.includes("Navegador y hora"), "El PDF no debe traer el navegador de la carga");
 });

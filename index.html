@@ -8,7 +8,7 @@
     en línea (lo exige la política de seguridad de contenido, CSP).
   Módulo: M1 – Interfaz de usuario (adaptador)
   Autores: Yustin Rico, David Cardona, Santiago González
-  Creado: 2026-11-13 · Modificado: 2026-11-13
+  Creado: 2026-11-13 · Modificado: 2026-11-14
   ============================================================================
 -->
 <html lang="es">
@@ -21,16 +21,16 @@
   <meta name="description" content="Simulador educativo de la prueba de seguridad eléctrica (IEC 60601-1) del electrocardiógrafo Mindray BeneHeart R12.">
   <link rel="icon" href="data:,">
   <!-- Integridad (SRI): las huellas SHA-384 las escribe tools/sri.mjs; correrlo después de cambiar JS o CSS -->
-  <link rel="stylesheet" href="css/estilos.css" integrity="sha384-CvWmKyxrqJN6URrRCZZvBVbJ0sQIWLU3/SaepgyNIIdQaXH06hTsb7PeUTs/2pPz">
+  <link rel="stylesheet" href="css/estilos.css" integrity="sha384-oOF2FkHTYi8C8wvSFjvyygxCK1v4QSsCOojJ2A0DZx15Kfip3kmt98UeQ81SJiMs">
   <!-- SRI: inicio (generado por tools/sri.mjs, no editar a mano) -->
-  <link rel="modulepreload" href="js/adaptadores/historial.js" integrity="sha384-xuotlox2oBXAC5OIQLcLkxklSJoVzMa03Y1zb8fYoOMnrPxPdf/utAK5o4mbsA7w">
-  <link rel="modulepreload" href="js/adaptadores/interfaz.js" integrity="sha384-MFB2QjEHhWuB88K2flKsO3sKwePU2zb7rpZswTb6Z+ZhCe6mCPb0+y/kbTMKUGO5">
+  <link rel="modulepreload" href="js/adaptadores/historial.js" integrity="sha384-lP1BTg/WUcEge6kTrPlYyCfDRi3aMNAe3seNUXphw1M2tIxXuci8eaYV138PNcs3">
+  <link rel="modulepreload" href="js/adaptadores/interfaz.js" integrity="sha384-FTvYKvsaBMRmJKsu5AcCU+fLcbw8NIfomZkK0cSVhtG8juXcw+1xI/9X1HRwtJTu">
   <link rel="modulepreload" href="js/adaptadores/pdf.js" integrity="sha384-2bsaqYFrn7TfsVHh4NNg/UZ/TKFo9l/ML73tb0/wKUH5vbk0/s9G8wDUJ7o3lAWD">
-  <link rel="modulepreload" href="js/adaptadores/reporte.js" integrity="sha384-+aFm+P1gPaCdCbrX2Rb+WwSTp50riFlhWojbs9SuFQ6KPfikXW5Wrr7MkWsceMZS">
+  <link rel="modulepreload" href="js/adaptadores/reporte.js" integrity="sha384-tPGzrWU7ymAr563jociUekbom1lkanbfLx9tTq6TvnpgCm6Qnhzo2shfvzW0A7zi">
   <link rel="modulepreload" href="js/adaptadores/tiempo_carga.js" integrity="sha384-HJaZ87n6slac+sCKpiv4PovGknwW6qIsYSbPkXqTEJSFVD0wGqJegnc9QHmWVjjg">
   <link rel="modulepreload" href="js/adaptadores/visualizador.js" integrity="sha384-BChwXZFE8xxYeuRAKjrWvaPet2N1m+30ddtFM2qRvag6PjZnnt1gRkEKLXV0K3Lp">
-  <link rel="modulepreload" href="js/nucleo/evaluador_limites.js" integrity="sha384-LSSN73TpGvoxmTACuvKwqcKZummgYCZPvczsVXZj/GsRoFqz3rfI5hMqsZ8C2VSi">
-  <link rel="modulepreload" href="js/nucleo/modelo_equipo.js" integrity="sha384-Qb77MAsOdDZAsRuC732Knrv2Be3wnwhGJUnjfM8eAdnjyFOmr2XRHseQUxFzPz9u">
+  <link rel="modulepreload" href="js/nucleo/evaluador_limites.js" integrity="sha384-YGRmK4mix2YZjUNY5HRq3XmSSRyOjGl/mQBQIOZM0J3KuAobvU5Oazi0lHwwjJT2">
+  <link rel="modulepreload" href="js/nucleo/modelo_equipo.js" integrity="sha384-Jl/reOup+TAQUmBWFCVz8CXHYRtMK4/NUmF5I8g8ivPXfDeq8lXq2pwTPjyMRpv6">
   <link rel="modulepreload" href="js/nucleo/motor_calculo.js" integrity="sha384-a+lAytkzsbOWOm4e2wyyJAo1ZYLGrVOtsf1NCxVn6lyGoQvBx01AhwIuTUHloY1R">
   <link rel="modulepreload" href="js/nucleo/secuencia.js" integrity="sha384-FKIHpcwKbIcHPpb1DNC/WpLa64I34nlWYzBgeRUiiJJS3AJvLHzfc26JI8YUiK9G">
   <!-- SRI: fin -->
@@ -90,9 +90,9 @@
           </thead>
           <tbody></tbody>
         </table>
-        <details class="glosario">
+        <details class="plegable">
           <summary>¿Qué significan estos términos?</summary>
-          <ul class="lista-simple glosario__lista" data-glosario></ul>
+          <ul class="lista-simple plegable__lista" data-glosario="todos"></ul>
         </details>
       </div>
     </section>
@@ -111,7 +111,12 @@
         <div class="paso-bloque" id="paso-bloque-resultado">
           <p class="paso-resultado__intro" id="paso-resultado-intro"></p>
           <ul class="lista-simple" id="paso-resultado"></ul>
+          <table class="tabla tabla--compacta paso-resultado__tabla" id="paso-resultado-tabla" hidden>
+            <thead><tr><th>Puntos medidos</th><th>Valor medido</th><th>Mínimo esperado</th><th>Resultado</th></tr></thead>
+            <tbody></tbody>
+          </table>
           <p id="paso-resultado-significado"></p>
+          <p class="nota" id="paso-resultado-nota" hidden></p>
         </div>
         <button type="button" class="boton boton--principal" id="boton-siguiente-paso">Entendido, siguiente paso</button>
       </article>
@@ -126,9 +131,9 @@
             <legend>Medición</legend>
             <label class="opcion"><input type="radio" name="medicion" value="contacto" checked> Corriente de contacto</label>
             <label class="opcion"><input type="radio" name="medicion" value="paciente"> Corriente de paciente CF</label>
-            <details class="glosario">
+            <details class="plegable">
               <summary>¿Qué estoy midiendo?</summary>
-              <ul class="lista-simple glosario__lista" data-glosario></ul>
+              <ul class="lista-simple plegable__lista" data-glosario="mediciones"></ul>
             </details>
           </fieldset>
           <fieldset class="grupo">
@@ -146,6 +151,10 @@
             <label class="opcion"><input type="radio" name="neutro" value="cerrado" checked> Cerrado</label>
             <label class="opcion"><input type="radio" name="neutro" value="abierto"> Abierto</label>
           </fieldset>
+          <details class="plegable plegable--controles">
+            <summary>¿Qué pasa si abro la tierra o el neutro?</summary>
+            <ul class="lista-simple plegable__lista" data-glosario="condiciones"></ul>
+          </details>
           <p class="nota nota--aviso" id="aviso-doble-falla" hidden></p>
           <button type="button" class="boton boton--principal boton--grande" id="boton-medir">Medir</button>
         </div>
@@ -214,7 +223,6 @@
     <section id="seccion-historial" class="seccion" data-seccion="historial" hidden>
       <h2 class="no-imprimir">Historial y reporte</h2>
       <p class="nota-importante no-imprimir" id="nota-borrado">Tus lecturas se borran al cerrar la pestaña. Descarga tu reporte antes de cerrar.</p>
-      <p class="nota no-imprimir" id="tiempo-carga" aria-live="polite">Tiempo de carga de esta página: midiendo…</p>
 
       <!-- Vista 1: historial de lecturas y botón para finalizar -->
       <div id="historial-vista">
@@ -263,6 +271,12 @@
         </div>
         <article class="tarjeta reporte" id="reporte-contenido"></article>
       </div>
+
+      <!-- Dato técnico para la prueba ES03 (no es parte de la práctica) -->
+      <details class="plegable no-imprimir">
+        <summary>Datos técnicos (para la prueba de carga ES03)</summary>
+        <p class="nota" id="tiempo-carga" aria-live="polite">Tiempo de carga de esta página: midiendo…</p>
+      </details>
     </section>
   </main>
 

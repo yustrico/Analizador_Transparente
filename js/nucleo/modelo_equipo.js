@@ -10,7 +10,7 @@
  *   módulo los cambie por accidente.
  * Módulo: M3 – Modelo del equipo (núcleo)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-13
+ * Creado: 2026-11-13 · Modificado: 2026-11-14
  * ============================================================================
  */
 
@@ -25,6 +25,7 @@ const CAMPOS_POSITIVOS = Object.freeze([
   ["R_MD_ohm"],
   ["exactitud_analizador", "piso_uA"],
   ["exactitud_analizador", "k"],
+  ["pasos_previos_medidos", "resistencia_tierra_ohm", "limite"],
 ]);
 
 /** Campos numéricos que pueden valer cero pero no ser negativos. */
@@ -40,6 +41,7 @@ const CAMPOS_TEXTO = Object.freeze([
   ["equipo", "parte_aplicada"],
   ["equipo", "norma_general"],
   ["pasos_previos_medidos", "inspeccion_visual"],
+  ["pasos_previos_medidos", "fuente_minimos_aislamiento"],
 ]);
 
 /** Datos de los pasos 1 a 3 de la prueba guiada que deben existir. */
@@ -47,6 +49,9 @@ const CAMPOS_OBJETO_PASOS_PREVIOS = Object.freeze([
   ["pasos_previos_medidos", "resistencia_tierra_ohm"],
   ["pasos_previos_medidos", "aislamiento_Mohm"],
 ]);
+
+/** Pares de puntos donde se mide el aislamiento (paso 3); cada uno trae valor, mínimo y figura de IEC 62353. */
+const PARES_AISLAMIENTO = Object.freeze(["red_tierra", "partes_aplicadas_tierra", "red_partes_aplicadas"]);
 
 /** Grupos de límites de IEC 60601-1 que debe traer el archivo. */
 const GRUPOS_DE_LIMITES = Object.freeze(["contacto", "paciente_B", "paciente_BF", "paciente_CF"]);
@@ -155,6 +160,33 @@ function validarTextosYPasosPrevios(datos) {
 }
 
 /**
+ * Revisa el aislamiento del paso 3: cada par de puntos debe traer el valor
+ * medido (número o texto como "> 100 (OL)"), el mínimo esperado de IEC 62353
+ * (MΩ, mayor que cero) y el número de la figura de esa norma (entero positivo).
+ * @param {object} datos - Objeto de parámetros.
+ * @throws {Error} Si falta un par o algún dato está mal.
+ */
+function validarAislamiento(datos) {
+  // Revisa cada par de puntos medidos
+  for (const par of PARES_AISLAMIENTO) {
+    const ruta = ["pasos_previos_medidos", "aislamiento_Mohm", par];
+    const valor = leerCampo(datos, [...ruta, "valor"]);
+    const valorEsNumero = typeof valor === "number" && Number.isFinite(valor) && valor >= 0;
+    const valorEsTexto = typeof valor === "string" && valor.trim() !== "";
+    if (!valorEsNumero && !valorEsTexto) {
+      throw new Error(`Parámetros del equipo: "${ruta.join(".")}.valor" debe ser un número no negativo o un texto como "> 100 (OL)".`);
+    }
+    if (leerNumero(datos, [...ruta, "minimo"]) <= 0) {
+      throw new Error(`Parámetros del equipo: "${ruta.join(".")}.minimo" debe ser mayor que cero.`);
+    }
+    const figura = leerNumero(datos, [...ruta, "figura_IEC_62353"]);
+    if (!Number.isInteger(figura) || figura <= 0) {
+      throw new Error(`Parámetros del equipo: "${ruta.join(".")}.figura_IEC_62353" debe ser un número entero positivo.`);
+    }
+  }
+}
+
+/**
  * Congela un objeto y todos los objetos que tenga adentro, para que nadie
  * pueda cambiar los parámetros después de validarlos.
  * @param {object} objeto - Objeto a congelar.
@@ -183,6 +215,7 @@ export function validarParametros(datos) {
   validarNumeros(datos);
   validarLimites(datos);
   validarTextosYPasosPrevios(datos);
+  validarAislamiento(datos);
   return congelarProfundo(structuredClone(datos));
 }
 

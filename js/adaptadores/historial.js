@@ -13,7 +13,7 @@
  *   historial, la sección Comparar y el reporte, para que se vean iguales.
  * Módulo: M8 – Historial (adaptador)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-13
+ * Creado: 2026-11-13 · Modificado: 2026-11-14
  * ============================================================================
  */
 

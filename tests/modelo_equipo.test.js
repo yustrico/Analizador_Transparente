@@ -6,7 +6,7 @@
  *   tipos equivocados o valores fuera de rango).
  * Módulo: M3 – Modelo del equipo (pruebas)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-13
+ * Creado: 2026-11-13 · Modificado: 2026-11-14
  * ============================================================================
  */
 
@@ -87,6 +87,27 @@ test("Rechaza si faltan los datos de los pasos previos", () => {
   const datos = copiaDatosReales();
   delete datos.pasos_previos_medidos.aislamiento_Mohm;
   assert.throws(() => validarParametros(datos), /aislamiento_Mohm/);
+});
+
+test("Rechaza un mínimo de aislamiento faltante, cero o una figura no entera", () => {
+  const sinMinimo = copiaDatosReales();
+  delete sinMinimo.pasos_previos_medidos.aislamiento_Mohm.red_tierra.minimo;
+  assert.throws(() => validarParametros(sinMinimo), /red_tierra\.minimo/);
+  const minimoCero = copiaDatosReales();
+  minimoCero.pasos_previos_medidos.aislamiento_Mohm.partes_aplicadas_tierra.minimo = 0;
+  assert.throws(() => validarParametros(minimoCero), /mayor que cero/);
+  const figuraMala = copiaDatosReales();
+  figuraMala.pasos_previos_medidos.aislamiento_Mohm.red_partes_aplicadas.figura_IEC_62353 = 1.5;
+  assert.throws(() => validarParametros(figuraMala), /entero positivo/);
+});
+
+test("Rechaza un valor de aislamiento vacío o negativo", () => {
+  const vacio = copiaDatosReales();
+  vacio.pasos_previos_medidos.aislamiento_Mohm.red_tierra.valor = " ";
+  assert.throws(() => validarParametros(vacio), /red_tierra\.valor/);
+  const negativo = copiaDatosReales();
+  negativo.pasos_previos_medidos.aislamiento_Mohm.partes_aplicadas_tierra.valor = -3;
+  assert.throws(() => validarParametros(negativo), /partes_aplicadas_tierra\.valor/);
 });
 
 test("cargarParametros lee el JSON con la función de lectura que se le pase", async () => {

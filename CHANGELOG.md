@@ -5,6 +5,15 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Agregado (14/11/2026)
+- Paso 3 de la prueba guiada (aislamiento) con veredicto: mínimos esperados de IEC 62353:2014, Tabla 2, para equipo Clase I con parte CF (red–tierra ≥ 2 MΩ, Figura 12; partes aplicadas–tierra ≥ 70 MΩ, Figura 14; red–partes aplicadas ≥ 70 MΩ, Figura 16). Tabla con valor medido, mínimo y «Cumple/No cumple» calculado, y nota sobre la fuente (medición opcional en IEC 62353; el manual del R12 no fija límite). Fuente anotada en docs/06 §7.
+- `datos/parametros_r12.json`: cada par de `aislamiento_Mohm` trae `valor`, `minimo` y `figura_IEC_62353`, más `fuente_minimos_aislamiento`. M3 los valida (mínimo > 0, figura entera).
+- M5: `evaluarAislamiento` (mínimo) y `evaluarResistenciaTierra` (máximo) entienden «> 100 (OL)» y «< 0.015» como cotas; el veredicto del paso 2 pasa de la interfaz a M5. 8 pruebas nuevas (87 en verde). Sin cambios en los cálculos de corriente.
+- Analizador: nuevo bloque plegable «¿Qué pasa si abro la tierra o el neutro?» (debajo de Tierra y Neutro) con condición normal, primer defecto y el ejemplo del límite que sube (100 → 500 µA, tomados del JSON). «¿Qué estoy midiendo?» queda solo con las dos corrientes; en Equipo siguen los cuatro términos. Una sola lista de textos para los tres bloques.
+
+### Cambiado (14/11/2026)
+- «Tiempo de carga de esta página» sale de la vista principal de Historial y reporte: queda en un bloque cerrado «Datos técnicos (para la prueba de carga ES03)» al final de la sección y en «Copiar resumen». Ya no va en el reporte en pantalla ni en el PDF. Protocolo ES03, manual, docs/03 y verificacion.md actualizados.
+
 ### Agregado
 - Tiempo de carga de la página con la API Navigation Timing (inicio de la navegación → loadEventEnd, en ms): se muestra en «Historial y reporte» como «Tiempo de carga de esta página: X ms» con el navegador, la fecha y hora y el tipo de carga (normal o recarga), y se incluye en el PDF y en «Copiar resumen». Nuevo módulo `js/adaptadores/tiempo_carga.js` y `tests/tiempo_carga.test.js` (79 pruebas en verde).
 - `docs/protocolo_ES03_30_usuarios.md`: 30 personas abren la página a la vez en incógnito y pegan su resumen; p95 por el método del rango más cercano, % de errores y tabla de 30 filas.

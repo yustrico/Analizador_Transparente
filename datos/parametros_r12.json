@@ -21,7 +21,12 @@
   "pasos_previos_medidos": {
     "inspeccion_visual": "Sin hallazgos (carcasa, contaminación, cableado, etiquetas, piezas: Bien)",
     "resistencia_tierra_ohm": { "valor": "< 0.015", "limite": 0.2 },
-    "aislamiento_Mohm": { "red_tierra": "> 100 (OL)", "partes_aplicadas_tierra": 94.7, "red_partes_aplicadas": "> 100 (OL)" }
+    "aislamiento_Mohm": {
+      "red_tierra": { "valor": "> 100 (OL)", "minimo": 2, "figura_IEC_62353": 12 },
+      "partes_aplicadas_tierra": { "valor": 94.7, "minimo": 70, "figura_IEC_62353": 14 },
+      "red_partes_aplicadas": { "valor": "> 100 (OL)", "minimo": 70, "figura_IEC_62353": 16 }
+    },
+    "fuente_minimos_aislamiento": "IEC 62353:2014, Tabla 2: valores mínimos esperados de resistencia de aislamiento para equipos Clase I con parte aplicada CF"
   },
   "fuente": "Calibrado con mediciones reales del Fluke ESA620 sobre el R12 serie FN-84011415 (3 repeticiones por condición)"
 }

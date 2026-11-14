@@ -70,3 +70,16 @@ Fuente: Mindray, "BeneHeart R12/BeneHeart R12A Electrocardiograph Operator's Man
   - red en parte aplicada CF 50 µA;
   - corriente auxiliar de paciente CF 10/50 µA.
 - El manual supone "un analizador de seguridad 601PRO XL o un analizador equivalente". El Fluke ESA620 del laboratorio es un analizador equivalente.
+
+## 7. Mínimos de resistencia de aislamiento (paso 3 de la prueba guiada, agregado el 14/11/2026)
+El manual del R12 no fija un límite propio para la resistencia de aislamiento. Se usan los **valores mínimos esperados de IEC 62353:2014, Tabla 2**, para un equipo **Clase I con parte aplicada CF**. El R12 es Clase I con parte aplicada tipo CF a prueba de desfibrilación según su manual (Apéndice A.1, sección 6 de este documento).
+
+| Par de puntos | Figura de IEC 62353:2014 | Mínimo esperado | Medido en el R12 | ¿Cumple? |
+|---|---|---|---|---|
+| Red – tierra (chasis) | Figura 12 | ≥ 2 MΩ | > 100 MΩ (OL) | Sí |
+| Partes aplicadas – tierra | Figura 14 | ≥ 70 MΩ | 94.7 MΩ | Sí |
+| Red – partes aplicadas | Figura 16 | ≥ 70 MΩ | > 100 MΩ (OL) | Sí |
+
+- Fuente: IEC 62353:2014, *Medical electrical equipment – Recurrent test and test after repair of medical electrical equipment*, Tabla 2. Valores verificados con EBME (ebme.co.uk) y con el manual del analizador Testboy TV 470.
+- En IEC 62353 la medición de aislamiento es **opcional**; la norma la da como referencia. Por eso la herramienta la muestra con el texto: "Valores mínimos esperados de IEC 62353:2014 (Tabla 2) para equipos Clase I con parte CF. En esta norma la medición de aislamiento es opcional y el manual del R12 no fija un límite propio."
+- En `datos/parametros_r12.json` cada par de `pasos_previos_medidos.aislamiento_Mohm` trae `valor`, `minimo` (MΩ) y `figura_IEC_62353`. El veredicto lo calcula M5 (`evaluarAislamiento`): "> 100 (OL)" se toma como "al menos 100 MΩ".

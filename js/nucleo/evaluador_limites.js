@@ -6,9 +6,12 @@
  *   primer defecto), dice si la lectura "Cumple" o "No cumple" y qué
  *   porcentaje del límite usó. También entrega los límites equivalentes para
  *   partes aplicadas B, BF y CF, para compararlos al lado de la lectura (RF07).
+ *   Además da el veredicto de los pasos 2 y 3 de la prueba guiada: resistencia
+ *   del conductor de protección (límite máximo) y resistencia de aislamiento
+ *   (mínimo esperado de IEC 62353:2014, Tabla 2).
  * Módulo: M5 – Evaluador de límites (núcleo)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-13
+ * Creado: 2026-11-13 · Modificado: 2026-11-14
  * ============================================================================
  */
 
@@ -30,6 +33,92 @@ const GRUPO_PACIENTE_POR_TIPO_DE_PARTE = Object.freeze({ B: "paciente_B", BF: "p
 
 /** Tipo de parte aplicada del R12 (sus límites son los que deciden el veredicto). */
 const TIPO_DE_PARTE_DEL_EQUIPO = "CF";
+
+/**
+ * Valor medido de los pasos 2 y 3 escrito como texto: un número, una cota
+ * ("< 0.015" o "> 100") y, opcionalmente, una nota entre paréntesis ("(OL)").
+ */
+const PATRON_VALOR_MEDIDO = /^([<>])?\s*(\d+(?:\.\d+)?)\s*(?:\(.*\))?$/;
+
+/**
+ * Convierte un valor medido en el intervalo donde está el valor real:
+ * 94.7 → [94.7, 94.7]; "> 100 (OL)" → [100, ∞); "< 0.015" → [0, 0.015].
+ * @param {number|string} valorMedido - Valor del JSON (número o texto).
+ * @returns {{desde: number, hasta: number}} Intervalo del valor real.
+ * @throws {Error} Si el valor no es un número no negativo ni un texto con ese formato.
+ */
+function intervaloDelValorMedido(valorMedido) {
+  if (typeof valorMedido === "number") {
+    if (!Number.isFinite(valorMedido) || valorMedido < 0) {
+      throw new Error(`El valor medido debe ser un número mayor o igual a cero (se recibió ${valorMedido}).`);
+    }
+    return { desde: valorMedido, hasta: valorMedido };
+  }
+  const coincidencia = PATRON_VALOR_MEDIDO.exec(String(valorMedido).trim());
+  if (coincidencia === null) {
+    throw new Error(`No se entiende el valor medido "${valorMedido}": debe ser un número, "< número" o "> número".`);
+  }
+  const [, cota, textoNumero] = coincidencia;
+  const numero = Number(textoNumero);
+  if (cota === ">") {
+    return { desde: numero, hasta: Number.POSITIVE_INFINITY };
+  }
+  if (cota === "<") {
+    return { desde: 0, hasta: numero };
+  }
+  return { desde: numero, hasta: numero };
+}
+
+/**
+ * Revisa que un límite de los pasos 2 y 3 sea un número mayor que cero.
+ * @param {number} limite - Límite.
+ * @throws {Error} Si no lo es.
+ */
+function validarLimitePaso(limite) {
+  if (typeof limite !== "number" || !Number.isFinite(limite) || limite <= 0) {
+    throw new Error(`El límite debe ser un número mayor que cero (se recibió ${limite}).`);
+  }
+}
+
+/**
+ * Veredicto del aislamiento (paso 3): cumple si la resistencia medida es al
+ * menos el mínimo esperado. "> 100 (OL)" cumple cualquier mínimo de hasta 100 MΩ.
+ * @param {number|string} valorMedido_Mohm - Resistencia medida (MΩ), número o texto.
+ * @param {number} minimo_Mohm - Mínimo esperado (MΩ).
+ * @returns {"Cumple"|"No cumple"} Veredicto.
+ * @throws {Error} Si los datos no son válidos o el valor no alcanza para decidir.
+ */
+export function evaluarAislamiento(valorMedido_Mohm, minimo_Mohm) {
+  validarLimitePaso(minimo_Mohm);
+  const intervalo = intervaloDelValorMedido(valorMedido_Mohm);
+  if (intervalo.desde >= minimo_Mohm) {
+    return VEREDICTO_CUMPLE;
+  }
+  if (intervalo.hasta < minimo_Mohm) {
+    return VEREDICTO_NO_CUMPLE;
+  }
+  throw new Error(`El valor medido "${valorMedido_Mohm}" no permite decidir si cumple el mínimo de ${minimo_Mohm} MΩ.`);
+}
+
+/**
+ * Veredicto de la resistencia del conductor de protección (paso 2): cumple si
+ * la resistencia medida no supera el límite. "< 0.015" cumple un límite de 0.2.
+ * @param {number|string} valorMedido_ohm - Resistencia medida (Ω), número o texto.
+ * @param {number} limite_ohm - Límite máximo (Ω).
+ * @returns {"Cumple"|"No cumple"} Veredicto.
+ * @throws {Error} Si los datos no son válidos o el valor no alcanza para decidir.
+ */
+export function evaluarResistenciaTierra(valorMedido_ohm, limite_ohm) {
+  validarLimitePaso(limite_ohm);
+  const intervalo = intervaloDelValorMedido(valorMedido_ohm);
+  if (intervalo.hasta <= limite_ohm) {
+    return VEREDICTO_CUMPLE;
+  }
+  if (intervalo.desde > limite_ohm) {
+    return VEREDICTO_NO_CUMPLE;
+  }
+  throw new Error(`El valor medido "${valorMedido_ohm}" no permite decidir si cumple el límite de ${limite_ohm} Ω.`);
+}
 
 /**
  * Clasifica la condición: "normal" si tierra y neutro están cerrados (la

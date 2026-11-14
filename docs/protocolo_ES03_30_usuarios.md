@@ -7,11 +7,13 @@ Analizador transparente (versión con la medición del tiempo de carga, posterio
 ## 1. Qué se mide y cómo lo mide la página
 Cada navegador mide su propia carga con la API estándar **Navigation Timing**: desde el **inicio de la navegación** (el Enter) hasta que termina el evento **load** (`loadEventEnd`), en milisegundos. Ese tiempo incluye la descarga de los 13 archivos desde GitHub Pages, que es lo único que cambia con muchos usuarios a la vez. Después de cargar, cada computador calcula solo.
 
-La página lo muestra en la sección **«5. Historial y reporte»**:
+Dónde encontrarlo:
+- En el texto de **«Copiar resumen»** (pestaña **5. Historial y reporte**, después de «Finalizar práctica» → «Generar reporte»), con el navegador y la fecha y hora. **Es la forma principal de entregarlo.**
+- En pantalla: al final de la pestaña **5. Historial y reporte**, en el bloque plegable **«Datos técnicos (para la prueba de carga ES03)»** (está cerrado; hay que hacer clic para abrirlo):
 
 > Tiempo de carga de esta página: 412 ms (Google Chrome 157 · 18/11/26, 10:00:03 a. m. · carga normal)
 
-El mismo dato va en el texto de **«Copiar resumen»** y en el PDF, con el navegador y la fecha y hora. Nada se envía a ningún servidor: cada persona pega su resumen a mano.
+El PDF **no** lo incluye (desde el 14/11/2026), porque no es parte de la práctica. Nada se envía a ningún servidor: cada persona pega su resumen a mano.
 
 **Por qué se descartó autocannon (13/11/2026):** la prueba con `autocannon -c 30 -d 60` no representaba el uso real. Sus 30 conexiones pidieron la página sin pausa, unas 28 500 veces en un minuto, 73 veces más que un curso de 30 abriendo la herramienta una vez. GitHub Pages la trató como abuso y respondió **429 «Too Many Requests»** al 67 % de las solicitudes, bloqueando la red unos 5 minutos. Ver `docs/verificacion.md` §ES03.
 
@@ -35,7 +37,7 @@ El mismo dato va en el texto de **«Copiar resumen»** y en el PDF, con el naveg
    2. Pestaña **3. Analizador** → **Medir**.
    3. Pestaña **5. Historial y reporte** → **Finalizar práctica** → en el nombre escriban su **código** (U01…) → **Generar reporte**.
    4. **Copiar resumen** → péguenlo en el formulario o el chat.
-   - Si algo falla en estos pasos, basta con copiar a mano la línea «Tiempo de carga de esta página: … ms (…)» que aparece arriba en la pestaña 5.
+   - Si algo falla en estos pasos, basta con abrir, al final de la pestaña 5, el bloque «Datos técnicos (para la prueba de carga ES03)» y copiar a mano la línea «Tiempo de carga de esta página: … ms (…)».
 6. Cerrar la ventana de incógnito.
 
 ## 4. Qué cuenta como válido y qué como error

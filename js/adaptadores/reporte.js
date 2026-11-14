@@ -11,7 +11,7 @@
  *   es del estudiante.
  * Módulo: M10 – Reporte (adaptador)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-13
+ * Creado: 2026-11-13 · Modificado: 2026-11-14
  * ============================================================================
  */
 
@@ -120,14 +120,13 @@ function textoMayorPorcentaje(registro) {
 /**
  * Arma el contenido del reporte (datos generales y filas de la tabla). Es el
  * mismo para la pantalla y para el PDF, así los dos nunca se diferencian.
- * Incluye el tiempo de carga de la página (ES03) con el navegador y la hora.
+ * El tiempo de carga de la página (ES03) no va aquí: solo va en «Copiar resumen».
  * @param {{nombre: string, registros: object[], parametros: object, fecha: Date, cargaPagina: object|null}} datos - Datos del reporte.
  * @returns {{datosGenerales: [string, string][], columnas: string[], filas: string[][]}} Contenido.
  */
 export function contenidoDelReporte(datos) {
-  const { nombre, registros, parametros, fecha, cargaPagina } = datos;
+  const { nombre, registros, parametros, fecha } = datos;
   const resumen = resumir(registros);
-  const [terminoCarga, valorCarga] = textoTiempoCarga(cargaPagina).split(": ");
   const datosGenerales = [
     ["Estudiante", nombre || NOMBRE_VACIO],
     ["Fecha y hora", fecha.toLocaleString(IDIOMA_FECHAS, FORMATO_FECHA)],
@@ -135,8 +134,6 @@ export function contenidoDelReporte(datos) {
     ["Clasificación", `Clase ${parametros.equipo.clase}, parte aplicada ${parametros.equipo.parte_aplicada}`],
     ["Normas", `${parametros.equipo.norma_general} y ${parametros.equipo.norma_particular}`],
     ["Resumen", textoResumen(resumen)],
-    [terminoCarga, valorCarga],
-    ["Navegador y hora de la carga", detalleCarga(cargaPagina)],
   ];
   // La lectura más cerca de su límite solo existe si hay lecturas
   if (resumen.mayor !== null) {

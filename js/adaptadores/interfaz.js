@@ -10,13 +10,15 @@
  *   textContent (nunca innerHTML), por seguridad.
  * Módulo: M1 – Interfaz de usuario (adaptador)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-13
+ * Creado: 2026-11-13 · Modificado: 2026-11-14
  * ============================================================================
  */
 
 import { PASOS_PRUEBA, crearEstadoInicial, obtenerPasoActual, completarPaso, pasoDisponible } from "../nucleo/secuencia.js";
 import { calcularMedicion, corrientePorFaradio_A_F, capacitanciaDeFuga_F } from "../nucleo/motor_calculo.js";
-import { evaluarMedicion, VEREDICTO_CUMPLE } from "../nucleo/evaluador_limites.js";
+import {
+  evaluarMedicion, evaluarAislamiento, evaluarResistenciaTierra, VEREDICTO_CUMPLE,
+} from "../nucleo/evaluador_limites.js";
 import { crearVisualizador, describirPartesDelCircuito, formatearCorriente_uA } from "./visualizador.js";
 import {
   crearHistorial, guardarAvancePrueba, leerAvancePrueba, filaDeRegistro, nombreCortoCondicion, textoLectura, textoPorcentaje, NOMBRES_MEDICION, UNIDAD_CORRIENTE,
@@ -82,17 +84,15 @@ const TEXTOS_RESULTADO_PASO = Object.freeze({
   tierraFuenteLimite: "manual del fabricante del R12",
   tierraCumple: "Cumple: la resistencia es menor que el límite, así que el chasis está bien unido a tierra y la corriente de fuga tiene un camino de muy baja resistencia que no pasa por la persona. Se escribe «<» porque el valor real es tan pequeño que queda por debajo de la exactitud del analizador.",
   tierraNoCumple: "No cumple: la resistencia supera el límite, así que la tierra no garantiza un camino de baja resistencia para la corriente de fuga.",
-  tierraSinComparar: "No se pudo comparar el valor medido con el límite.",
   aislamientoIntro: "Resultado de la medición en el R12 del laboratorio: se midió la resistencia de aislamiento entre tres pares de puntos.",
-  aislamientoSignificado: "Qué significa: los tres valores son de megaohmios, es decir, el aislamiento es muy alto y casi no deja pasar corriente. OL quiere decir que la resistencia superó el rango del analizador. Los datos de esta herramienta no traen un límite para esta prueba, por eso aquí no se indica si cumple o no.",
+  aislamientoCumple: "Cumple: todos los valores están por encima del mínimo esperado, así que el aislamiento es bueno y casi no deja pasar corriente. OL quiere decir que la resistencia superó el rango del analizador.",
+  aislamientoNoCumple: "No cumple: al menos un valor está por debajo del mínimo esperado; el aislamiento podría estar dañado y dejar pasar más corriente de fuga.",
+  aislamientoNota: "Valores mínimos esperados de IEC 62353:2014 (Tabla 2) para equipos Clase I con parte CF. En esta norma la medición de aislamiento es opcional y el manual del R12 no fija un límite propio.",
 });
 
 /** Unidades de los pasos 2 y 3. */
 const UNIDAD_RESISTENCIA_TIERRA = "Ω";
 const UNIDAD_AISLAMIENTO = "MΩ";
-
-/** Valor escrito como cota superior, por ejemplo "< 0.015". */
-const PATRON_COTA_SUPERIOR = /^<\s*(\d+(?:\.\d+)?)$/;
 
 const ETIQUETAS_AISLAMIENTO = Object.freeze({
   red_tierra: "Red – tierra",
@@ -123,16 +123,29 @@ const TEXTOS_EXPLICACION = Object.freeze({
 });
 
 /**
- * Significado de los términos de las mediciones: [término, explicación].
- * Es la única fuente de este texto; se muestra en los dos bloques plegables
- * (debajo de la tabla de límites y junto al selector de Medición).
+ * Significado de los términos: [término, explicación]. Es la única fuente de
+ * este texto; cada bloque plegable muestra los términos de su grupo.
  */
-const TERMINOS_GLOSARIO = Object.freeze([
-  ["Corriente de contacto", "La que pasaría por una persona que toca la carcasa del equipo."],
-  ["Corriente de paciente", "La que pasaría desde los electrodos, a través del paciente, hacia tierra."],
-  ["Condición normal", "Todas las protecciones del equipo funcionan."],
-  ["Primer defecto", "Falla una sola protección (tierra de protección abierta o neutro abierto). La norma permite un límite más alto porque es una situación temporal; dos fallas a la vez no se evalúan."],
-]);
+const TERMINOS_GLOSARIO = Object.freeze({
+  corrienteContacto: ["Corriente de contacto", "La que pasaría por una persona que toca la carcasa del equipo."],
+  corrientePaciente: ["Corriente de paciente", "La que pasaría desde los electrodos, a través del paciente, hacia tierra."],
+  condicionNormal: ["Condición normal", "Todas las protecciones del equipo funcionan."],
+  primerDefecto: ["Primer defecto", "Falla una sola protección (tierra de protección abierta o neutro abierto). La norma permite un límite más alto porque es una situación temporal; dos fallas a la vez no se evalúan."],
+});
+
+/**
+ * Términos de cada bloque plegable (atributo data-glosario del HTML):
+ * "todos" en la sección Equipo; "mediciones" junto al selector de Medición;
+ * "condiciones" debajo de los conmutadores de tierra y neutro.
+ */
+const GRUPOS_GLOSARIO = Object.freeze({
+  todos: ["corrienteContacto", "corrientePaciente", "condicionNormal", "primerDefecto"],
+  mediciones: ["corrienteContacto", "corrientePaciente"],
+  condiciones: ["condicionNormal", "primerDefecto"],
+});
+
+/** Grupo que, además, explica por qué sube el límite al abrir la tierra o el neutro. */
+const GRUPO_CON_EJEMPLO_DE_LIMITE = "condiciones";
 
 /** Qué aporta cada norma, para la ficha del equipo. */
 const PAPEL_NORMA_GENERAL = "norma general; de aquí salen los límites";
@@ -253,15 +266,38 @@ function agregarLineaTermino(lista, termino, texto) {
 }
 
 /**
- * Llena los bloques plegables del glosario (marcados con data-glosario) con
- * los mismos términos, para que el texto sea igual en todos.
+ * Frase que explica por qué sube el límite con un primer defecto, con los
+ * límites de la corriente de contacto del JSON (por ejemplo, de 100 a 500 µA).
+ * @param {object} parametros - Parámetros validados (M3).
+ * @returns {string} Frase.
  */
-function mostrarGlosario() {
-  // Cada bloque recibe la lista completa de términos
+function textoEjemploDeLimite(parametros) {
+  const { normal, primer_defecto: primerDefecto } = parametros.limites_uA.contacto;
+  return `Abrir la tierra o el neutro simula un primer defecto; por eso el límite sube (por ejemplo, de ${normal} ${UNIDAD_CORRIENTE} a ${primerDefecto} ${UNIDAD_CORRIENTE} en la corriente de contacto).`;
+}
+
+/**
+ * Llena cada bloque plegable del glosario (marcado con data-glosario="grupo")
+ * con los términos de su grupo, todos sacados de TERMINOS_GLOSARIO.
+ * @param {object} parametros - Parámetros validados (M3).
+ * @throws {Error} Si un bloque pide un grupo que no existe.
+ */
+function mostrarGlosario(parametros) {
+  // Cada bloque recibe solo los términos de su grupo
   for (const lista of document.querySelectorAll("[data-glosario]")) {
+    const grupo = lista.dataset.glosario;
+    const claves = GRUPOS_GLOSARIO[grupo];
+    if (!claves) {
+      throw new Error(`Glosario: no existe el grupo "${grupo}".`);
+    }
     lista.replaceChildren();
-    for (const [termino, explicacion] of TERMINOS_GLOSARIO) {
+    for (const clave of claves) {
+      const [termino, explicacion] = TERMINOS_GLOSARIO[clave];
       agregarLineaTermino(lista, termino, explicacion);
+    }
+    // El grupo de condiciones termina con el ejemplo del límite que sube
+    if (grupo === GRUPO_CON_EJEMPLO_DE_LIMITE) {
+      crearConTexto("li", textoEjemploDeLimite(parametros), lista);
     }
   }
 }
@@ -352,65 +388,85 @@ function textoConUnidad(valor, unidad) {
 }
 
 /**
- * Valor máximo que puede tener una medición: el número mismo, o el número de
- * una cota superior como "< 0.015".
- * @param {number|string} valor - Valor del JSON.
- * @returns {number} Valor máximo, o NaN si no se puede interpretar.
+ * Escribe la tabla del aislamiento (paso 3): valor medido, mínimo esperado
+ * de IEC 62353 y veredicto de cada par de puntos (calculado por M5).
+ * @param {object} aislamiento - pasos_previos_medidos.aislamiento_Mohm del JSON.
+ * @returns {boolean} true si todos los pares cumplen.
  */
-function valorMaximoMedido(valor) {
-  if (typeof valor === "number") {
-    return valor;
+function escribirTablaAislamiento(aislamiento) {
+  const cuerpo = elemento("paso-resultado-tabla").tBodies[0];
+  cuerpo.replaceChildren();
+  let todosCumplen = true;
+  // Una fila por cada par de puntos medidos
+  for (const [clave, par] of Object.entries(aislamiento)) {
+    const veredicto = evaluarAislamiento(par.valor, par.minimo);
+    todosCumplen = todosCumplen && veredicto === VEREDICTO_CUMPLE;
+    const fila = cuerpo.insertRow();
+    crearConTexto("td", ETIQUETAS_AISLAMIENTO[clave] ?? clave, fila);
+    crearConTexto("td", textoConUnidad(par.valor, UNIDAD_AISLAMIENTO), fila);
+    crearConTexto("td", `≥ ${par.minimo} ${UNIDAD_AISLAMIENTO} (Figura ${par.figura_IEC_62353})`, fila);
+    crearConTexto("td", veredicto, fila, veredicto === VEREDICTO_CUMPLE ? "veredicto--cumple" : "veredicto--no-cumple");
   }
-  const coincidencia = PATRON_COTA_SUPERIOR.exec(String(valor).trim());
-  return coincidencia ? Number(coincidencia[1]) : Number.NaN;
+  return todosCumplen;
 }
 
 /**
- * Frase que dice si la resistencia de tierra cumple su límite y por qué.
- * @param {{valor: number|string, limite: number}} dato - Resistencia medida y límite (Ω).
- * @returns {string} Frase.
+ * Escribe el contenido propio de cada paso (lista, tabla y significado).
+ * @param {string} claveDato - Campo de pasos_previos_medidos.
+ * @param {object} dato - Valor de ese campo.
+ * @param {{lista: HTMLElement, significado: HTMLElement, nota: HTMLElement}} destino - Elementos donde se escribe.
  */
-function significadoResistenciaTierra(dato) {
-  const maximo_ohm = valorMaximoMedido(dato.valor);
-  if (!Number.isFinite(maximo_ohm)) {
-    return TEXTOS_RESULTADO_PASO.tierraSinComparar;
+function escribirDetallePaso(claveDato, dato, destino) {
+  if (claveDato === "inspeccion_visual") {
+    // Un renglón por cada punto revisado
+    for (const [punto, estadoPunto] of PUNTOS_INSPECCION) {
+      agregarLineaTermino(destino.lista, punto, estadoPunto);
+    }
+  } else if (claveDato === "resistencia_tierra_ohm") {
+    agregarLineaTermino(destino.lista, "Resistencia medida", textoConUnidad(dato.valor, UNIDAD_RESISTENCIA_TIERRA));
+    agregarLineaTermino(destino.lista, "Límite", `≤ ${dato.limite} ${UNIDAD_RESISTENCIA_TIERRA} (${TEXTOS_RESULTADO_PASO.tierraFuenteLimite})`);
+    const cumple = evaluarResistenciaTierra(dato.valor, dato.limite) === VEREDICTO_CUMPLE;
+    destino.significado.textContent = cumple ? TEXTOS_RESULTADO_PASO.tierraCumple : TEXTOS_RESULTADO_PASO.tierraNoCumple;
+  } else if (claveDato === "aislamiento_Mohm") {
+    elemento("paso-resultado-tabla").hidden = false;
+    const cumple = escribirTablaAislamiento(dato);
+    destino.significado.textContent = cumple ? TEXTOS_RESULTADO_PASO.aislamientoCumple : TEXTOS_RESULTADO_PASO.aislamientoNoCumple;
+    destino.nota.textContent = TEXTOS_RESULTADO_PASO.aislamientoNota;
+    destino.nota.hidden = false;
   }
-  return maximo_ohm <= dato.limite ? TEXTOS_RESULTADO_PASO.tierraCumple : TEXTOS_RESULTADO_PASO.tierraNoCumple;
 }
+
+/** Frase que presenta el resultado de cada paso. */
+const INTRO_POR_PASO = Object.freeze({
+  inspeccion_visual: TEXTOS_RESULTADO_PASO.inspeccionIntro,
+  resistencia_tierra_ohm: TEXTOS_RESULTADO_PASO.tierraIntro,
+  aislamiento_Mohm: TEXTOS_RESULTADO_PASO.aislamientoIntro,
+});
 
 /**
  * Escribe el resultado de un paso de la prueba guiada: una frase que dice qué
- * se hizo, una lista "Punto: valor" (un renglón por punto) y, en los pasos 2
- * y 3, una frase que explica qué significa.
+ * se hizo, los valores con su unidad y, en los pasos 2 y 3, si cumplen y qué
+ * significa. Si un dato no permite dar el veredicto, muestra el error sin
+ * romper la página.
  * @param {string} claveDato - Campo de pasos_previos_medidos.
  * @param {object} pasosPrevios - Objeto pasos_previos_medidos del JSON.
  */
 function escribirResultadoPaso(claveDato, pasosPrevios) {
-  const dato = pasosPrevios[claveDato];
-  const intro = elemento("paso-resultado-intro");
-  const lista = elemento("paso-resultado");
-  const significado = elemento("paso-resultado-significado");
-  lista.replaceChildren();
-  significado.textContent = "";
-
-  if (claveDato === "inspeccion_visual") {
-    intro.textContent = TEXTOS_RESULTADO_PASO.inspeccionIntro;
-    // Un renglón por cada punto revisado
-    for (const [punto, estadoPunto] of PUNTOS_INSPECCION) {
-      agregarLineaTermino(lista, punto, estadoPunto);
-    }
-  } else if (claveDato === "resistencia_tierra_ohm") {
-    intro.textContent = TEXTOS_RESULTADO_PASO.tierraIntro;
-    agregarLineaTermino(lista, "Resistencia medida", textoConUnidad(dato.valor, UNIDAD_RESISTENCIA_TIERRA));
-    agregarLineaTermino(lista, "Límite", `≤ ${dato.limite} ${UNIDAD_RESISTENCIA_TIERRA} (${TEXTOS_RESULTADO_PASO.tierraFuenteLimite})`);
-    significado.textContent = significadoResistenciaTierra(dato);
-  } else if (claveDato === "aislamiento_Mohm") {
-    intro.textContent = TEXTOS_RESULTADO_PASO.aislamientoIntro;
-    // Un renglón por cada par de puntos medidos
-    for (const [clave, valor] of Object.entries(dato)) {
-      agregarLineaTermino(lista, ETIQUETAS_AISLAMIENTO[clave] ?? clave, textoConUnidad(valor, UNIDAD_AISLAMIENTO));
-    }
-    significado.textContent = TEXTOS_RESULTADO_PASO.aislamientoSignificado;
+  const destino = {
+    lista: elemento("paso-resultado"),
+    significado: elemento("paso-resultado-significado"),
+    nota: elemento("paso-resultado-nota"),
+  };
+  // Se limpia lo que haya dejado el paso anterior
+  destino.lista.replaceChildren();
+  destino.significado.textContent = "";
+  destino.nota.hidden = true;
+  elemento("paso-resultado-tabla").hidden = true;
+  elemento("paso-resultado-intro").textContent = INTRO_POR_PASO[claveDato] ?? "";
+  try {
+    escribirDetallePaso(claveDato, pasosPrevios[claveDato], destino);
+  } catch (error) {
+    destino.significado.textContent = error.message;
   }
 }
 
@@ -1189,7 +1245,7 @@ export function iniciarInterfaz(parametros) {
     elemento("tiempo-carga").textContent = `${textoTiempoCarga(carga)} (${detalleCarga(carga)})`;
   });
   mostrarEquipo(parametros);
-  mostrarGlosario();
+  mostrarGlosario(parametros);
   configurarNavegacion(estado);
   elemento("boton-siguiente-paso").addEventListener("click", () => avanzarPaso(estado));
   mostrarPasoActual(estado);
