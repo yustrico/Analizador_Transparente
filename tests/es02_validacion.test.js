@@ -7,7 +7,7 @@
  *   de la incertidumbre de la medición (criterio de ISO/IEC 17043 e ISO 13528).
  * Módulo: M4 – Motor de cálculo (validación)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-13
+ * Creado: 2026-11-13 · Modificado: 2026-11-14
  * ============================================================================
  */
 
@@ -34,7 +34,7 @@ const parametros = validarParametros(
   JSON.parse(readFileSync(new URL("../datos/parametros_r12.json", import.meta.url), "utf8"))
 );
 
-/** Datos medidos con el ESA620 (media ± desviación estándar, n = 3), CLAUDE.md sección 5. */
+/** Datos medidos con el ESA620 (media ± desviación estándar, n = 3), CLAUDE.md sección 5 y docs/06 §1 (16 configuraciones). */
 const DATOS_MEDIDOS = [
   { tipo: "contacto", polaridad: "normal", tierra: "cerrada", neutro: "cerrado", media_uA: 0.12, desviacion_uA: 0.03 },
   { tipo: "contacto", polaridad: "invertida", tierra: "cerrada", neutro: "cerrado", media_uA: 0.12, desviacion_uA: 0.03 },
@@ -48,6 +48,12 @@ const DATOS_MEDIDOS = [
   { tipo: "paciente", polaridad: "invertida", tierra: "abierta", neutro: "cerrado", media_uA: 2.13, desviacion_uA: 0.15 },
   { tipo: "paciente", polaridad: "normal", tierra: "cerrada", neutro: "abierto", media_uA: 1.20, desviacion_uA: 0.10 },
   { tipo: "paciente", polaridad: "invertida", tierra: "cerrada", neutro: "abierto", media_uA: 1.07, desviacion_uA: 0.12 },
+  // Fuga a tierra (docs/06 §1). Con polaridad normal son los datos con que se calibró
+  // C_L y k_N; con polaridad invertida son la validación independiente.
+  { tipo: "fuga_tierra", polaridad: "normal", tierra: "cerrada", neutro: "cerrado", media_uA: 14.73, desviacion_uA: 0.49 },
+  { tipo: "fuga_tierra", polaridad: "invertida", tierra: "cerrada", neutro: "cerrado", media_uA: 14.90, desviacion_uA: 0.10 },
+  { tipo: "fuga_tierra", polaridad: "normal", tierra: "cerrada", neutro: "abierto", media_uA: 27.13, desviacion_uA: 0.71 },
+  { tipo: "fuga_tierra", polaridad: "invertida", tierra: "cerrada", neutro: "abierto", media_uA: 27.43, desviacion_uA: 0.45 },
 ];
 
 /**

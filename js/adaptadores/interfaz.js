@@ -18,16 +18,20 @@ import {
   PASOS_PRUEBA, crearEstadoInicial, crearEstadoDesdeAvance, obtenerPasoActual, obtenerPasoVisto, completarPaso,
   pasoDisponible, pasoCompletado, verPaso,
 } from "../nucleo/secuencia.js";
-import { calcularMedicion, corrientePorFaradio_A_F, capacitanciaDeFuga_F } from "../nucleo/motor_calculo.js";
+import {
+  calcularMedicion, corrientePorFaradio_A_F, capacitanciaDeFuga_F, capacitanciaFugaATierra_F, listarConfiguraciones,
+  medicionPosible, MENSAJE_FUGA_SIN_TIERRA,
+} from "../nucleo/motor_calculo.js";
 import {
   evaluarMedicion, evaluarAislamiento, evaluarResistenciaTierra, VEREDICTO_CUMPLE,
 } from "../nucleo/evaluador_limites.js";
 import { crearVisualizador, describirPartesDelCircuito, formatearCorriente_uA } from "./visualizador.js";
 import {
   crearHistorial, guardarAvancePrueba, leerAvancePrueba, filaDeRegistro, nombreCortoCondicion, textoLectura, textoPorcentaje, NOMBRES_MEDICION, UNIDAD_CORRIENTE,
+  textoLimite, textoConfiguracion, resumirAvance, claveConfiguracion,
 } from "./historial.js";
 import {
-  generarReporte, crearPdfReporte, nombreArchivoReporte, armarResumen, limpiarNombre, TEXTO_INCERTIDUMBRE,
+  generarReporte, crearPdfReporte, nombreArchivoReporte, armarResumen, limpiarNombre, TEXTO_INCERTIDUMBRE, TEXTO_CERCA_DEL_LIMITE,
 } from "./reporte.js";
 import { descargarPdf } from "./pdf.js";
 import { medirCargaPagina, textoTiempoCarga, detalleCarga } from "./tiempo_carga.js";
@@ -103,13 +107,22 @@ const ETIQUETAS_AISLAMIENTO = Object.freeze({
   red_partes_aplicadas: "Red – partes aplicadas",
 });
 
-/** Orden fijo de las mediciones y de las condiciones en la sección Comparar. */
-const ORDEN_MEDICIONES = Object.freeze(["contacto", "paciente"]);
-const ORDEN_CONDICIONES = Object.freeze([
-  "normal|cerrada|cerrado", "invertida|cerrada|cerrado",
-  "normal|abierta|cerrado", "invertida|abierta|cerrado",
-  "normal|cerrada|abierto", "invertida|cerrada|abierto",
-]);
+/** Orden fijo de las mediciones (tabla de límites y gráficas de Comparar). */
+const ORDEN_MEDICIONES = Object.freeze(["contacto", "paciente", "fuga_tierra"]);
+
+/** Las 16 configuraciones (medición + condición) que simula la herramienta, en orden fijo (M4). */
+const CONFIGURACIONES = listarConfiguraciones();
+
+/** Medición de fuga a tierra (no existe con la tierra abierta). */
+const MEDICION_FUGA_TIERRA = "fuga_tierra";
+
+/** Grupos de límites del JSON para B, BF y CF en cada medición (tabla de la sección Equipo). */
+const GRUPOS_LIMITES_POR_MEDICION = Object.freeze({
+  contacto: ["contacto", "contacto", "contacto"],
+  paciente: ["paciente_B", "paciente_BF", "paciente_CF"],
+  fuga_tierra: ["fuga_tierra", "fuga_tierra", "fuga_tierra"],
+});
+
 
 /** Textos de explicación (CLAUDE.md, sección 7). */
 const TEXTOS_EXPLICACION = Object.freeze({
@@ -121,6 +134,11 @@ const TEXTOS_EXPLICACION = Object.freeze({
   pacientePolaridadInvertida: "Invertir la polaridad casi no cambia la lectura.",
   pacienteTierraAbierta: "Con el chasis sin tierra aumenta el acople hacia la parte aplicada: ≈ 2.1 µA (aumento medido en el laboratorio). Límite de primer defecto: 50 µA.",
   pacienteNeutroAbierto: "≈ 1.3 µA, casi igual a la condición normal en este equipo. Límite de primer defecto: 50 µA.",
+  fugaNormal: "Es la corriente que la capacitancia de fuga entre fase y chasis (≈ 326 pF) manda al chasis y que vuelve por el conductor de protección hacia la tierra de la instalación: I = V·2πf·C ≈ 14.7 µA. El límite es del equipo completo: 5 mA en condición normal.",
+  fugaNeutroAbierto: "Con el neutro abierto, el lado del neutro también queda con tensión y suma parte de su fuga: I = V·2πf·(C_L + k_N·C_N) ≈ 27.1 µA. k_N ≈ 0.84 es un factor empírico medido en el laboratorio: el lado del neutro no queda exactamente a la tensión de fase. Es primer defecto: límite 10 mA.",
+  fugaSegundaEdicion: "El manual del R12 indica 500/1000 µA porque usa la 2.ª edición de la norma.",
+  limiteContactoIgual: "Para la corriente de contacto el límite es el mismo para B, BF y CF.",
+  limiteEquipoCompleto: "Para la fuga a tierra el límite es del equipo completo, no depende de B, BF o CF.",
   bandaIncertidumbre: "Es la exactitud del analizador real (±(1 % + 1 µA), k = 2). Si dos lecturas difieren menos que esta banda, la diferencia puede ser del instrumento y no de la condición.",
   dobleFalla: "No se pueden abrir la tierra y el neutro al mismo tiempo: serían dos fallas a la vez (doble falla). La norma evalúa una sola falla a la vez (primer defecto), por eso esa opción está deshabilitada.",
 });
@@ -132,6 +150,7 @@ const TEXTOS_EXPLICACION = Object.freeze({
 const TERMINOS_GLOSARIO = Object.freeze({
   corrienteContacto: ["Corriente de contacto", "La que pasaría por una persona que toca la carcasa del equipo."],
   corrientePaciente: ["Corriente de paciente", "La que pasaría desde los electrodos, a través del paciente, hacia tierra."],
+  corrienteFugaTierra: ["Corriente de fuga a tierra", "La que circula por el cable de tierra del equipo hacia la tierra de la instalación."],
   condicionNormal: ["Condición normal", "Todas las protecciones del equipo funcionan."],
   primerDefecto: ["Primer defecto", "Falla una sola protección (tierra de protección abierta o neutro abierto). La norma permite un límite más alto porque es una situación temporal; dos fallas a la vez no se evalúan."],
 });
@@ -142,8 +161,8 @@ const TERMINOS_GLOSARIO = Object.freeze({
  * "condiciones" debajo de los conmutadores de tierra y neutro.
  */
 const GRUPOS_GLOSARIO = Object.freeze({
-  todos: ["corrienteContacto", "corrientePaciente", "condicionNormal", "primerDefecto"],
-  mediciones: ["corrienteContacto", "corrientePaciente"],
+  todos: ["corrienteContacto", "corrientePaciente", "corrienteFugaTierra", "condicionNormal", "primerDefecto"],
+  mediciones: ["corrienteContacto", "corrientePaciente", "corrienteFugaTierra"],
   condiciones: ["condicionNormal", "primerDefecto"],
 });
 
@@ -242,17 +261,16 @@ function mostrarEquipo(parametros) {
       const fila = document.createElement("tr");
       crearConTexto("td", NOMBRES_MEDICION[tipoMedicion].replace(" CF", ""), fila);
       crearConTexto("td", NOMBRES_ESTADO[estado], fila);
-      const grupos = tipoMedicion === "contacto"
-        ? ["contacto", "contacto", "contacto"]
-        : ["paciente_B", "paciente_BF", "paciente_CF"];
+      const grupos = GRUPOS_LIMITES_POR_MEDICION[tipoMedicion];
       // Límite de cada tipo de parte aplicada (B, BF, CF)
       for (const [indice, grupo] of grupos.entries()) {
         const esColumnaCF = indice === grupos.length - 1;
-        crearConTexto("td", `${limites[grupo][estado]} ${UNIDAD_CORRIENTE}`, fila, esColumnaCF ? "columna-destacada" : "");
+        crearConTexto("td", textoLimite(limites[grupo][estado]), fila, esColumnaCF ? "columna-destacada" : "");
       }
       cuerpo.appendChild(fila);
     }
   }
+  elemento("nota-limites-equipo").textContent = `Fuga a tierra: límites de IEC 60601-1, 3.ª edición. ${TEXTOS_EXPLICACION.fugaSegundaEdicion}`;
 }
 
 /**
@@ -681,17 +699,41 @@ function cambiarDisponibilidadOpcion(nombre, valor, deshabilitada) {
 }
 
 /**
- * Deshabilita la combinación prohibida (tierra abierta + neutro abierto) y explica por qué.
+ * Deshabilita las opciones que no se pueden medir y explica por qué:
+ * - tierra abierta + neutro abierto (doble falla);
+ * - tierra abierta en la fuga a tierra (no hay conductor por donde circule).
+ * @param {string} tipoMedicion - Medición elegida.
  * @param {{tierra: string, neutro: string}} condicion - Condición elegida.
  */
-function aplicarRestriccionDobleFalla(condicion) {
+function aplicarRestricciones(tipoMedicion, condicion) {
   const tierraAbierta = condicion.tierra === "abierta";
   const neutroAbierto = condicion.neutro === "abierto";
+  const sinTierraPosible = !medicionPosible(tipoMedicion, { ...condicion, tierra: "abierta" });
   cambiarDisponibilidadOpcion("neutro", "abierto", tierraAbierta);
-  cambiarDisponibilidadOpcion("tierra", "abierta", neutroAbierto);
+  cambiarDisponibilidadOpcion("tierra", "abierta", neutroAbierto || sinTierraPosible);
+  // Cada restricción activa suma su explicación
+  const avisos = [];
+  if (sinTierraPosible) {
+    avisos.push(MENSAJE_FUGA_SIN_TIERRA);
+  }
+  if (tierraAbierta || neutroAbierto) {
+    avisos.push(TEXTOS_EXPLICACION.dobleFalla);
+  }
   const aviso = elemento("aviso-doble-falla");
-  aviso.textContent = TEXTOS_EXPLICACION.dobleFalla;
-  aviso.hidden = !(tierraAbierta || neutroAbierto);
+  aviso.textContent = avisos.join(" ");
+  aviso.hidden = avisos.length === 0;
+}
+
+/**
+ * Si se elige una medición que no existe con la tierra abierta (fuga a
+ * tierra), vuelve a cerrar la tierra antes de seguir.
+ * @param {string} tipoMedicion - Medición elegida.
+ * @param {{tierra: string}} condicion - Condición elegida.
+ */
+function corregirCondicionImposible(tipoMedicion, condicion) {
+  if (!medicionPosible(tipoMedicion, condicion)) {
+    document.querySelector('input[name="tierra"][value="cerrada"]').checked = true;
+  }
 }
 
 /** Deja la lectura en blanco hasta que se vuelva a medir. */
@@ -704,7 +746,7 @@ function limpiarLectura() {
   veredicto.textContent = "—";
   veredicto.className = "";
   elemento("tabla-limites-lectura").querySelector("tbody").replaceChildren();
-  elemento("lectura-limites-contacto").hidden = true;
+  elemento("lectura-limite-unico").hidden = true;
   elemento("lectura-comparacion").hidden = true;
   elemento("lectura-pendiente").hidden = false;
   elemento("explicacion-texto").replaceChildren();
@@ -734,8 +776,10 @@ function mostrarPartesDelCircuito(parametros) {
  * @param {object} estado - Estado de la interfaz.
  */
 function alCambiarControles(estado) {
+  const elegido = leerSeleccion();
+  corregirCondicionImposible(elegido.tipoMedicion, elegido.condicion);
   const { tipoMedicion, condicion } = leerSeleccion();
-  aplicarRestriccionDobleFalla(condicion);
+  aplicarRestricciones(tipoMedicion, condicion);
   estado.visualizador.borrarCamino();
   estado.visualizador.mostrarCondicion(condicion, tipoMedicion);
   limpiarLectura();
@@ -748,21 +792,28 @@ function alCambiarControles(estado) {
 function mostrarLectura(resultado) {
   elemento("lectura-etiqueta").textContent = `${NOMBRES_MEDICION[resultado.tipoMedicion]} · ${describirCondicion(resultado.condicion)}`;
   elemento("lectura-valor").textContent = `${textoLectura(resultado)} µA`;
-  elemento("lectura-limite").textContent = `${resultado.limite_uA} µA (parte CF, ${NOMBRES_ESTADO[resultado.estadoCondicion].toLowerCase()})`;
+  const alcanceLimite = resultado.tipoMedicion === MEDICION_FUGA_TIERRA ? "equipo completo" : "parte CF";
+  elemento("lectura-limite").textContent = `${textoLimite(resultado.limite_uA)} (${alcanceLimite}, ${NOMBRES_ESTADO[resultado.estadoCondicion].toLowerCase()})`;
   elemento("lectura-porcentaje").textContent = textoPorcentaje(resultado.porcentajeDelLimite);
   const veredicto = elemento("lectura-veredicto");
   const cumple = resultado.veredicto === VEREDICTO_CUMPLE;
   veredicto.textContent = cumple ? `✓ ${resultado.veredicto}` : `✗ ${resultado.veredicto}`;
   veredicto.className = cumple ? "veredicto--cumple" : "veredicto--no-cumple";
 
-  // Contacto: el límite es igual para B, BF y CF, basta una frase.
+  // Contacto y fuga a tierra: el límite es igual para B, BF y CF, basta una frase.
   // Paciente: tabla con los límites equivalentes para partes B, BF y CF (RF07)
-  const esContacto = resultado.tipoMedicion === "contacto";
-  elemento("lectura-limites-contacto").hidden = !esContacto;
-  elemento("lectura-comparacion").hidden = esContacto;
+  const frasesLimiteUnico = {
+    contacto: TEXTOS_EXPLICACION.limiteContactoIgual,
+    fuga_tierra: `${TEXTOS_EXPLICACION.limiteEquipoCompleto} ${TEXTOS_EXPLICACION.fugaSegundaEdicion}`,
+  };
+  const fraseLimiteUnico = frasesLimiteUnico[resultado.tipoMedicion];
+  const notaLimiteUnico = elemento("lectura-limite-unico");
+  notaLimiteUnico.textContent = fraseLimiteUnico ?? "";
+  notaLimiteUnico.hidden = fraseLimiteUnico === undefined;
+  elemento("lectura-comparacion").hidden = fraseLimiteUnico !== undefined;
   const fila = document.createElement("tr");
   for (const tipoDeParte of ["B", "BF", "CF"]) {
-    crearConTexto("td", `${resultado.limitesPorTipoDeParte_uA[tipoDeParte]} µA`, fila, tipoDeParte === "CF" ? "columna-destacada" : "");
+    crearConTexto("td", textoLimite(resultado.limitesPorTipoDeParte_uA[tipoDeParte]), fila, tipoDeParte === "CF" ? "columna-destacada" : "");
   }
   elemento("tabla-limites-lectura").querySelector("tbody").replaceChildren(fila);
   elemento("lectura-pendiente").hidden = true;
@@ -775,6 +826,14 @@ function mostrarLectura(resultado) {
  */
 function textosDeExplicacion(resultado) {
   const { tierra, neutro, polaridad } = resultado.condicion;
+  // Fuga a tierra: normal o neutro abierto (con la tierra abierta no existe)
+  if (resultado.tipoMedicion === MEDICION_FUGA_TIERRA) {
+    const parrafos = [neutro === "abierto" ? TEXTOS_EXPLICACION.fugaNeutroAbierto : TEXTOS_EXPLICACION.fugaNormal];
+    if (polaridad === "invertida") {
+      parrafos.push(TEXTOS_EXPLICACION.contactoPolaridadInvertida);
+    }
+    return parrafos;
+  }
   const esContacto = resultado.tipoMedicion === "contacto";
   let principal = esContacto ? TEXTOS_EXPLICACION.contactoNormal : TEXTOS_EXPLICACION.pacienteNormal;
   if (tierra === "abierta") {
@@ -805,6 +864,8 @@ function significadoDeSiglas(parametros, capacitanciaActiva_F) {
   const corrientePorFaradio = corrientePorFaradio_A_F(parametros).toFixed(DECIMALES_CORRIENTE_POR_FARADIO);
   const significados = {
     I: "I (corriente que pasa por la MD, el cuerpo humano simulado: es lo que lee el analizador)",
+    I_TIERRA: "I (corriente que circula por el conductor de protección hacia la tierra: es lo que lee el analizador)",
+    K_N: `k_N (factor empírico de la fuga a tierra con neutro abierto, calibrado en el laboratorio: 27.13 µA / 14.73 µA − 1) = ${parametros.factor_neutro_abierto_fuga_tierra}`,
     VF: `V·2πf (tensión de la red V = ${V_rms} V, por 2π, por la frecuencia f = ${f_Hz} Hz) = ${corrientePorFaradio} A/F`,
     C_L: `C_L (capacitancia de fuga entre fase y chasis) = ${capacitancia_pF("C_L")} pF`,
     C_N: `C_N (capacitancia de fuga entre neutro y chasis) = ${capacitancia_pF("C_N")} pF`,
@@ -837,7 +898,20 @@ function formulaUsada(resultado, parametros) {
   let siglasUsadas;
   let significados;
 
-  if (resultado.tipoMedicion === "contacto") {
+  if (resultado.tipoMedicion === MEDICION_FUGA_TIERRA) {
+    // Fuga a tierra: toda la fuga capacitiva vuelve por el conductor de protección
+    significados = significadoDeSiglas(parametros);
+    const capacitancia_pF = (capacitanciaFugaATierra_F(condicion, parametros) * PICOFARADIOS_POR_FARADIO).toFixed(DECIMALES_CAPACITANCIA);
+    const [activa, otra] = condicion.polaridad === "normal" ? ["C_L", "C_N"] : ["C_N", "C_L"];
+    if (condicion.neutro === "abierto") {
+      siglasUsadas = ["I_TIERRA", "VF", "C_L", "C_N", "K_N", "U"];
+      lineas.push(`I = V·2πf · (${activa} + k_N · ${otra})`);
+    } else {
+      siglasUsadas = ["I_TIERRA", "VF", activa, "U"];
+      lineas.push(`I = V·2πf · ${activa}`);
+    }
+    lineas.push(`I = ${corrientePorFaradio} A/F × ${capacitancia_pF} pF = ${corriente} µA`);
+  } else if (resultado.tipoMedicion === "contacto") {
     const capacitancia_F = capacitanciaDeFuga_F(condicion, parametros);
     const capacitancia_pF = (capacitancia_F * PICOFARADIOS_POR_FARADIO).toFixed(DECIMALES_CAPACITANCIA);
     significados = significadoDeSiglas(parametros, capacitancia_F);
@@ -977,16 +1051,6 @@ function llenarFila(fila, registro, campos) {
 }
 
 /**
- * Clave única de una configuración (medición + condición), por ejemplo "contacto|normal|abierta|cerrado".
- * @param {{tipoMedicion: string, condicion: object}} lectura - Lectura.
- * @returns {string} Clave.
- */
-function claveConfiguracion(lectura) {
-  const { polaridad, tierra, neutro } = lectura.condicion;
-  return `${lectura.tipoMedicion}|${polaridad}|${tierra}|${neutro}`;
-}
-
-/**
  * Deja solo la última lectura de cada configuración, en el orden fijo de Comparar.
  * @param {object[]} lecturas - Todas las lecturas de la sesión.
  * @returns {object[]} Una lectura por configuración, ordenadas.
@@ -997,10 +1061,8 @@ function ultimaLecturaPorConfiguracion(lecturas) {
   for (const lectura of lecturas) {
     porClave.set(claveConfiguracion(lectura), lectura);
   }
-  const posicion = (lectura) => {
-    const [tipo, ...condicion] = claveConfiguracion(lectura).split("|");
-    return ORDEN_MEDICIONES.indexOf(tipo) * ORDEN_CONDICIONES.length + ORDEN_CONDICIONES.indexOf(condicion.join("|"));
-  };
+  const ordenDeClaves = CONFIGURACIONES.map(claveConfiguracion);
+  const posicion = (lectura) => ordenDeClaves.indexOf(claveConfiguracion(lectura));
   return [...porClave.values()].sort((primera, segunda) => posicion(primera) - posicion(segunda));
 }
 
@@ -1018,10 +1080,42 @@ function mostrarTablaComparar(filas) {
 }
 
 /**
- * Actualiza toda la sección Comparar (gráficas y tabla).
+ * Llena una lista con un renglón por texto.
+ * @param {HTMLElement} lista - Elemento ul.
+ * @param {string[]} textos - Renglones.
+ */
+function llenarLista(lista, textos) {
+  lista.replaceChildren();
+  // Un renglón por texto
+  for (const texto of textos) {
+    crearConTexto("li", texto, lista);
+  }
+}
+
+/**
+ * Muestra el cuadro de avance de Comparar: cuántas de las 16 configuraciones
+ * se midieron, cuáles faltan y cuáles se repitieron (cálculo puro en M8).
+ * @param {object[]} registros - Todas las lecturas del historial.
+ */
+function mostrarAvance(registros) {
+  const avance = resumirAvance(registros, CONFIGURACIONES);
+  const completo = avance.faltantes.length === 0;
+  elemento("avance-resumen").textContent = completo
+    ? `Has medido ${avance.medidas} de las ${avance.total} configuraciones que simula esta herramienta. Completaste las ${avance.total} configuraciones.`
+    : `Has medido ${avance.medidas} de las ${avance.total} configuraciones que simula esta herramienta.`;
+  elemento("avance-faltan-bloque").hidden = completo;
+  llenarLista(elemento("avance-faltan"), avance.faltantes.map(textoConfiguracion));
+  elemento("avance-repetidas-bloque").hidden = avance.repetidas.length === 0;
+  llenarLista(elemento("avance-repetidas"),
+    avance.repetidas.map(({ configuracion, veces }) => `${textoConfiguracion(configuracion)}: ${veces} veces`));
+}
+
+/**
+ * Actualiza toda la sección Comparar (avance, gráficas y tabla).
  * @param {object} estado - Estado de la interfaz.
  */
 function mostrarComparacion(estado) {
+  mostrarAvance(estado.historial.obtenerRegistros());
   const filas = ultimaLecturaPorConfiguracion(estado.historial.obtenerRegistros());
   const hayLecturas = filas.length > 0;
   elemento("comparar-vacio").hidden = hayLecturas;
@@ -1139,7 +1233,7 @@ function dibujarGraficaBarras(filas) {
     const centroY = GRAFICA.margenSuperior + indice * GRAFICA.altoFila + GRAFICA.altoFila / 2;
     const grupo = crearSvg("g", { class: "fila-grafica" }, svg);
     const ayuda = crearSvg("title", {}, grupo);
-    ayuda.textContent = `${nombreCortoCondicion(lectura.condicion)}: ${textoLectura(lectura)} µA · límite ${lectura.limite_uA} µA · ${lectura.veredicto}`;
+    ayuda.textContent = `${nombreCortoCondicion(lectura.condicion)}: ${textoLectura(lectura)} µA · límite ${textoLimite(lectura.limite_uA)} · ${lectura.veredicto}`;
 
     const inicioBanda = posicionX(Math.max(0, lectura.corriente_uA - lectura.incertidumbre_uA));
     const finBanda = posicionX(lectura.corriente_uA + lectura.incertidumbre_uA);
@@ -1217,7 +1311,7 @@ function mostrarHistorial(estado) {
   }
 
   // Antes de generar el reporte se revisa cuántas lecturas hay
-  const configuracionesPosibles = ORDEN_MEDICIONES.length * ORDEN_CONDICIONES.length;
+  const configuracionesPosibles = CONFIGURACIONES.length;
   const configuracionesMedidas = ultimaLecturaPorConfiguracion(registros).length;
   elemento("finalizar-resumen").textContent = hayLecturas
     ? `Llevas ${registros.length} lecturas de ${configuracionesMedidas} configuraciones distintas (hay ${configuracionesPosibles} posibles). El reporte incluye todas las lecturas.`
@@ -1336,6 +1430,10 @@ export function iniciarInterfaz(parametros) {
   });
   mostrarEquipo(parametros);
   mostrarGlosario(parametros);
+  // La misma nota debajo de cada tabla con la columna "Qué tan cerca del límite"
+  for (const nota of document.querySelectorAll("[data-nota-cerca-limite]")) {
+    nota.textContent = TEXTO_CERCA_DEL_LIMITE;
+  }
   configurarNavegacion(estado);
   configurarPruebaGuiada(estado);
   configurarAnalizador(estado);

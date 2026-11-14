@@ -8,9 +8,10 @@ La herramienta no tiene servidor, base de datos ni librerías externas, así que
 
 | Qué | Cada cuánto | Cómo | Quién |
 |---|---|---|---|
-| **Navegadores** (Chrome y Edge en Windows) | Al inicio de cada semestre, y si un estudiante reporta un error | Abrir la página publicada en las versiones actuales de Chrome y Edge, hacer una práctica completa (los 4 pasos, las 12 configuraciones, reporte PDF y «Copiar resumen») y revisar que la consola (F12) no tenga errores | Monitor de la asignatura o el equipo |
+| **Navegadores** (Chrome y Edge en Windows) | Al inicio de cada semestre, y si un estudiante reporta un error | Abrir la página publicada en las versiones actuales de Chrome y Edge, hacer una práctica completa (los 4 pasos, las 16 configuraciones, reporte PDF, «Copiar resumen» y el enlace «Ayuda») y revisar que la consola (F12) no tenga errores | Monitor de la asignatura o el equipo |
 | **Pruebas automáticas** | Antes de cada cambio que se publique | `npm test` (debe salir todo en verde) | Quien hace el cambio |
-| **Parámetros del R12** (`datos/parametros_r12.json`) | Cada vez que el laboratorio mida de nuevo el equipo, y como mínimo una vez al año (junto con la calibración del ESA620) | Repetir las mediciones de ES02 (corriente de contacto y de paciente en las 12 configuraciones, n ≥ 3), actualizar el JSON y los datos de ES02, y correr `npm test` | Equipo del proyecto / docente |
+| **Parámetros del R12** (`datos/parametros_r12.json`) | Cada vez que el laboratorio mida de nuevo el equipo, y como mínimo una vez al año (junto con la calibración del ESA620) | Repetir las mediciones de ES02 (corriente de contacto, de paciente y de fuga a tierra en las 16 configuraciones, n ≥ 3; recalcular k_N = fuga a tierra con neutro abierto / normal − 1, polaridad normal), actualizar el JSON y los datos de ES02, y correr `npm test` | Equipo del proyecto / docente |
+| **Manual de usuario** (`docs/manual_usuario.md` y `ayuda.html`) | Cada vez que cambie la pantalla o lo que hace la herramienta | `ayuda.html` es la versión web del manual: si cambias uno, cambia el otro igual. Después de editar `ayuda.html` no hace falta `npm run sri` (no tiene scripts), salvo que cambie el CSS | Quien hace el cambio |
 | **Exactitud del analizador** (`exactitud_analizador`) | Si cambia el modelo del analizador del laboratorio o su hoja de datos | Actualizar porcentaje, piso y k en el JSON; revisar el texto de incertidumbre | Docente |
 | **Norma** (IEC 60601-1 e IEC 60601-2-25) | Una vez al año, o si sale una edición o enmienda nueva | Revisar los límites de corriente (`limites_uA`) y las condiciones de primer defecto | Docente |
 | **Peso y seguridad** | Antes de cada versión | `npm run sri`, `npm run peso` (≤ 1 600 KiB) y revisar en la pestaña Red que no haya peticiones a otros sitios | Quien publica |
@@ -19,7 +20,7 @@ La herramienta no tiene servidor, base de datos ni librerías externas, así que
 
 ## 2. Cómo hacer un cambio
 1. Edita los archivos (código en español, cabecera y JSDoc, sin números mágicos; ver CLAUDE.md §8).
-2. Si cambiaste un `.js` o el `.css`: **`npm run sri`** (si no, el navegador bloquea el archivo y la página deja de funcionar).
+2. Si cambiaste un `.js` o el `.css`: **`npm run sri`** (actualiza las huellas en `index.html` y `ayuda.html`; si no, el navegador bloquea el archivo y la página deja de funcionar).
 3. `npm test` → todo en verde.
 4. Prueba en el navegador con un servidor local: `python -m http.server 8000` y abre `http://localhost:8000`.
 5. Anota el cambio en `CHANGELOG.md` (sección *Sin publicar*).

@@ -12,15 +12,17 @@
  *     integrity del <script> solo revisa main.js, no los módulos que importa;
  *     modulepreload hace que el navegador descargue y revise cada módulo
  *     antes de que main.js lo importe.
+ *   - ayuda.html (manual en la web, sin scripts) → integrity en su
+ *     <link rel="stylesheet"> de css/estilos.css.
  *   Uso:
- *     node tools/sri.mjs              → actualiza index.html (correr después
- *                                       de cambiar cualquier JS o CSS y antes
- *                                       de cada versión)
- *     node tools/sri.mjs --comprobar  → solo revisa; falla si index.html
- *                                       está desactualizado
+ *     node tools/sri.mjs              → actualiza index.html y ayuda.html
+ *                                       (correr después de cambiar cualquier
+ *                                       JS o CSS y antes de cada versión)
+ *     node tools/sri.mjs --comprobar  → solo revisa; falla si alguna página
+ *                                       está desactualizada
  * Módulo: Herramienta de seguridad (Fase 4)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-13
+ * Creado: 2026-11-13 · Modificado: 2026-11-14
  * ============================================================================
  */
 
@@ -34,6 +36,7 @@ export const RAIZ_PROYECTO = path.resolve(path.dirname(fileURLToPath(import.meta
 
 /** Archivos con nombre fijo dentro de la página. */
 const ARCHIVO_PAGINA = "index.html";
+const ARCHIVO_AYUDA = "ayuda.html";
 const ARCHIVO_ESTILOS = "css/estilos.css";
 const ARCHIVO_PRINCIPAL = "js/main.js";
 const CARPETA_JS = "js";
@@ -81,7 +84,7 @@ function ponerIntegridad(html, atributo, ruta, integridad) {
   const patron = new RegExp(`<(script|link)\\b([^>]*?)\\s${atributo}="${ruta.replaceAll(".", "\\.")}"([^>]*?)>`);
   const coincidencia = html.match(patron);
   if (coincidencia === null) {
-    throw new Error(`No se encontró en index.html la etiqueta que carga ${ruta}.`);
+    throw new Error(`No se encontró en la página la etiqueta que carga ${ruta}.`);
   }
   const [etiquetaCompleta, nombre, antes, despues] = coincidencia;
   const sinIntegridad = (texto) => texto.replace(/\s+integrity="[^"]*"/, "");
@@ -117,22 +120,37 @@ export async function calcularPaginaConIntegridad(raiz = RAIZ_PROYECTO) {
 }
 
 /**
- * Programa principal: actualiza index.html o, con --comprobar, solo revisa.
+ * Calcula cómo debe quedar ayuda.html (solo carga la hoja de estilos).
+ * @param {string} [raiz=RAIZ_PROYECTO] - Carpeta del proyecto.
+ * @returns {Promise<{actual: string, esperado: string}>} Página actual y página con la huella correcta.
+ */
+export async function calcularAyudaConIntegridad(raiz = RAIZ_PROYECTO) {
+  const actual = await readFile(path.join(raiz, ARCHIVO_AYUDA), "utf8");
+  const huellaEstilos = calcularIntegridad(await readFile(path.join(raiz, ARCHIVO_ESTILOS)));
+  return { actual, esperado: ponerIntegridad(actual, "href", ARCHIVO_ESTILOS, huellaEstilos) };
+}
+
+/**
+ * Programa principal: actualiza index.html y ayuda.html o, con --comprobar, solo revisa.
  */
 async function principal() {
   const soloComprobar = process.argv.includes("--comprobar");
-  const { actual, esperado } = await calcularPaginaConIntegridad();
-  if (actual === esperado) {
-    console.log("SRI: index.html ya tiene las huellas correctas.");
-    return;
+  const paginas = [
+    [ARCHIVO_PAGINA, await calcularPaginaConIntegridad()],
+    [ARCHIVO_AYUDA, await calcularAyudaConIntegridad()],
+  ];
+  // Cada página se revisa (y, si hace falta, se actualiza) por separado
+  for (const [archivo, { actual, esperado }] of paginas) {
+    if (actual === esperado) {
+      console.log(`SRI: ${archivo} ya tiene las huellas correctas.`);
+    } else if (soloComprobar) {
+      console.error(`SRI: ${archivo} está DESACTUALIZADO. Corre: node tools/sri.mjs`);
+      process.exitCode = 1;
+    } else {
+      await writeFile(path.join(RAIZ_PROYECTO, archivo), esperado, "utf8");
+      console.log(`SRI: huellas SHA-384 actualizadas en ${archivo}.`);
+    }
   }
-  if (soloComprobar) {
-    console.error("SRI: index.html está DESACTUALIZADO. Corre: node tools/sri.mjs");
-    process.exitCode = 1;
-    return;
-  }
-  await writeFile(path.join(RAIZ_PROYECTO, ARCHIVO_PAGINA), esperado, "utf8");
-  console.log("SRI: huellas SHA-384 actualizadas en index.html.");
 }
 
 // Solo corre el programa si se llama directamente (no cuando lo importa una prueba)

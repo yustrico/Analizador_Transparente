@@ -24,6 +24,7 @@ Justificación: cumple RNF04 (sin instalación, fuera del laboratorio), RNF05 (P
 - Hexagonal: el NÚCLEO (M2–M5) son funciones puras, sin pantalla. Se prueban solas (pruebas unitarias) y no cambian si cambia la interfaz.
 - Los ADAPTADORES (M1, M6, M8, M10) conectan el núcleo con la pantalla, la memoria y el reporte.
 - Expansión futura (lo que pidió el profesor sobre "expandible"): versión celular, M7 Evaluación, M9 módulo físico, exportación HL7/FHIR. Todo como adaptadores nuevos, sin tocar el núcleo.
+- Alcance de las mediciones (actualizado 14/11/2026): corriente de contacto, corriente de paciente CF y corriente de fuga a tierra (16 configuraciones validadas con el ESA620). Trabajo futuro: corriente con red en la parte aplicada y corriente auxiliar de paciente. Se miden con el ESA620 sin abrir el equipo y están en la inspección del manual del R12, pero no hay mediciones del laboratorio para calibrarlas y validarlas, así que esta versión no las simula. Agregarlas solo exige los datos en el JSON y una función nueva en M4.
 
 ## 3. Jerarquía (Sistema → Subsistema → Componente → Elemento)
 - Sistema: Analizador transparente.
@@ -41,7 +42,7 @@ Justificación: cumple RNF04 (sin instalación, fuera del laboratorio), RNF05 (P
 | M1 Interfaz | Adaptador | 5 secciones: Equipo, Prueba guiada, Analizador, Comparar, Historial | Clics del estudiante; Resultado | Acción (paso, condición, medición) | RF01, RF08, RNF07 | ES10, ES11, ES06 |
 | M2 Secuencia | Núcleo | Orden fijo de la prueba y propósito de cada paso; no deja saltar pasos | Acción | Paso actual; Condición + Medición | RF01, RF02 | — |
 | M3 Modelo del equipo | Núcleo | Carga y valida los parámetros del R12 | parametros_r12.json | Parámetros | RR01, RR02 | — |
-| M4 Motor de cálculo | Núcleo | Corriente de contacto y de paciente por condición e incertidumbre U | Condición, Medición, Parámetros | I (µA), U (µA), corriente por rama | RF03, RF04, RNF02, RNF03 | ES01, ES02 |
+| M4 Motor de cálculo | Núcleo | Corriente de contacto, de paciente y de fuga a tierra por condición e incertidumbre U; lista de las 16 configuraciones | Condición, Medición, Parámetros | I (µA), U (µA), corriente por rama | RF03, RF04, RNF02, RNF03 | ES01, ES02 |
 | M5 Evaluador de límites | Núcleo | Límite IEC 60601-1 aplicable y veredicto; veredicto de los pasos 2 (resistencia de tierra) y 3 (aislamiento, mínimos de IEC 62353:2014 Tabla 2) | I, U, Medición, Condición | Resultado | RF06, RF07 | — |
 | M6 Visualizador | Adaptador | Dibuja la red MD y los conmutadores L/N/PE en SVG y anima el camino de la corriente | Corriente por rama, Condición | Dibujo SVG | RF05 | ES15 (CPU) |
 | M8 Historial | Adaptador | Guarda las lecturas de la sesión | Resultado | Lista de registros | RF11 | ES14 (RAM) |
@@ -53,9 +54,9 @@ Justificación: cumple RNF04 (sin instalación, fuera del laboratorio), RNF05 (P
 | Dato | Campos | Ejemplo |
 |---|---|---|
 | Condición | polaridad: "normal" o "invertida"; tierra: "cerrada" o "abierta"; neutro: "cerrado" o "abierto" (nunca tierra y neutro abiertos a la vez) | {polaridad:"normal", tierra:"abierta", neutro:"cerrado"} |
-| Medición | tipo: "contacto" o "paciente" | {tipo:"contacto"} |
-| Parámetros | V = 120 V; f = 60 Hz; C_L = C_N = 325.7 pF; C_AP = 28.0 pF; ΔI = 0.83 µA; R_PE = 0.0026 Ω; R_MD = 1000 Ω | Archivo 06 |
-| Límites | contacto: 100 µA (normal) y 500 µA (primer defecto); paciente CF: 10 µA y 50 µA | IEC 60601-1 |
+| Medición | tipo: "contacto", "paciente" o "fuga_tierra" (la fuga a tierra no existe con la tierra abierta) | {tipo:"fuga_tierra"} |
+| Parámetros | V = 120 V; f = 60 Hz; C_L = C_N = 325.7 pF; C_AP = 28.0 pF; ΔI = 0.83 µA; k_N = 0.8418; R_PE = 0.0026 Ω; R_MD = 1000 Ω | Archivo 06 |
+| Límites | contacto: 100 µA (normal) y 500 µA (primer defecto); paciente CF: 10 µA y 50 µA; fuga a tierra: 5 mA y 10 mA (3.ª edición; iguales para B, BF y CF) | IEC 60601-1 |
 | Resultado | I_uA, U_uA, limite_uA, veredicto ("Cumple" o "No cumple"), hora | {I_uA:14.73, U_uA:1.33, limite_uA:500, veredicto:"Cumple"} |
 | Registro | Resultado + Condición + Medición | Una fila del historial y del reporte |
 

@@ -11,10 +11,11 @@ Autores: Yustin Rico, David Cardona y Santiago González.
 
 ## Qué hace
 - Guía la prueba en orden: inspección visual → resistencia de tierra → aislamiento → corrientes de fuga.
-- Calcula la **corriente de contacto** y la **corriente de paciente CF** en cuatro condiciones (normal, polaridad invertida, tierra abierta, neutro abierto), con la incertidumbre que tendría el analizador real.
+- Calcula la **corriente de contacto**, la **corriente de paciente CF** y la **corriente de fuga a tierra** en las condiciones de prueba (normal, polaridad invertida, tierra abierta, neutro abierto; la fuga a tierra no existe con la tierra abierta): 16 configuraciones, con la incertidumbre que tendría el analizador real.
 - Compara cada lectura con el límite de IEC 60601-1 y dice si cumple.
 - Dibuja el circuito y anima el camino de la corriente.
 - Genera un reporte final que se descarga en PDF y un resumen que se copia al portapapeles para pegarlo en el correo.
+- Trae el manual de usuario en la misma página web (enlace «Ayuda», `ayuda.html`).
 
 Todo corre en el navegador: sin servidor propio, sin base de datos, sin cuentas y sin enviar datos a ningún lado.
 
@@ -42,7 +43,7 @@ Esto corre las pruebas de la carpeta `tests/` con el ejecutor de pruebas que tra
 
 ## Antes de publicar una versión (seguridad y peso)
 ```bash
-npm run sri      # recalcula las huellas SHA-384 (SRI) de los JS y el CSS en index.html
+npm run sri      # recalcula las huellas SHA-384 (SRI) de los JS y el CSS en index.html y ayuda.html
 npm run peso     # suma lo que descarga la página y lo compara con la meta ES05 (≤ 1 600 KiB)
 ```
 
@@ -50,7 +51,7 @@ npm run peso     # suma lo que descarga la página y lo compara con la meta ES05
 
 ## Estructura
 ```
-index.html, css/, js/main.js
+index.html, ayuda.html (manual de usuario en la web), css/, js/main.js
 js/nucleo/        Núcleo (funciones puras): secuencia, modelo del equipo, motor de cálculo, evaluador de límites
 js/adaptadores/   Adaptadores: interfaz, visualizador, historial, reporte, generador de PDF
 datos/            Parámetros calibrados del R12

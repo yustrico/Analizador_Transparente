@@ -37,6 +37,7 @@ Se calibra SOLO con los datos de polaridad normal y se valida con los de polarid
 | C_L = C_N (simetría) | 325.7 pF | Fuga a tierra normal / (120 V · 2π · 60 Hz) = 14.73 µA / 45 239 |
 | C_AP (red–parte aplicada) | 28.0 pF | Paciente normal / 45 239 = 1.27 µA / 45 239 |
 | ΔI_paciente con tierra abierta | +0.83 µA | 2.10 − 1.27 µA (término empírico) |
+| k_N (fuga a tierra con neutro abierto) | 0.8418 | 27.13 / 14.73 − 1 (factor empírico; ver §8, agregado el 14/11/2026) |
 | R_PE | 0.0026 Ω | Media medida |
 | R_MD | 1 kΩ | IEC 60601-1 |
 
@@ -53,6 +54,7 @@ Se calibra SOLO con los datos de polaridad normal y se valida con los de polarid
 Resultado: 7 de 7 con E_n ≤ 0.18.
 
 Límite del modelo (decirlo con honestidad): la fuga a tierra con neutro abierto se predice en 29.5 µA y se midió 27.1 µA (E_n = 1.39). Causa probable: la fuente interna del equipo no deja el lado del neutro exactamente a la tensión de fase. No afecta a ES02, porque el simulador muestra las corrientes de contacto y de paciente, no la fuga a tierra.
+**Actualización 14/11/2026:** el simulador ahora sí muestra la fuga a tierra. Este límite se corrige con el factor empírico k_N (§8): E_n = 0.19 con neutro abierto y polaridad invertida.
 
 ## 5. Cambios que esto produce
 - ES02: n = 3 (los datos existentes) en vez de n = 10. Se verifica con estos datos: NO hace falta otra sesión de laboratorio.
@@ -84,3 +86,28 @@ El manual del R12 no fija un límite propio para la resistencia de aislamiento. 
 - Corrección (14/11/2026): una versión anterior de esta tabla traía «Figura 12, 14 y 16». Esos números eran de las figuras del artículo de EBME, no de la norma, y se quitaron de la tabla, del JSON, de la pantalla y de las pruebas.
 - En IEC 62353 la medición de aislamiento es **opcional**; la norma la da como referencia. Por eso la herramienta la muestra con el texto: "Valores mínimos esperados de IEC 62353:2014 (Tabla 2) para equipos Clase I con parte CF. En esta norma la medición de aislamiento es opcional y el manual del R12 no fija un límite propio."
 - En `datos/parametros_r12.json` cada par de `pasos_previos_medidos.aislamiento_Mohm` trae `valor` y `minimo` (MΩ). El veredicto lo calcula M5 (`evaluarAislamiento`): "> 100 (OL)" se toma como "al menos 100 MΩ".
+
+## 8. Fuga a tierra y factor empírico k_N (agregado el 14/11/2026)
+La herramienta agrega la medición de **corriente de fuga a tierra** (la que circula por el conductor de protección). Solo existe con la tierra conectada: condición normal y neutro abierto, cada una con las 2 polaridades (4 configuraciones). Con la tierra abierta no hay conductor por donde circule; esa fuga es la que pasa por la persona y se mide como corriente de contacto.
+
+**Modelo:**
+- Condición normal: I = V·2πf·C_activa (C_L con polaridad normal, C_N con polaridad invertida).
+- Neutro abierto: I = V·2πf·(C_activa + k_N·C_otra).
+- Si el lado del neutro quedara exactamente a la tensión de fase, sería k_N = 1 e I = V·2πf·(C_L + C_N) = 29.47 µA. Se midió 27.13 µA (E_n = 1.39 con polaridad normal y 1.31 con polaridad invertida: no cumple). Causa probable (§4): la fuente interna del equipo no deja el lado del neutro exactamente a la tensión de fase.
+
+**De dónde sale k_N:** se calibra **solo con la polaridad normal**, igual que C_L, C_N y C_AP (§3):
+k_N = I_neutro abierto / I_normal − 1 = 27.13 µA / 14.73 µA − 1 = **0.8418** (≈ 0.84).
+Se guarda en `datos/parametros_r12.json` como `factor_neutro_abierto_fuga_tierra`, con su origen en `origen_factor_neutro_abierto`, igual que el ΔI de paciente.
+
+**Validación con la polaridad invertida** (datos que no se usaron para calibrar). U_med = 2·√((s/√3)² + ((0.01·media + 1 µA)/√3)²):
+
+| Polaridad | Condición | Modelo (µA) | Medido (µA), n = 3 | U_med (µA) | E_n | Uso |
+|---|---|---|---|---|---|---|
+| Normal | Normal | 14.734 | 14.73 ± 0.49 | 1.441 | 0.003 | Calibración (C_L) |
+| Normal | Neutro abierto | 27.138 | 27.13 ± 0.71 | 1.681 | 0.005 | Calibración (k_N) |
+| Invertida | Normal | 14.734 | 14.90 ± 0.10 | 1.332 | 0.124 | **Validación** |
+| Invertida | Neutro abierto | 27.138 | 27.43 ± 0.45 | 1.560 | **0.187** | **Validación** |
+
+Resultado: las 4 con E_n ≤ 1. Las 2 de polaridad normal valen ≈ 0 por construcción (son los datos de calibración); las 2 de polaridad invertida son la validación independiente (E_n máximo 0.187).
+
+**Límites (IEC 60601-1, 3.ª edición):** 5 mA en condición normal y 10 mA con primer defecto, iguales para partes B, BF y CF (es un límite del equipo completo). El manual del R12 indica 500/1000 µA porque usa la 2.ª edición de la norma (§6).

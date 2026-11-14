@@ -21,17 +21,17 @@
   <meta name="description" content="Simulador educativo de la prueba de seguridad eléctrica (IEC 60601-1) del electrocardiógrafo Mindray BeneHeart R12.">
   <link rel="icon" href="data:,">
   <!-- Integridad (SRI): las huellas SHA-384 las escribe tools/sri.mjs; correrlo después de cambiar JS o CSS -->
-  <link rel="stylesheet" href="css/estilos.css" integrity="sha384-crhOikeLkiS3e9shXEkwcRyJn62d5Ep2o2O2t2/2xzCS0Ql3ZoDqkCYMYJ9mioQJ">
+  <link rel="stylesheet" href="css/estilos.css" integrity="sha384-pMYO5YXy6ik6c0TuMrAw5mRtnd/dtCEmz0Zn3HIJDISQACzb9Vh+VY+hshSAk2Gi">
   <!-- SRI: inicio (generado por tools/sri.mjs, no editar a mano) -->
-  <link rel="modulepreload" href="js/adaptadores/historial.js" integrity="sha384-lP1BTg/WUcEge6kTrPlYyCfDRi3aMNAe3seNUXphw1M2tIxXuci8eaYV138PNcs3">
-  <link rel="modulepreload" href="js/adaptadores/interfaz.js" integrity="sha384-YzpcpvygVsL/8Aaqy9WVCsj8f6eXW07IGl/EiL1ZzXOJtTdZCm9wN5Cx304oR+5/">
+  <link rel="modulepreload" href="js/adaptadores/historial.js" integrity="sha384-N764jbU0sVhRC7ghKObyjTjXmaVMHHAPvVcAtTAhaCYpBXdSrwJZ+STKTxzDL19N">
+  <link rel="modulepreload" href="js/adaptadores/interfaz.js" integrity="sha384-BmD8jM/yYXIu1iFSgkTigMljHaRz8ubkchQoKL3yhpYmbAwYT0JwY/QkL51HqRKe">
   <link rel="modulepreload" href="js/adaptadores/pdf.js" integrity="sha384-2bsaqYFrn7TfsVHh4NNg/UZ/TKFo9l/ML73tb0/wKUH5vbk0/s9G8wDUJ7o3lAWD">
-  <link rel="modulepreload" href="js/adaptadores/reporte.js" integrity="sha384-tPGzrWU7ymAr563jociUekbom1lkanbfLx9tTq6TvnpgCm6Qnhzo2shfvzW0A7zi">
+  <link rel="modulepreload" href="js/adaptadores/reporte.js" integrity="sha384-XdMvp4IDt1BaPAMEZAqy1vRxysKaU5QkjBbHQUHxkv10Wty+fKXOWPBEr49kSPN9">
   <link rel="modulepreload" href="js/adaptadores/tiempo_carga.js" integrity="sha384-HJaZ87n6slac+sCKpiv4PovGknwW6qIsYSbPkXqTEJSFVD0wGqJegnc9QHmWVjjg">
-  <link rel="modulepreload" href="js/adaptadores/visualizador.js" integrity="sha384-BChwXZFE8xxYeuRAKjrWvaPet2N1m+30ddtFM2qRvag6PjZnnt1gRkEKLXV0K3Lp">
-  <link rel="modulepreload" href="js/nucleo/evaluador_limites.js" integrity="sha384-YGRmK4mix2YZjUNY5HRq3XmSSRyOjGl/mQBQIOZM0J3KuAobvU5Oazi0lHwwjJT2">
-  <link rel="modulepreload" href="js/nucleo/modelo_equipo.js" integrity="sha384-Jj/vyxFcOxO62uNLtXZDrq90gkX0YgTB6vUgWqUInIz4snQx9cf84kkAIEHMAQP/">
-  <link rel="modulepreload" href="js/nucleo/motor_calculo.js" integrity="sha384-a+lAytkzsbOWOm4e2wyyJAo1ZYLGrVOtsf1NCxVn6lyGoQvBx01AhwIuTUHloY1R">
+  <link rel="modulepreload" href="js/adaptadores/visualizador.js" integrity="sha384-pazeM0knXrd79Z7TxwvuJWO7Q7gEqWRZVPdflahrC+XLbfYASsOB/w37A4GD+iir">
+  <link rel="modulepreload" href="js/nucleo/evaluador_limites.js" integrity="sha384-MgQxLjK0Gtd1oufIMJpQJjlnFrdqnfRQlgJU5AoYFRnr5XZvz6B5C9tC0O5UJPqc">
+  <link rel="modulepreload" href="js/nucleo/modelo_equipo.js" integrity="sha384-gKFJQwP1A2DxCu/gNIXbgoQYjFHiACskueM9Kn5KsbziEzkTT5vHfTcclQruyLO+">
+  <link rel="modulepreload" href="js/nucleo/motor_calculo.js" integrity="sha384-76c67VUxXI/+Dx+nZ2FVjBDKPq9e8YkcvFPa3CAQQR4D8ItL4ouxZ+3uEIrZXUoc">
   <link rel="modulepreload" href="js/nucleo/secuencia.js" integrity="sha384-v/4SHgduYquka0rL7HHdb+Z7SFxlx6UnWtzSicOu2HWYIDc2nw7ylTx8duc2u5qj">
   <!-- SRI: fin -->
   <script type="module" src="js/main.js" integrity="sha384-tNkb5vL2b5P1psSkVFlOiH62v7ps9hHJG2GjwrEuyRmJh+rzxChjuZeFBhNrpCkQ"></script>
@@ -39,9 +39,12 @@
 <body>
   <header class="encabezado">
     <div class="encabezado__contenido">
-      <div>
-        <h1 class="encabezado__titulo">Analizador transparente</h1>
-        <p class="encabezado__subtitulo">Pruebas de seguridad eléctrica del electrocardiógrafo Mindray BeneHeart R12 (IEC 60601-1)</p>
+      <div class="encabezado__fila">
+        <div>
+          <h1 class="encabezado__titulo">Analizador transparente</h1>
+          <p class="encabezado__subtitulo">Pruebas de seguridad eléctrica del electrocardiógrafo Mindray BeneHeart R12 (IEC 60601-1)</p>
+        </div>
+        <a class="encabezado__ayuda" href="ayuda.html">Ayuda</a>
       </div>
       <nav class="navegacion" aria-label="Secciones">
         <button type="button" class="navegacion__boton" data-seccion="equipo">1. Equipo bajo prueba</button>
@@ -90,6 +93,7 @@
           </thead>
           <tbody></tbody>
         </table>
+        <p class="nota" id="nota-limites-equipo"></p>
         <details class="plegable">
           <summary>¿Qué significan estos términos?</summary>
           <ul class="lista-simple plegable__lista" data-glosario="todos"></ul>
@@ -132,6 +136,7 @@
             <legend>Medición</legend>
             <label class="opcion"><input type="radio" name="medicion" value="contacto" checked> Corriente de contacto</label>
             <label class="opcion"><input type="radio" name="medicion" value="paciente"> Corriente de paciente CF</label>
+            <label class="opcion"><input type="radio" name="medicion" value="fuga_tierra"> Corriente de fuga a tierra</label>
             <details class="plegable">
               <summary>¿Qué estoy midiendo?</summary>
               <ul class="lista-simple plegable__lista" data-glosario="mediciones"></ul>
@@ -169,7 +174,7 @@
             <dt>% del límite usado</dt><dd id="lectura-porcentaje">—</dd>
             <dt>Veredicto</dt><dd id="lectura-veredicto">—</dd>
           </dl>
-          <p class="nota" id="lectura-limites-contacto" hidden>Para la corriente de contacto el límite es el mismo para B, BF y CF.</p>
+          <p class="nota" id="lectura-limite-unico" hidden></p>
           <div class="lectura__comparacion" id="lectura-comparacion">
             <p class="nota">Mismo caso con otros tipos de parte aplicada:</p>
             <table class="tabla tabla--compacta" id="tabla-limites-lectura">
@@ -207,16 +212,32 @@
       <h2>Comparar condiciones</h2>
       <p class="introduccion" id="comparar-incertidumbre"></p>
       <p class="introduccion">Cada configuración medida en esta sesión (la última lectura de cada una). La barra es la lectura y la franja clara es el margen de incertidumbre del analizador: si dos franjas se traslapan, la diferencia puede ser del instrumento y no de la condición.</p>
+      <div class="tarjeta avance" id="comparar-avance">
+        <p class="avance__resumen" id="avance-resumen"></p>
+        <div id="avance-faltan-bloque" hidden>
+          <p class="avance__titulo">Te faltan:</p>
+          <ul class="avance__lista" id="avance-faltan"></ul>
+        </div>
+        <div id="avance-repetidas-bloque" hidden>
+          <p class="avance__titulo">Repetiste:</p>
+          <ul class="avance__lista" id="avance-repetidas"></ul>
+        </div>
+        <details class="plegable">
+          <summary>¿Por qué 16?</summary>
+          <p>Son las configuraciones que esta herramienta pudo validar con mediciones reales del Fluke ESA620 sobre el R12: corriente de contacto y de paciente CF (12) y fuga a tierra (4). La inspección completa según el manual del R12 incluye además la corriente con red en la parte aplicada y la corriente auxiliar de paciente. Se pueden medir con el analizador sin abrir el equipo, pero no se midieron en la práctica, así que esta versión no las simula.</p>
+        </details>
+      </div>
       <p class="nota" id="comparar-vacio">Todavía no hay lecturas. Mide en la sección Analizador.</p>
       <div id="comparar-graficas" class="rejilla-dos"></div>
       <div class="tarjeta" id="comparar-tabla-tarjeta" hidden>
         <h3>Tabla de lecturas</h3>
         <table class="tabla" id="tabla-comparar">
           <thead>
-            <tr><th>Medición</th><th>Condición</th><th>Lectura ± incertidumbre</th><th>Límite</th><th>% del límite</th><th>Veredicto</th></tr>
+            <tr><th>Medición</th><th>Condición</th><th>Lectura ± incertidumbre</th><th>Límite</th><th>Qué tan cerca del límite</th><th>Veredicto</th></tr>
           </thead>
           <tbody></tbody>
         </table>
+        <p class="nota" data-nota-cerca-limite></p>
       </div>
     </section>
 
@@ -232,10 +253,11 @@
         <div class="tarjeta" id="historial-tabla-tarjeta" hidden>
           <table class="tabla" id="tabla-historial">
             <thead>
-              <tr><th>#</th><th>Hora</th><th>Medición</th><th>Condición</th><th>Lectura ± incertidumbre</th><th>Límite</th><th>% del límite</th><th>Veredicto</th></tr>
+              <tr><th>#</th><th>Hora</th><th>Medición</th><th>Condición</th><th>Lectura ± incertidumbre</th><th>Límite</th><th>Qué tan cerca del límite</th><th>Veredicto</th></tr>
             </thead>
             <tbody></tbody>
           </table>
+          <p class="nota" data-nota-cerca-limite></p>
         </div>
         <div class="tarjeta finalizar">
           <h3>Finalizar práctica</h3>

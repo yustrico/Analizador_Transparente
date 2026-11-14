@@ -18,13 +18,14 @@ El Analizador transparente simula la prueba de seguridad eléctrica (IEC 60601-1
 1. Abre Chrome o Edge.
 2. Escribe la dirección: **https://yustrico.github.io/Analizador_Transparente/**
 3. Verás el encabezado azul y cinco pestañas: *1. Equipo bajo prueba*, *2. Prueba guiada*, *3. Analizador*, *4. Comparar* y *5. Historial y reporte*.
+4. Arriba a la derecha está el enlace **«Ayuda»**: abre este manual en el mismo sitio. Para regresar, usa **«Volver al simulador»**.
 
 📷 *Captura sugerida 1: la página recién abierta, con las cinco pestañas y el aviso educativo abajo.*
 
 ## 4. Paso a paso de la práctica
 
 ### Paso 1 — Conoce el equipo (pestaña «1. Equipo bajo prueba»)
-Lee la ficha del R12: es **Clase I** (tiene conductor de protección a tierra) y sus partes aplicadas (electrodos y cable de paciente) son tipo **CF a prueba de desfibrilación**. La tabla compara los límites de las partes B, BF y CF: la CF es la más estricta porque los electrodos pueden quedar cerca del corazón (microchoque).
+Lee la ficha del R12: es **Clase I** (tiene conductor de protección a tierra) y sus partes aplicadas (electrodos y cable de paciente) son tipo **CF a prueba de desfibrilación**. La tabla compara los límites de las partes B, BF y CF: la CF es la más estricta porque los electrodos pueden quedar cerca del corazón (microchoque). La fuga a tierra tiene el mismo límite para B, BF y CF porque es un límite del equipo completo.
 
 📷 *Captura sugerida 2: la ficha del equipo y la tabla de límites B/BF/CF.*
 
@@ -39,18 +40,19 @@ No se puede saltar pasos hacia adelante: un paso nuevo se habilita al completar 
 📷 *Captura sugerida 3: un paso de la prueba guiada con su propósito, el valor medido y el botón.*
 
 ### Paso 3 — Mide en el Analizador (pestaña «3. Analizador»)
-1. Elige la **medición**: *corriente de contacto* (lo que pasaría por una persona que toca el chasis) o *corriente de paciente CF* (lo que pasa por los electrodos).
+1. Elige la **medición**: *corriente de contacto* (lo que pasaría por una persona que toca el chasis), *corriente de paciente CF* (lo que pasa por los electrodos) o *corriente de fuga a tierra* (la que circula por el cable de tierra del equipo hacia la tierra de la instalación).
 2. Elige la **condición** con los conmutadores:
    - **Polaridad**: normal o invertida.
    - **Tierra (PE)**: cerrada o abierta.
    - **Neutro**: cerrado o abierto.
    - No se puede abrir la tierra y el neutro a la vez: sería una **doble falla**, que la norma no evalúa. La página te explica por qué.
+   - En la **fuga a tierra** la opción «tierra abierta» está deshabilitada: sin conductor de protección no hay por dónde circular la fuga a tierra; por eso, con la tierra abierta, se mide la corriente de contacto. Solo tiene 2 condiciones (normal y neutro abierto), cada una con las 2 polaridades.
 3. Presiona **«Medir»**.
 4. Lee el resultado:
    - **Lectura ± incertidumbre** en µA (lo que mostraría el analizador real y cuánto podría variar).
-   - **Límite** que aplica (condición normal o primer defecto) y **% del límite** usado.
+   - **Límite** que aplica (condición normal o primer defecto) y **qué tan cerca del límite** está la lectura (en %).
    - **Cumple / No cumple**.
-5. Mira el **circuito**: el camino de la corriente se dibuja en **rojo** y muestra cuánta corriente va por cada rama. Pasa el mouse sobre cada parte para saber qué es; el cuadro «¿Qué es cada parte?» lo explica también.
+5. Mira el **circuito**: el camino de la corriente se dibuja en **rojo** y muestra cuánta corriente va por cada rama (en la fuga a tierra, el camino rojo va por el conductor de protección). Pasa el mouse sobre cada parte para saber qué es; el cuadro «¿Qué es cada parte?» lo explica también.
 6. Lee **«¿Por qué da este valor?»**: la explicación física y la fórmula con los números usados.
 
 📷 *Captura sugerida 4: el Analizador con «tierra abierta» y corriente de contacto: lectura ≈ 14.73 ± 1.32 µA y el camino rojo por la persona (MD).*
@@ -60,7 +62,9 @@ No se puede saltar pasos hacia adelante: un paso nuevo se habilita al completar 
 > La animación se detiene sola si no mueves el mouse durante 30 s (para ahorrar batería) y vuelve al moverlo. Si en Windows tienes desactivados los «Efectos de animación», el camino rojo se muestra quieto.
 
 ### Paso 4 — Compara (pestaña «4. Comparar»)
-Aquí aparece la última lectura de cada configuración que hayas medido, en una tabla y en barras. La franja clara de cada barra es el **margen de incertidumbre** del analizador: si dos lecturas difieren menos que esa franja, la diferencia puede ser del instrumento y no de la condición.
+Arriba verás tu **avance**: «Has medido X de las 16 configuraciones que simula esta herramienta», con la lista de las que te faltan y de las que repetiste (y cuántas veces). El bloque «¿Por qué 16?» explica de dónde sale ese número: 12 de contacto y de paciente CF y 4 de fuga a tierra.
+
+Debajo aparece la última lectura de cada configuración que hayas medido, en una tabla y en barras (una gráfica por medición). La franja clara de cada barra es el **margen de incertidumbre** del analizador: si dos lecturas difieren menos que esa franja, la diferencia puede ser del instrumento y no de la condición.
 
 📷 *Captura sugerida 5: la tabla y las barras con varias configuraciones medidas.*
 
@@ -84,7 +88,8 @@ Después de generar el reporte puedes volver a medir y generarlo otra vez.
 ## 6. Cómo leer los números
 - **0.00 µA en condición normal:** casi toda la fuga se va por la tierra. El analizador real muestra ≈ 0.1 µA por su resolución.
 - **± U (incertidumbre):** cuánto podría diferir la lectura del analizador real, según su exactitud ±(1 % de la lectura + 1 µA) y la guía GUM.
-- **Límites (IEC 60601-1):** corriente de contacto 100 µA (normal) y 500 µA (primer defecto); corriente de paciente CF 10 µA (normal) y 50 µA (primer defecto).
+- **Límites (IEC 60601-1):** corriente de contacto 100 µA (normal) y 500 µA (primer defecto); corriente de paciente CF 10 µA (normal) y 50 µA (primer defecto); corriente de fuga a tierra 5 mA (normal) y 10 mA (primer defecto), según la 3.ª edición de la norma. El manual del R12 indica 500/1000 µA porque usa la 2.ª edición de la norma.
+- **Qué tan cerca del límite:** una corriente pequeña puede estar más cerca de su límite que una grande: compara la corriente de paciente CF (límite 10 µA) con la de contacto (límite 100 µA).
 
 ## 7. Si algo no funciona
 Consulta [solucion_problemas.md](solucion_problemas.md).

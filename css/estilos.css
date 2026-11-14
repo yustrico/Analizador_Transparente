@@ -60,6 +60,17 @@ h4 { margin: 14px 0 6px; font-size: 1rem; }
   padding: 14px 0 0;
 }
 .encabezado__titulo { margin: 0; font-size: 1.5rem; }
+/* Título a la izquierda y enlace "Ayuda" arriba a la derecha */
+.encabezado__fila { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.encabezado__ayuda {
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--radio);
+  padding: 6px 14px;
+  text-decoration: none;
+  font-weight: 600;
+}
+.encabezado__ayuda:hover, .encabezado__ayuda:focus-visible { background: rgba(255, 255, 255, 0.15); }
 .encabezado__subtitulo { margin: 2px 0 12px; opacity: 0.85; }
 
 .navegacion { display: flex; gap: 4px; }
@@ -120,6 +131,18 @@ h4 { margin: 14px 0 6px; font-size: 1rem; }
 .plegable summary { cursor: pointer; font-weight: 600; color: var(--azul-principal); }
 .plegable__lista { margin: 8px 0 4px; }
 .plegable--controles { margin: 0 0 12px; }
+
+/* Página de ayuda (manual): títulos en el azul principal y listas con aire */
+.manual h2 { color: var(--azul-principal); margin-top: 8px; }
+.manual h3 { margin-top: 20px; }
+.manual li { margin: 4px 0; }
+
+/* Comparar: cuadro de avance (configuraciones medidas, faltantes y repetidas) */
+.avance { margin-bottom: 16px; }
+.avance__resumen { font-weight: 600; color: var(--azul-principal); margin: 0 0 8px; }
+.avance__titulo { font-weight: 600; margin: 8px 0 4px; }
+.avance__lista { columns: 2; column-gap: 32px; margin: 0; padding-left: 20px; }
+.avance__lista li { margin: 2px 0; break-inside: avoid; }
 
 /* Prueba guiada, paso 3: tabla de aislamiento con su mínimo y veredicto */
 .paso-resultado__tabla { margin: 8px 0; }

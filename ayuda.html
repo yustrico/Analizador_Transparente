@@ -1,0 +1,159 @@
+<!doctype html>
+<!--
+  ============================================================================
+  Título: Ayuda (manual de usuario en la web)
+  Descripción: Versión HTML de docs/manual_usuario.md, para que el estudiante
+    la abra desde el simulador con el enlace "Ayuda". No tiene scripts: solo
+    texto y la hoja de estilos del sitio (con su huella SRI). Si cambia el
+    manual, hay que actualizar también esta página (docs/mantenimiento.md).
+  Módulo: M1 – Interfaz de usuario (adaptador)
+  Autores: Yustin Rico, David Cardona, Santiago González
+  Creado: 2026-11-14 · Modificado: 2026-11-14
+  ============================================================================
+-->
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <!-- Política de seguridad de contenido: la misma de index.html; esta página no tiene scripts -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ayuda – Analizador transparente</title>
+  <meta name="description" content="Manual de usuario del Analizador transparente: cómo hacer la práctica de seguridad eléctrica del electrocardiógrafo Mindray BeneHeart R12.">
+  <link rel="icon" href="data:,">
+  <!-- Integridad (SRI): la huella SHA-384 la escribe tools/sri.mjs -->
+  <link rel="stylesheet" href="css/estilos.css" integrity="sha384-pMYO5YXy6ik6c0TuMrAw5mRtnd/dtCEmz0Zn3HIJDISQACzb9Vh+VY+hshSAk2Gi">
+</head>
+<body>
+  <header class="encabezado">
+    <div class="encabezado__contenido">
+      <div class="encabezado__fila">
+        <div>
+          <h1 class="encabezado__titulo">Ayuda – Manual de usuario</h1>
+          <p class="encabezado__subtitulo">Analizador transparente · Versión 1.0.0 · Noviembre de 2026 · Yustin Rico, David Cardona y Santiago González (UAO)</p>
+        </div>
+        <a class="encabezado__ayuda" href="index.html">Volver al simulador</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="principal manual">
+    <p class="tarjeta"><strong>Herramienta educativa.</strong> Complementa la práctica con el analizador real (Fluke ESA620); no sirve para certificar equipos. No es un dispositivo médico.</p>
+
+    <article class="tarjeta">
+      <h2>1. Qué es y para qué sirve</h2>
+      <p>El Analizador transparente simula la prueba de seguridad eléctrica (IEC 60601-1) del electrocardiógrafo <strong>Mindray BeneHeart R12</strong>, como la haría el analizador del laboratorio. La diferencia es que, en vez de mostrar solo un número, <strong>muestra por dentro el camino de la corriente</strong> y explica por qué la lectura cambia en cada condición de prueba (polaridad invertida, tierra abierta, neutro abierto).</p>
+      <p>Úsalo para practicar solo, antes o después de la práctica con el equipo real. Puedes pausar cuando quieras: no hay límite de tiempo.</p>
+
+      <h2>2. Qué necesitas</h2>
+      <ul>
+        <li>Un <strong>computador</strong> con <strong>Google Chrome</strong> o <strong>Microsoft Edge</strong> (Windows). No funciona en celular.</li>
+        <li>Internet solo para abrir la página. Después de cargar, todos los cálculos se hacen en tu computador.</li>
+        <li>No hay que instalar nada, crear cuenta ni iniciar sesión.</li>
+      </ul>
+
+      <h2>3. Cómo abrirla</h2>
+      <ol>
+        <li>Abre Chrome o Edge.</li>
+        <li>Escribe la dirección: <strong>https://yustrico.github.io/Analizador_Transparente/</strong></li>
+        <li>Verás el encabezado azul y cinco pestañas: <em>1. Equipo bajo prueba</em>, <em>2. Prueba guiada</em>, <em>3. Analizador</em>, <em>4. Comparar</em> y <em>5. Historial y reporte</em>.</li>
+        <li>Arriba a la derecha está el enlace <strong>«Ayuda»</strong>: abre este manual en el mismo sitio. Para regresar, usa <strong>«Volver al simulador»</strong>.</li>
+      </ol>
+    </article>
+
+    <article class="tarjeta">
+      <h2>4. Paso a paso de la práctica</h2>
+
+      <h3>Paso 1 — Conoce el equipo (pestaña «1. Equipo bajo prueba»)</h3>
+      <p>Lee la ficha del R12: es <strong>Clase I</strong> (tiene conductor de protección a tierra) y sus partes aplicadas (electrodos y cable de paciente) son tipo <strong>CF a prueba de desfibrilación</strong>. La tabla compara los límites de las partes B, BF y CF: la CF es la más estricta porque los electrodos pueden quedar cerca del corazón (microchoque). La fuga a tierra tiene el mismo límite para B, BF y CF porque es un límite del equipo completo.</p>
+
+      <h3>Paso 2 — Haz la prueba guiada (pestaña «2. Prueba guiada»)</h3>
+      <p>La prueba tiene <strong>4 pasos en orden fijo</strong>: inspección visual → resistencia de tierra → aislamiento → corrientes de fuga.</p>
+      <ol>
+        <li>Lee el <strong>propósito</strong> de seguridad del paso (por qué se hace).</li>
+        <li>Mira el <strong>valor medido</strong> en el laboratorio.</li>
+        <li>Presiona <strong>«Entendido, siguiente paso»</strong>.</li>
+      </ol>
+      <p>No se puede saltar pasos hacia adelante: un paso nuevo se habilita al completar el anterior. Los pasos completados quedan marcados con ✓ y puedes abrirlos con un clic para repasarlos sin perder tu avance (el botón te devuelve al paso pendiente). Al completar los 4, todos quedan libres. Al llegar al paso 4 se habilitan las pestañas <em>Analizador</em> y <em>Comparar</em>. Si recargas la página, tu avance se conserva.</p>
+
+      <h3>Paso 3 — Mide en el Analizador (pestaña «3. Analizador»)</h3>
+      <ol>
+        <li>Elige la <strong>medición</strong>: <em>corriente de contacto</em> (lo que pasaría por una persona que toca el chasis), <em>corriente de paciente CF</em> (lo que pasa por los electrodos) o <em>corriente de fuga a tierra</em> (la que circula por el cable de tierra del equipo hacia la tierra de la instalación).</li>
+        <li>Elige la <strong>condición</strong> con los conmutadores:
+          <ul>
+            <li><strong>Polaridad</strong>: normal o invertida.</li>
+            <li><strong>Tierra (PE)</strong>: cerrada o abierta.</li>
+            <li><strong>Neutro</strong>: cerrado o abierto.</li>
+            <li>No se puede abrir la tierra y el neutro a la vez: sería una <strong>doble falla</strong>, que la norma no evalúa. La página te explica por qué.</li>
+            <li>En la <strong>fuga a tierra</strong> la opción «tierra abierta» está deshabilitada: sin conductor de protección no hay por dónde circular la fuga a tierra; por eso, con la tierra abierta, se mide la corriente de contacto. Solo tiene 2 condiciones (normal y neutro abierto), cada una con las 2 polaridades.</li>
+          </ul>
+        </li>
+        <li>Presiona <strong>«Medir»</strong>.</li>
+        <li>Lee el resultado:
+          <ul>
+            <li><strong>Lectura ± incertidumbre</strong> en µA (lo que mostraría el analizador real y cuánto podría variar).</li>
+            <li><strong>Límite</strong> que aplica (condición normal o primer defecto) y <strong>qué tan cerca del límite</strong> está la lectura (en %).</li>
+            <li><strong>Cumple / No cumple</strong>.</li>
+          </ul>
+        </li>
+        <li>Mira el <strong>circuito</strong>: el camino de la corriente se dibuja en <strong>rojo</strong> y muestra cuánta corriente va por cada rama (en la fuga a tierra, el camino rojo va por el conductor de protección). Pasa el mouse sobre cada parte para saber qué es; el cuadro «¿Qué es cada parte?» lo explica también.</li>
+        <li>Lee <strong>«¿Por qué da este valor?»</strong>: la explicación física y la fórmula con los números usados.</li>
+      </ol>
+      <p><strong>Prueba sugerida:</strong> mide la corriente de contacto en condición normal (≈ 0 µA) y luego con tierra abierta (≈ 14.7 µA). Observa en el circuito por qué cambia: sin tierra, la corriente de fuga ya no tiene un camino de baja resistencia y pasa por la persona.</p>
+      <p class="nota">La animación se detiene sola si no mueves el mouse durante 30 s (para ahorrar batería) y vuelve al moverlo. Si en Windows tienes desactivados los «Efectos de animación», el camino rojo se muestra quieto.</p>
+
+      <h3>Paso 4 — Compara (pestaña «4. Comparar»)</h3>
+      <p>Arriba verás tu <strong>avance</strong>: «Has medido X de las 16 configuraciones que simula esta herramienta», con la lista de las que te faltan y de las que repetiste (y cuántas veces). El bloque «¿Por qué 16?» explica de dónde sale ese número: 12 de contacto y de paciente CF y 4 de fuga a tierra.</p>
+      <p>Debajo aparece la última lectura de cada configuración que hayas medido, en una tabla y en barras (una gráfica por medición). La franja clara de cada barra es el <strong>margen de incertidumbre</strong> del analizador: si dos lecturas difieren menos que esa franja, la diferencia puede ser del instrumento y no de la condición.</p>
+
+      <h3>Paso 5 — Genera tu reporte (pestaña «5. Historial y reporte»)</h3>
+      <ol>
+        <li>Revisa la tabla con todas tus lecturas, en orden y con la hora. (Al final de la pestaña hay un bloque cerrado, «Datos técnicos (para la prueba de carga ES03)», con el tiempo que tardó la página en abrir; solo se usa para verificar la especificación ES03 y también va en «Copiar resumen».)</li>
+        <li>Presiona <strong>«Finalizar práctica»</strong> y escribe tu nombre (opcional, máximo 60 caracteres). Presiona <strong>«Generar reporte»</strong>.</li>
+        <li>Presiona <strong>«Descargar reporte (PDF)»</strong>: se descarga el archivo <code>reporte_seguridad_electrica_AAAA-MM-DD.pdf</code> a tu carpeta de <strong>Descargas</strong>.</li>
+        <li>Presiona <strong>«Copiar resumen»</strong>: se copia un resumen corto.</li>
+        <li><strong>Para enviarlo:</strong> abre tu correo (Outlook, Gmail o el de la universidad), <strong>pega</strong> el resumen (Ctrl + V) y <strong>adjunta</strong> el PDF.</li>
+      </ol>
+      <p>Después de generar el reporte puedes volver a medir y generarlo otra vez.</p>
+    </article>
+
+    <article class="tarjeta">
+      <h2>5. Importante sobre tus datos</h2>
+      <ul>
+        <li>Tus lecturas se guardan <strong>solo en esta pestaña del navegador</strong>. Nada se envía a ningún servidor.</li>
+        <li><strong>Se borran al cerrar la pestaña.</strong> Descarga tu reporte antes de cerrar. (Recargar la página no las borra; abrir esta Ayuda y volver tampoco).</li>
+        <li>El nombre solo aparece en tu reporte.</li>
+      </ul>
+
+      <h2>6. Cómo leer los números</h2>
+      <ul>
+        <li><strong>0.00 µA en condición normal:</strong> casi toda la fuga se va por la tierra. El analizador real muestra ≈ 0.1 µA por su resolución.</li>
+        <li><strong>± U (incertidumbre):</strong> cuánto podría diferir la lectura del analizador real, según su exactitud ±(1 % de la lectura + 1 µA) y la guía GUM.</li>
+        <li><strong>Límites (IEC 60601-1):</strong> corriente de contacto 100 µA (normal) y 500 µA (primer defecto); corriente de paciente CF 10 µA (normal) y 50 µA (primer defecto); corriente de fuga a tierra 5 mA (normal) y 10 mA (primer defecto), según la 3.ª edición de la norma. El manual del R12 indica 500/1000 µA porque usa la 2.ª edición de la norma.</li>
+        <li><strong>Qué tan cerca del límite:</strong> una corriente pequeña puede estar más cerca de su límite que una grande: compara la corriente de paciente CF (límite 10 µA) con la de contacto (límite 100 µA).</li>
+      </ul>
+
+      <h2>7. Si algo no funciona</h2>
+      <table class="tabla">
+        <thead><tr><th>Problema</th><th>Qué hacer</th></tr></thead>
+        <tbody>
+          <tr><td>La página sale en blanco o los botones no hacen nada</td><td>Usa Chrome o Edge actualizados (Menú → Ayuda → Acerca de). Prueba en una ventana de incógnito (sin extensiones).</td></tr>
+          <tr><td>Las pestañas <em>Analizador</em> y <em>Comparar</em> no se pueden abrir</td><td>Ve a <em>2. Prueba guiada</em> y presiona «Entendido, siguiente paso» hasta llegar al paso 4.</td></tr>
+          <tr><td>No puedo abrir la tierra y el neutro a la vez</td><td>Es a propósito: sería una doble falla, que la norma no evalúa. Abre solo uno de los dos (es un «primer defecto»).</td></tr>
+          <tr><td>En la fuga a tierra no puedo abrir la tierra</td><td>Es a propósito: sin conductor de protección no hay por dónde circular la fuga a tierra. Con la tierra abierta, mide la corriente de contacto.</td></tr>
+          <tr><td>El camino rojo no se mueve</td><td>Mueve el mouse. Si sigue quieto, es por la configuración de Windows (Configuración → Accesibilidad → Efectos visuales); la información es la misma.</td></tr>
+          <tr><td>Mi lectura es 0.00 y en el laboratorio el analizador mostró 0.1 µA</td><td>Es normal: la diferencia es mucho menor que la incertidumbre (± 1.15 µA).</td></tr>
+          <tr><td>Perdí mis lecturas</td><td>No se pueden recuperar (nada se guarda fuera de la pestaña). Repite las mediciones y descarga el reporte antes de cerrar.</td></tr>
+          <tr><td>«Descargar reporte (PDF)» no hace nada visible</td><td>Busca <code>reporte_seguridad_electrica_AAAA-MM-DD.pdf</code> en <em>Descargas</em> (Ctrl + J). Si aparece un aviso de descarga bloqueada, permítela.</td></tr>
+          <tr><td>«No se pudo copiar» al presionar «Copiar resumen»</td><td>Abre la dirección https publicada y vuelve a intentar. Si sigue fallando, copia a mano los datos del reporte en tu correo.</td></tr>
+          <tr><td>El PDF muestra «?» en mi nombre</td><td>Escribe el nombre solo con letras del español.</td></tr>
+          <tr><td>«429 Too Many Requests» al abrir la página</td><td>Espera unos minutos y recarga.</td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <p><a href="index.html">← Volver al simulador</a></p>
+  </main>
+
+  <footer class="aviso">Herramienta educativa. Complementa la práctica con el analizador real; no sirve para certificar equipos.</footer>
+</body>
+</html>

@@ -4,12 +4,16 @@ Analizador transparente **v1.0.0** · Medido el 13 de noviembre de 2026 · Versi
 
 Equipo de medición: PC con Windows 11 (16 núcleos lógicos), Chrome 157.0.8103.51, Edge 157.0.4341.57, Node.js 26.13.1. Las especificaciones y metas vienen de `docs/03_Especificaciones_v2.md` (ES07 fue eliminada el 12/11/2026).
 
+## Alcance de esta versión (actualizado 14/11/2026)
+- Simula 16 configuraciones validadas con mediciones reales del Fluke ESA620 sobre el R12: corriente de contacto y corriente de paciente CF (6 condiciones cada una) y corriente de fuga a tierra (4: normal y neutro abierto, con las 2 polaridades).
+- Trabajo futuro: corriente con red en la parte aplicada y corriente auxiliar de paciente. Se miden con el ESA620 sin abrir el equipo, pero no hay mediciones del laboratorio para calibrarlas y validarlas.
+
 ## Resumen
 
 | ID | Especificación | Meta | Cómo se mide | Valor medido | ¿Cumple? |
 |---|---|---|---|---|---|
-| ES01 | Error del cálculo frente a la referencia | ≤ 1 % en cada caso | `npm test` (`tests/motor_calculo.test.js`): I y U de las 12 configuraciones frente a la tabla de referencia de CLAUDE.md §5 | Error máximo **0.41 %** (12 de 12 ≤ 1 %) | ✅ Sí |
-| ES02 | Concordancia con el ESA620, E_n | \|E_n\| ≤ 1 en cada configuración | `npm test` (`tests/es02_validacion.test.js`): E_n = \|I_modelo − media\| / U_med con las mediciones reales del R12 (n = 3 por configuración) | E_n máximo **0.186** (12 de 12 ≤ 1) | ✅ Sí |
+| ES01 | Error del cálculo frente a la referencia | ≤ 1 % en cada caso | `npm test` (`tests/motor_calculo.test.js`): I y U de las 16 configuraciones frente a la tabla de referencia de CLAUDE.md §5 | Error máximo **0.41 %** (16 de 16 ≤ 1 %) | ✅ Sí |
+| ES02 | Concordancia con el ESA620, E_n | \|E_n\| ≤ 1 en cada configuración | `npm test` (`tests/es02_validacion.test.js`): E_n = \|I_modelo − media\| / U_med con las mediciones reales del R12 (n = 3 por configuración) | E_n máximo **0.187** (16 de 16 ≤ 1) | ✅ Sí |
 | ES03 | Tiempo de carga con 30 usuarios reales simultáneos | p95 ≤ 1 s y 0 % de errores | 30 personas abren la página a la vez en incógnito; cada navegador mide su carga con Navigation Timing y la pega en su resumen (`docs/protocolo_ES03_30_usuarios.md`) | Pendiente: prueba con 30 usuarios reales | Pendiente (ver §ES03) |
 | ES04 | Tiempo de carga (LCP) | ≤ 2.5 s | Lighthouse 12.8.2, perfil escritorio, 5 corridas contra la URL publicada, mediana | Mediana **0.288 s** (5 de 5 corridas entre 0.286 y 0.296 s) | ✅ Sí |
 | ES05 | Peso descargado en la primera carga | ≤ 1 600 KiB | `npm run peso` (archivos en disco) y pestaña Red / CDP sin caché en la URL publicada | **62.0 KiB** transferidos (comprimidos por GitHub Pages); 188.1 KiB sin comprimir, 13 archivos | ✅ Sí |
@@ -28,8 +32,9 @@ Equipo de medición: PC con Windows 11 (16 núcleos lógicos), Chrome 157.0.8103
 ## Detalle de cada medición
 
 ### ES01 — Error del cálculo
-- Comando: `npm test` (75 pruebas en verde).
-- Se comparan la corriente I y la incertidumbre U de las 12 configuraciones (contacto y paciente CF × 6 condiciones) con la tabla de referencia de CLAUDE.md §5.
+- Comando: `npm test` (116 pruebas en verde, 14/11/2026).
+- Se comparan la corriente I y la incertidumbre U de las 16 configuraciones (contacto y paciente CF × 6 condiciones, y fuga a tierra × 4) con la tabla de referencia de CLAUDE.md §5.
+- Fuga a tierra (agregada el 14/11/2026): normal 14.7343 µA frente a 14.734 (0.002 %), U 1.3248 frente a 1.32 (0.36 %); neutro abierto 27.1377 µA frente a 27.138 (0.001 %), U 1.4681 frente a 1.47 (0.13 %).
 - Error relativo máximo: 0.41 %. Meta ≤ 1 %.
 - Nota: docs/03 menciona LTspice como referencia; el equipo acordó usar la tabla de CLAUDE.md §5 (13/11/2026).
 
@@ -50,6 +55,12 @@ U_med = 2·√((s/√3)² + ((0.01·media + 1 µA)/√3)²), mediciones del R12 
 | Paciente CF | invertida | abierta | cerrado | 2.097 | 2.13 ± 0.15 | 1.19 | 0.028 |
 | Paciente CF | normal | cerrada | abierto | 1.267 | 1.20 ± 0.10 | 1.17 | 0.057 |
 | Paciente CF | invertida | cerrada | abierto | 1.267 | 1.07 ± 0.12 | 1.18 | 0.167 |
+| Fuga a tierra | normal | cerrada | cerrado | 14.734 | 14.73 ± 0.49 | 1.44 | 0.003 |
+| Fuga a tierra | invertida | cerrada | cerrado | 14.734 | 14.90 ± 0.10 | 1.33 | 0.124 |
+| Fuga a tierra | normal | cerrada | abierto | 27.138 | 27.13 ± 0.71 | 1.68 | 0.005 |
+| Fuga a tierra | invertida | cerrada | abierto | 27.138 | 27.43 ± 0.45 | 1.56 | **0.187** |
+
+Fuga a tierra: C_L y el factor empírico k_N = 0.8418 se calibraron con la polaridad normal; la polaridad invertida es la validación independiente (docs/06 §8).
 
 Nota honesta (docs/03 §6): C_L, C_N, C_AP y el término de 0.83 µA se ajustaron con estas mismas mediciones, así que ES02 muestra que el simulador calibrado reproduce lo que el estudiante verá en el laboratorio; no es una predicción independiente.
 
@@ -95,6 +106,8 @@ Casos de prueba ejecutados en cada navegador contra la URL publicada (script aut
 6. Reporte en pantalla con un nombre que contiene HTML (se muestra como texto).
 7. Descarga del PDF (`reporte_seguridad_electrica_2026-11-13.pdf`, empieza con `%PDF-1.4`).
 8. «Copiar resumen» (el portapapeles contiene el resumen).
+
+Repetido el 14/11/2026 en un servidor local con las 16 configuraciones (incluida la fuga a tierra, con «tierra abierta» deshabilitada), el cuadro de avance de Comparar, la gráfica de fuga a tierra y la página ayuda.html: 0 errores de la página en Chrome y en Edge (Edge sin ventana registró un aviso interno del navegador, «runtime.lastError», que no viene de la página), 0 peticiones a otros sitios. Falta repetirlo contra la URL publicada.
 
 Resultado: Chrome 157.0.8103.51 y Edge 157.0.4341.57 con 0 errores ni avisos en la consola. El PDF descargado se abrió y revisó visualmente en el visor de ambos navegadores: 2 páginas, con el encabezado de la tabla repetido y tildes, ñ, µ, ± y √ correctos.
 

@@ -143,3 +143,22 @@ test("Resistencia de tierra: igual al límite cumple; por encima no cumple; «< 
   assert.equal(evaluarResistenciaTierra("> 0.3", 0.2), "No cumple");
   assert.throws(() => evaluarResistenciaTierra("< 1", 0.2), /no permite decidir/);
 });
+
+/* ---- Fuga a tierra ---- */
+
+test("Fuga a tierra: 5 mA en condición normal y 10 mA con primer defecto (IEC 60601-1 3.ª ed.)", () => {
+  assert.equal(obtenerLimite_uA("fuga_tierra", NORMAL, parametros), 5000);
+  assert.equal(obtenerLimite_uA("fuga_tierra", INVERTIDA, parametros), 5000);
+  assert.equal(obtenerLimite_uA("fuga_tierra", NEUTRO_ABIERTO, parametros), 10000);
+});
+
+test("Fuga a tierra: el límite es del equipo completo, igual para B, BF y CF", () => {
+  assert.deepEqual({ ...obtenerLimitesPorTipoDeParte_uA("fuga_tierra", NORMAL, parametros) }, { B: 5000, BF: 5000, CF: 5000 });
+  assert.deepEqual({ ...obtenerLimitesPorTipoDeParte_uA("fuga_tierra", NEUTRO_ABIERTO, parametros) }, { B: 10000, BF: 10000, CF: 10000 });
+});
+
+test("Fuga a tierra del R12 con neutro abierto: 27.14 µA cumple y usa ≈ 0.27 % del límite", () => {
+  const resultado = evaluarMedicion(calcularMedicion("fuga_tierra", NEUTRO_ABIERTO, parametros), parametros);
+  assert.equal(resultado.veredicto, "Cumple");
+  assert.ok(Math.abs(resultado.porcentajeDelLimite - 0.2714) < 0.001);
+});

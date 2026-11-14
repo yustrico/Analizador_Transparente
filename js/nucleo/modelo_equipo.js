@@ -31,6 +31,7 @@ const CAMPOS_POSITIVOS = Object.freeze([
 /** Campos numéricos que pueden valer cero pero no ser negativos. */
 const CAMPOS_NO_NEGATIVOS = Object.freeze([
   ["delta_paciente_tierra_abierta_A"],
+  ["factor_neutro_abierto_fuga_tierra"],
   ["exactitud_analizador", "porcentaje_lectura"],
 ]);
 
@@ -42,6 +43,7 @@ const CAMPOS_TEXTO = Object.freeze([
   ["equipo", "norma_general"],
   ["pasos_previos_medidos", "inspeccion_visual"],
   ["pasos_previos_medidos", "fuente_minimos_aislamiento"],
+  ["origen_factor_neutro_abierto"],
 ]);
 
 /** Datos de los pasos 1 a 3 de la prueba guiada que deben existir. */
@@ -54,7 +56,7 @@ const CAMPOS_OBJETO_PASOS_PREVIOS = Object.freeze([
 const PARES_AISLAMIENTO = Object.freeze(["red_tierra", "partes_aplicadas_tierra", "red_partes_aplicadas"]);
 
 /** Grupos de límites de IEC 60601-1 que debe traer el archivo. */
-const GRUPOS_DE_LIMITES = Object.freeze(["contacto", "paciente_B", "paciente_BF", "paciente_CF"]);
+const GRUPOS_DE_LIMITES = Object.freeze(["contacto", "paciente_B", "paciente_BF", "paciente_CF", "fuga_tierra"]);
 
 /** Un porcentaje no puede ser mayor que 100 %. */
 const PORCENTAJE_MAXIMO = 100;

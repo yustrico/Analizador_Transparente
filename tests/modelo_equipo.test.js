@@ -83,6 +83,15 @@ test("Rechaza si faltan los límites de partes B o BF", () => {
   assert.throws(() => validarParametros(datos), /paciente_BF/);
 });
 
+test("Rechaza si faltan los límites de fuga a tierra o el factor k_N es negativo", () => {
+  const sinLimites = copiaDatosReales();
+  delete sinLimites.limites_uA.fuga_tierra;
+  assert.throws(() => validarParametros(sinLimites), /fuga_tierra/);
+  const factorNegativo = copiaDatosReales();
+  factorNegativo.factor_neutro_abierto_fuga_tierra = -0.1;
+  assert.throws(() => validarParametros(factorNegativo), /factor_neutro_abierto_fuga_tierra/);
+});
+
 test("Rechaza si faltan los datos de los pasos previos", () => {
   const datos = copiaDatosReales();
   delete datos.pasos_previos_medidos.aislamiento_Mohm;

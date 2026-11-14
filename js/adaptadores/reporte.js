@@ -16,11 +16,14 @@
  */
 
 import { VEREDICTO_CUMPLE } from "../nucleo/evaluador_limites.js";
-import { filaDeRegistro, textoLectura, textoPorcentaje, NOMBRES_MEDICION, nombreCortoCondicion } from "./historial.js";
+import { filaDeRegistro, textoLectura, textoPorcentaje, textoLimite, NOMBRES_MEDICION, nombreCortoCondicion } from "./historial.js";
 import { crearDocumentoPdf } from "./pdf.js";
 import { textoTiempoCarga, detalleCarga } from "./tiempo_carga.js";
 
 /** Explicación de la incertidumbre (se usa en Comparar y en el reporte). */
+/** Nota debajo de la tabla de lecturas (columna "Qué tan cerca del límite"). */
+export const TEXTO_CERCA_DEL_LIMITE = "Una corriente pequeña puede estar más cerca de su límite que una grande: compara la corriente de paciente CF (límite 10 µA) con la de contacto (límite 100 µA).";
+
 export const TEXTO_INCERTIDUMBRE = "La incertidumbre (U) indica cuánto podría diferir la lectura del analizador real. Se calcula con la exactitud que declara el fabricante del ESA620, ±(1 % de la lectura + 1 µA), según la guía GUM (JCGM 100:2008): u = exactitud/√3 y U = 2·u. Ejemplo: 14.73 ± 1.32 µA significa que el analizador real podría mostrar entre 13.41 y 16.05 µA.";
 
 /** Aviso obligatorio del reporte. */
@@ -60,12 +63,12 @@ const COLUMNA_NUMERO = Object.freeze(["#", 0.04]);
 
 /** Columnas de la tabla del reporte: [título, campo de filaDeRegistro, fracción del ancho en el PDF]. */
 const COLUMNAS_REPORTE = Object.freeze([
-  ["Hora", "hora", 0.14],
+  ["Hora", "hora", 0.13],
   ["Medición", "medicion", 0.17],
-  ["Condición", "condicion", 0.19],
+  ["Condición", "condicion", 0.18],
   ["Lectura ± incertidumbre", "lectura", 0.16],
   ["Límite", "limite", 0.08],
-  ["% del límite", "porcentaje", 0.09],
+  ["Qué tan cerca del límite", "porcentaje", 0.11],
   ["Veredicto", "veredicto", 0.13],
 ]);
 
@@ -114,7 +117,7 @@ function textoResumen(resumen) {
  * @returns {string} Texto.
  */
 function textoMayorPorcentaje(registro) {
-  return `${NOMBRES_MEDICION[registro.tipoMedicion]}, ${nombreCortoCondicion(registro.condicion)}: ${textoLectura(registro)} µA = ${textoPorcentaje(registro.porcentajeDelLimite)} del límite de ${registro.limite_uA} µA.`;
+  return `${NOMBRES_MEDICION[registro.tipoMedicion]}, ${nombreCortoCondicion(registro.condicion)}: ${textoLectura(registro)} µA = ${textoPorcentaje(registro.porcentajeDelLimite)} del límite de ${textoLimite(registro.limite_uA)}.`;
 }
 
 /**
@@ -216,6 +219,7 @@ export function generarReporte(contenedor, datos) {
   // Tabla de lecturas
   agregar("h3", TITULO_LECTURAS, contenedor);
   contenedor.appendChild(crearTablaLecturas(contenido.columnas, contenido.filas));
+  agregar("p", TEXTO_CERCA_DEL_LIMITE, contenedor, "nota");
 
   // Incertidumbre y aviso
   agregar("h3", TITULO_INCERTIDUMBRE, contenedor);
@@ -241,6 +245,7 @@ export function crearPdfReporte(datos) {
   documento.listaDatos(contenido.datosGenerales);
   documento.seccion(TITULO_LECTURAS);
   documento.tabla(columnas, contenido.filas);
+  documento.parrafo(TEXTO_CERCA_DEL_LIMITE);
   documento.seccion(TITULO_INCERTIDUMBRE);
   documento.parrafo(TEXTO_INCERTIDUMBRE);
   documento.aviso(TEXTO_AVISO);

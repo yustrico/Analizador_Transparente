@@ -5,6 +5,20 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Agregado (14/11/2026, quinta ronda)
+- Nueva medición: **corriente de fuga a tierra** (la que circula por el conductor de protección). Modelo: I = V·2πf·C_activa en condición normal e I = V·2πf·(C_activa + k_N·C_otra) con neutro abierto. k_N = 27.13/14.73 − 1 = 0.8418 es un factor empírico calibrado con la polaridad normal; queda en `datos/parametros_r12.json` (`factor_neutro_abierto_fuga_tierra` y `origen_factor_neutro_abierto`) y M3 lo valida.
+- Solo existen 4 configuraciones de fuga a tierra (normal y neutro abierto, con las 2 polaridades): con fuga a tierra se deshabilita «tierra abierta» y se explica por qué; M4 la rechaza con el mismo mensaje (`medicionPosible`).
+- Límites de IEC 60601-1, 3.ª ed.: 5 mA (condición normal) y 10 mA (primer defecto), iguales para B, BF y CF; se escriben en mA. Nota: el manual del R12 indica 500/1000 µA porque usa la 2.ª edición. Filas nuevas en la tabla de límites de Equipo; en el Analizador, la frase «Para la fuga a tierra el límite es del equipo completo, no depende de B, BF o CF» en vez de la tabla B/BF/CF.
+- Circuito: con fuga a tierra el camino rojo va solo por el conductor de protección (con su valor) y la MD queda desconectada.
+- Explicación física, fórmula con k_N y glosario («Corriente de fuga a tierra: La que circula por el cable de tierra del equipo hacia la tierra de la instalación.»).
+- Pruebas: ES01 con las 4 configuraciones de fuga (16 en total; error máximo sigue en 0.41 %), ES02 con E_n frente a los datos de docs/06 (máximo 0.187, polaridad invertida con neutro abierto), límites, M3 y `listarConfiguraciones` (16). 116 pruebas en verde.
+- Comparar: cuadro de avance «Has medido X de las 16 configuraciones que simula esta herramienta», con «Te faltan:» y «Repetiste:» (con cuántas veces) o «Completaste las 16 configuraciones.», y el bloque cerrado «¿Por qué 16?». La lógica es una función pura de M8 (`resumirAvance`) con pruebas (`tests/historial.test.js`). Gráfica nueva de fuga a tierra.
+- `ayuda.html`: el manual de usuario en HTML (mismos estilos, misma CSP, SRI del CSS y sin scripts), con enlace «Ayuda» arriba a la derecha del encabezado y «Volver al simulador». `tools/sri.mjs` y `tests/sri.test.js` cubren también esta página.
+
+### Cambiado (14/11/2026, quinta ronda)
+- La columna «% del límite» se llama «Qué tan cerca del límite» en Comparar, Historial y el PDF, con la nota: «Una corriente pequeña puede estar más cerca de su límite que una grande: compara la corriente de paciente CF (límite 10 µA) con la de contacto (límite 100 µA).»
+- Documentos alineados: docs/02 (RF04 con la fuga a tierra y su trazabilidad), docs/03 (ES01 y ES02 con 16 configuraciones), docs/06 §8 (factor k_N y su validación), docs/08 y docs/verificacion.md (alcance; red en parte aplicada y corriente auxiliar como trabajo futuro), manual de usuario, solución de problemas, mantenimiento (mantener `ayuda.html` igual al manual), README y CLAUDE.md.
+
 ### Agregado (14/11/2026)
 - Paso 3 de la prueba guiada (aislamiento) con veredicto: mínimos esperados de IEC 62353:2014, Tabla 2, para equipo Clase I con parte CF (red–tierra ≥ 2 MΩ; partes aplicadas–tierra ≥ 70 MΩ; red–partes aplicadas ≥ 70 MΩ). Tabla con valor medido, mínimo y «Cumple/No cumple» calculado, y nota sobre la fuente (medición opcional en IEC 62353; el manual del R12 no fija límite). Fuente anotada en docs/06 §7.
 - `datos/parametros_r12.json`: cada par de `aislamiento_Mohm` trae `valor` y `minimo`, más `fuente_minimos_aislamiento`. M3 los valida (mínimo > 0).

@@ -14,7 +14,7 @@
  *   camino rojo sigue dibujado; solo dejan de moverse los guiones.
  * Módulo: M6 – Visualizador (adaptador)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-13
+ * Creado: 2026-11-13 · Modificado: 2026-11-14
  * ============================================================================
  */
 
@@ -131,6 +131,9 @@ const CABLES_FIJOS = Object.freeze([
 /** Cable de la punta de contacto (chasis → MD) y cable de los electrodos (parte aplicada → MD). */
 const CABLE_CONTACTO = Object.freeze(["puntoContacto", "contactoDer", "contactoBajada", "nodoMD"]);
 const CABLE_PACIENTE = Object.freeze(["parteAbajo", "nodoMD"]);
+
+/** Medición cuyo camino va solo por el conductor de protección. */
+const MEDICION_FUGA_TIERRA = "fuga_tierra";
 
 /** Tramos de los caminos de corriente (se unen para formar cada camino completo). */
 const TRAMO_FUENTE_VIVO = Object.freeze(["fuenteArriba", "esquinaL", "entradaPolaridadL"]);
@@ -323,7 +326,7 @@ export function describirPartesDelCircuito(parametros) {
     { id: "interruptorNeutro", nombre: "Interruptor de neutro", enCuadro: true,
       explicacion: "Abre el neutro para simular un cable de neutro roto (primer defecto). Entonces los dos lados del equipo quedan a la tensión de la fase." },
     { id: "conductorProteccion", nombre: "Conductor de protección (PE)", enCuadro: true,
-      explicacion: `El cable de tierra que une el chasis metálico con la tierra de la instalación (≈ ${parametros.R_PE_ohm} Ω). Al abrirlo se simula la tierra rota (primer defecto).` },
+      explicacion: `El cable de tierra que une el chasis metálico con la tierra de la instalación (≈ ${parametros.R_PE_ohm} Ω). Al abrirlo se simula la tierra rota (primer defecto). En la fuga a tierra, el analizador mide la corriente que circula por él.` },
     { id: "capacitanciaL", nombre: `C_L (${capacitancia_pF("C_L")} pF)`, enCuadro: true,
       explicacion: "Capacitancia de fuga entre la fase y el chasis. No es una pieza que se pueda ver: es el acople natural, a través del aislamiento, entre los cables con tensión y la carcasa metálica. Por ahí se «escapa» la corriente de fuga." },
     { id: "capacitanciaN", nombre: `C_N (${capacitancia_pF("C_N")} pF)`, enCuadro: true,
@@ -436,7 +439,7 @@ function construirCaminos(medicion) {
     }];
   }
 
-  // Corriente de contacto: primero, qué capacitores de fuga reciben la fase
+  // Contacto y fuga a tierra: primero, qué capacitores de fuga reciben la fase
   const viaCL = ["cargaArribaL", "capLlinea", "capLchasis"];
   const viaCN = ["cargaAbajoN", "capNlinea", "capNchasis"];
   const tramosHastaChasis = [esNormal ? [...tramoVivo, ...viaCL] : [...tramoVivo, ...viaCN]];
@@ -451,9 +454,13 @@ function construirCaminos(medicion) {
     const salidaChasis = tramo[tramo.length - 1];
     const esquinaPE = salidaChasis === "capLchasis" ? ["chasisSupIzq", "chasisInfIzq"] : [];
     const esquinaContacto = salidaChasis === "capLchasis" ? ["chasisSupDer"] : ["chasisInfDer"];
+    const porPE = [...tramo, ...esquinaPE, ...TRAMO_POR_PE, ...TRAMO_REGRESO];
     const porPersona = [...tramo, ...esquinaContacto, ...CABLE_CONTACTO, ...TRAMO_POR_MD.slice(1), ...TRAMO_REGRESO];
-    if (tierra === "cerrada") {
-      caminos.push({ puntos: [...tramo, ...esquinaPE, ...TRAMO_POR_PE, ...TRAMO_REGRESO], tipo: "principal" });
+    // Fuga a tierra: toda la corriente vuelve por el conductor de protección
+    if (medicion.tipoMedicion === MEDICION_FUGA_TIERRA) {
+      caminos.push({ puntos: porPE, tipo: "principal" });
+    } else if (tierra === "cerrada") {
+      caminos.push({ puntos: porPE, tipo: "principal" });
       caminos.push({ puntos: porPersona, tipo: "minimo" });
     } else {
       caminos.push({ puntos: porPersona, tipo: "principal" });
@@ -562,7 +569,7 @@ export function crearVisualizador(svg, parametros) {
   /**
    * Dibuja los conmutadores y la conexión de la MD según la condición y la medición elegidas.
    * @param {{polaridad: string, tierra: string, neutro: string}} condicion - Condición de prueba.
-   * @param {string} tipoMedicion - "contacto" o "paciente".
+   * @param {string} tipoMedicion - "contacto", "paciente" o "fuga_tierra".
    */
   function mostrarCondicion(condicion, tipoMedicion) {
     grupoConmutadores.replaceChildren();
@@ -576,10 +583,10 @@ export function crearVisualizador(svg, parametros) {
     }
     dibujarInterruptor("neutroInicio", "neutroFin", "neutroAbiertoPunta", condicion.neutro === "cerrado", grupoConmutadores);
     dibujarInterruptor("peInterruptorArriba", "peInterruptorAbajo", "peAbiertoPunta", condicion.tierra === "cerrada", grupoConmutadores);
-    // La MD se conecta a la punta de contacto o a los electrodos, según la medición
-    const esContacto = tipoMedicion === "contacto";
-    dibujarCable(CABLE_CONTACTO, esContacto ? "cable" : "cable cable--inactivo", grupoConmutadores);
-    dibujarCable(CABLE_PACIENTE, esContacto ? "cable cable--inactivo" : "cable", grupoConmutadores);
+    // La MD se conecta a la punta de contacto o a los electrodos, según la
+    // medición; en la fuga a tierra no se usa (se mide en el conductor de protección)
+    dibujarCable(CABLE_CONTACTO, tipoMedicion === "contacto" ? "cable" : "cable cable--inactivo", grupoConmutadores);
+    dibujarCable(CABLE_PACIENTE, tipoMedicion === "paciente" ? "cable" : "cable cable--inactivo", grupoConmutadores);
     escribirTexto(condicion.neutro, ...POSICION_ESTADO_NEUTRO, grupoConmutadores, CLASE_PEQUENO);
     escribirTexto(condicion.polaridad, ...POSICION_ESTADO_POLARIDAD, grupoConmutadores, CLASE_PEQUENO);
   }
@@ -604,8 +611,11 @@ export function crearVisualizador(svg, parametros) {
       animacion.caminos.push(dibujarCable(camino.puntos, `camino-corriente camino-corriente--${camino.tipo}`, grupoCamino));
     }
     // Valores por rama, calculados por el motor
-    escribirTexto(`${formatearCorriente_uA(medicion.ramas.porPersona_uA)} µA`, ...POSICION_VALOR_PERSONA, grupoValores, CLASE_VALOR, "start");
-    if (medicion.tipoMedicion === "contacto" && medicion.condicion.tierra === "cerrada") {
+    const esFugaATierra = medicion.tipoMedicion === MEDICION_FUGA_TIERRA;
+    if (!esFugaATierra) {
+      escribirTexto(`${formatearCorriente_uA(medicion.ramas.porPersona_uA)} µA`, ...POSICION_VALOR_PERSONA, grupoValores, CLASE_VALOR, "start");
+    }
+    if (esFugaATierra || (medicion.tipoMedicion === "contacto" && medicion.condicion.tierra === "cerrada")) {
       escribirTexto(`${formatearCorriente_uA(medicion.ramas.porTierra_uA)} µA`, ...POSICION_VALOR_TIERRA, grupoValores, CLASE_VALOR, "start");
     }
     actualizarAnimacion();

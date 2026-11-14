@@ -18,13 +18,14 @@
 SÍ:
 - Solo **computador**: Chrome y Edge en Windows.
 - **Sin servidor propio, sin base de datos y sin cuentas.** Todo corre en el navegador. Se publica gratis en GitHub Pages.
-- 5 secciones (sección 6), un solo equipo (R12), dos tipos de medición (**corriente de contacto** y **corriente de paciente CF**) y cuatro condiciones.
+- 5 secciones (sección 6), un solo equipo (R12), tres tipos de medición (**corriente de contacto**, **corriente de paciente CF** y **corriente de fuga a tierra**) y cuatro condiciones: 16 configuraciones validadas con el ESA620 (la fuga a tierra no existe con la tierra abierta).
+- Página de ayuda (ayuda.html) con el manual de usuario en HTML, enlazada desde el encabezado.
 - Reporte final descargable en PDF + botón para copiar resumen al portapapeles.
 
 NO (trabajo futuro: no lo construyas):
 - Versión para celular; otros equipos; predecir antes de medir (RF09); ayuda contextual avanzada (RF10).
 - Módulo físico; HL7/FHIR; backend; inicio de sesión; analítica o rastreo de cualquier tipo.
-- Fuga a tierra y red en parte aplicada: NO se calculan (fuera del alcance de esta versión).
+- Red en parte aplicada y corriente auxiliar de paciente: NO se calculan. Se miden con el ESA620 sin abrir el equipo, pero no hay mediciones de la práctica para calibrarlas y validarlas (trabajo futuro).
 
 ## 3. Arquitectura (obligatoria; ver docs/Diagramas y docs/08)
 Modular tipo **hexagonal**:
@@ -36,7 +37,7 @@ Modular tipo **hexagonal**:
 | M1 Interfaz de usuario | js/adaptadores/interfaz.js + index.html + css/estilos.css | Adaptador | 5 secciones, navegación y eventos; muestra resultados |
 | M2 Secuencia de la prueba | js/nucleo/secuencia.js | Núcleo | Orden fijo de los pasos, propósito de cada paso, no permite saltar pasos |
 | M3 Modelo del equipo | js/nucleo/modelo_equipo.js | Núcleo | Carga y VALIDA datos/parametros_r12.json (tipos y rangos) |
-| M4 Motor de cálculo | js/nucleo/motor_calculo.js | Núcleo | Corriente de contacto y de paciente por condición + incertidumbre U |
+| M4 Motor de cálculo | js/nucleo/motor_calculo.js | Núcleo | Corriente de contacto, de paciente y de fuga a tierra por condición + incertidumbre U; lista de las 16 configuraciones |
 | M5 Evaluador de límites | js/nucleo/evaluador_limites.js | Núcleo | Límite IEC 60601-1 aplicable y veredicto; veredicto de los pasos 2 y 3 (tierra y aislamiento) |
 | M6 Visualizador | js/adaptadores/visualizador.js | Adaptador | Circuito en SVG (red MD, conmutadores L/N/PE, chasis, parte aplicada) y animación del camino de la corriente |
 | M8 Historial | js/adaptadores/historial.js | Adaptador | Registro de lecturas en memoria (y sessionStorage); nota visible de que las lecturas se borran al cerrar la pestaña (sin aviso beforeunload) |
@@ -53,10 +54,13 @@ datos/parametros_r12.json (todo en unidades SI):
   "red": {"V_rms": 120, "f_Hz": 60},
   "capacitancias_F": {"C_L": 325.7e-12, "C_N": 325.7e-12, "C_AP": 28.0e-12},
   "delta_paciente_tierra_abierta_A": 0.83e-6,
+  "factor_neutro_abierto_fuga_tierra": 0.8418,
+  "origen_factor_neutro_abierto": "k_N = 27.13 µA / 14.73 µA − 1 (fuga a tierra con neutro abierto / normal, polaridad normal; docs/06 §8)",
   "R_PE_ohm": 0.0026,
   "R_MD_ohm": 1000,
   "exactitud_analizador": {"porcentaje_lectura": 1.0, "piso_uA": 1.0, "k": 2},
-  "limites_uA": {"contacto": {"normal": 100, "primer_defecto": 500}, "paciente_CF": {"normal": 10, "primer_defecto": 50}},
+  "limites_uA": {"contacto": {"normal": 100, "primer_defecto": 500}, "paciente_CF": {"normal": 10, "primer_defecto": 50},
+                 "fuga_tierra": {"normal": 5000, "primer_defecto": 10000}},
   "pasos_previos_medidos": {
     "inspeccion_visual": "Sin hallazgos (carcasa, contaminación, cableado, etiquetas, piezas: Bien)",
     "resistencia_tierra_ohm": {"valor": "< 0.015", "limite": 0.2},
@@ -80,6 +84,10 @@ Fórmulas (k = V_rms · 2πf = 45 238.93 A/F; resultados en µA):
 - **Paciente CF**:
   - Normal o neutro abierto: I = k·C_AP.
   - Tierra abierta: I = k·C_AP + 0.83 µA (término EMPÍRICO medido; el comentario del código debe decirlo así).
+- **Fuga a tierra** (corriente por el conductor de protección; solo con tierra cerrada: con tierra abierta se rechaza con "Sin conductor de protección no hay por dónde circular la fuga a tierra; por eso se mide la corriente de contacto."):
+  - Normal: I = k·C_activa.
+  - Neutro abierto: I = k·(C_activa + k_N·C_otra), con k_N = 0.8418 (factor EMPÍRICO calibrado con la polaridad normal y validado con la invertida).
+  - Límites IEC 60601-1 3.ª ed.: 5 mA y 10 mA, iguales para B, BF y CF (límite del equipo completo). El manual del R12 indica 500/1000 µA porque usa la 2.ª edición.
 - **Incertidumbre mostrada** (la que tendría el analizador real): U = k_cob · (0.01·I + 1 µA)/√3, con k_cob = 2. Se muestra como "± U".
 - **Veredicto**: "Cumple" si I ≤ límite; si no, "No cumple". Muestra también el % del límite usado.
 
@@ -92,10 +100,13 @@ Fórmulas (k = V_rms · 2πf = 45 238.93 A/F; resultados en µA):
 | Paciente CF | Normal | 1.267 | 1.17 | 10 | Cumple |
 | Paciente CF | Tierra abierta | 2.097 | 1.18 | 50 | Cumple |
 | Paciente CF | Neutro abierto | 1.267 | 1.17 | 50 | Cumple |
+| Fuga a tierra | Normal (cualquier polaridad) | 14.734 | 1.32 | 5000 | Cumple |
+| Fuga a tierra | Neutro abierto (cualquier polaridad) | 27.138 | 1.47 | 10000 | Cumple |
 
 Datos medidos con el ESA620 (media ± desviación estándar, n = 3), para la prueba ES02 (tests/es02_validacion.test.js):
 - Contacto: NC normal 0.12 ± 0.03 | NC invertida 0.12 ± 0.03 | tierra abierta normal 14.47 ± 0.45 | tierra abierta invertida 14.97 ± 0.06 | neutro abierto normal 0.10 ± 0.00 | neutro abierto invertida 0.10 ± 0.00.
 - Paciente CF: NC normal 1.27 ± 0.21 | NC invertida 1.20 ± 0.10 | tierra abierta normal 2.10 ± 0.10 | tierra abierta invertida 2.13 ± 0.15 | neutro abierto normal 1.20 ± 0.10 | neutro abierto invertida 1.07 ± 0.12.
+- Fuga a tierra: normal normal 14.73 ± 0.49 | normal invertida 14.90 ± 0.10 | neutro abierto normal 27.13 ± 0.71 | neutro abierto invertida 27.43 ± 0.45 (la polaridad normal es la calibración; la invertida, la validación).
 - Criterio: E_n = |I_modelo − media| / U_med ≤ 1, con U_med = 2·√((s/√3)² + ((0.01·media + 1)/√3)²). Debe cumplirse en TODAS las configuraciones.
 
 ## 6. Interfaz (M1): 5 secciones en una sola página, en español, sobria
@@ -108,12 +119,12 @@ Estilo:
 1. **Equipo bajo prueba**: ficha del R12 (Clase I, parte CF a prueba de desfibrilación, partes aplicadas: electrodos y cable de paciente). Por qué CF es la más estricta (microchoque: corriente directa al corazón) y comparación de límites B, BF y CF.
 2. **Prueba guiada** (M2): 4 pasos en orden fijo: inspección visual → resistencia de tierra → aislamiento → corrientes de fuga. Cada paso muestra su PROPÓSITO de seguridad antes del resultado. Los pasos 1–3 muestran los valores medidos de "pasos_previos_medidos"; el paso 4 lleva a la sección Analizador. No se puede avanzar sin completar el paso anterior.
 3. **Analizador** (M4 + M5 + M6), el corazón:
-   - selector de medición (contacto o paciente CF);
+   - selector de medición (contacto, paciente CF o fuga a tierra); con fuga a tierra se deshabilita "tierra abierta" y se explica por qué; en vez de la tabla B/BF/CF: "Para la fuga a tierra el límite es del equipo completo, no depende de B, BF o CF";
    - conmutadores de polaridad, tierra y neutro (deshabilita la combinación prohibida y explica por qué);
    - botón "Medir"; lectura grande "I ± U µA", límite, % del límite y Cumple/No cumple;
    - circuito SVG con el camino de la corriente resaltado en rojo, animado;
    - explicación física (texto de la sección 7) y fórmula usada.
-4. **Comparar**: tabla con todas las configuraciones medidas en la sesión, lado a lado, con barras horizontales simples en SVG propio (sin librerías) y la banda ± U visible.
+4. **Comparar**: cuadro de avance ("Has medido X de las 16 configuraciones…", faltantes y repetidas, calculado por la función pura resumirAvance de M8; <details> "¿Por qué 16?"), tabla con todas las configuraciones medidas en la sesión, lado a lado, con barras horizontales simples en SVG propio (sin librerías, una gráfica por medición) y la banda ± U visible. La columna del porcentaje se llama "Qué tan cerca del límite" (también en Historial y PDF), con la nota: "Una corriente pequeña puede estar más cerca de su límite que una grande: compara la corriente de paciente CF (límite 10 µA) con la de contacto (límite 100 µA)."
 5. **Historial y reporte** (M8 + M10):
    - tabla de lecturas (condición, medición, I, U, límite, veredicto, hora);
    - botón "Finalizar práctica" → pide el nombre (máximo 60 caracteres; texto plano) → vista de reporte;
@@ -129,15 +140,19 @@ Estilo:
 - Paciente CF, normal: "Es la corriente que cruza la barrera de aislamiento de la parte aplicada (≈ 28 pF): ≈ 1.3 µA. Como los electrodos pueden quedar cerca del corazón (CF), el límite es 10 µA."
 - Paciente CF, tierra abierta: "Con el chasis sin tierra aumenta el acople hacia la parte aplicada: ≈ 2.1 µA (aumento medido en el laboratorio). Límite de primer defecto: 50 µA."
 - Paciente CF, neutro abierto: "≈ 1.3 µA, casi igual a la condición normal en este equipo. Límite de primer defecto: 50 µA."
+- Fuga a tierra, normal: "Es la corriente que la capacitancia de fuga entre fase y chasis (≈ 326 pF) manda al chasis y que vuelve por el conductor de protección hacia la tierra de la instalación: I = V·2πf·C ≈ 14.7 µA. El límite es del equipo completo: 5 mA en condición normal."
+- Fuga a tierra, neutro abierto: "Con el neutro abierto, el lado del neutro también queda con tensión y suma parte de su fuga: I = V·2πf·(C_L + k_N·C_N) ≈ 27.1 µA. k_N ≈ 0.84 es un factor empírico medido en el laboratorio: el lado del neutro no queda exactamente a la tensión de fase. Es primer defecto: límite 10 mA."
+- Fuga a tierra, polaridad invertida: se agrega el mismo texto de contacto con polaridad invertida.
+- Glosario: "Corriente de fuga a tierra: La que circula por el cable de tierra del equipo hacia la tierra de la instalación."
 - Banda ± U: "Es la exactitud del analizador real (±(1 % + 1 µA), k = 2). Si dos lecturas difieren menos que esta banda, la diferencia puede ser del instrumento y no de la condición."
 
 ## 7.1 Estructura del repositorio
 ```
-index.html · css/estilos.css · js/main.js
+index.html · ayuda.html (manual en HTML, sin scripts) · css/estilos.css · js/main.js
 js/nucleo/{secuencia,modelo_equipo,motor_calculo,evaluador_limites}.js
 js/adaptadores/{interfaz,visualizador,historial,reporte,pdf,tiempo_carga}.js
 datos/parametros_r12.json
-tests/{motor_calculo,evaluador_limites,secuencia,modelo_equipo,es02_validacion,pdf,sri,tiempo_carga}.test.js
+tests/{motor_calculo,evaluador_limites,secuencia,modelo_equipo,es02_validacion,historial,pdf,sri,tiempo_carga}.test.js
 tools/sri.mjs (calcula los hashes SHA-384 de los JS y CSS y los escribe en index.html) · tools/peso.mjs (suma el peso descargado, ES05)
 docs/ (nuestros documentos + manual_usuario.md, solucion_problemas.md, mantenimiento.md, verificacion.md)
 README.md · LICENSE (MIT) · CHANGELOG.md · CLAUDE.md · .gitignore

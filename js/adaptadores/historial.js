@@ -10,7 +10,9 @@
  *   descargue su reporte antes). También guarda cuántos pasos de la prueba
  *   guiada se completaron.
  *   También da el formato de una fila (texto de cada columna), que usan el
- *   historial, la sección Comparar y el reporte, para que se vean iguales.
+ *   historial, la sección Comparar y el reporte, para que se vean iguales, y
+ *   resume el avance: cuántas de las 16 configuraciones se han medido, cuáles
+ *   faltan y cuáles se repitieron (función pura, con pruebas).
  * Módulo: M8 – Historial (adaptador)
  * Autores: Yustin Rico, David Cardona, Santiago González
  * Creado: 2026-11-13 · Modificado: 2026-11-14
@@ -30,8 +32,16 @@ const DECIMALES_PORCENTAJE = 1;
 /** Unidad de las corrientes que se muestran en las tablas. */
 export const UNIDAD_CORRIENTE = "µA";
 
+/** Los límites desde 1 mA se escriben en mA (por ejemplo, 5 mA en vez de 5000 µA). */
+const MICROAMPERIOS_POR_MILIAMPERIO = 1000;
+const UNIDAD_MILIAMPERIOS = "mA";
+
 /** Nombres para mostrar de cada medición. */
-export const NOMBRES_MEDICION = Object.freeze({ contacto: "Corriente de contacto", paciente: "Corriente de paciente CF" });
+export const NOMBRES_MEDICION = Object.freeze({
+  contacto: "Corriente de contacto",
+  paciente: "Corriente de paciente CF",
+  fuga_tierra: "Corriente de fuga a tierra",
+});
 
 /** Formato de la hora de cada lectura (hora colombiana del navegador). */
 const FORMATO_HORA = Object.freeze({ hour: "2-digit", minute: "2-digit", second: "2-digit" });
@@ -62,6 +72,61 @@ export function textoLectura(registro) {
 }
 
 /**
+ * Texto de un límite con su unidad: en mA desde 1 mA ("5 mA", "10 mA") y en
+ * µA por debajo ("100 µA", "10 µA").
+ * @param {number} limite_uA - Límite en µA.
+ * @returns {string} Límite con su unidad.
+ */
+export function textoLimite(limite_uA) {
+  if (limite_uA >= MICROAMPERIOS_POR_MILIAMPERIO) {
+    return `${limite_uA / MICROAMPERIOS_POR_MILIAMPERIO} ${UNIDAD_MILIAMPERIOS}`;
+  }
+  return `${limite_uA} ${UNIDAD_CORRIENTE}`;
+}
+
+/**
+ * Texto de una configuración, por ejemplo "Corriente de contacto, Tierra abierta (pol. invertida)".
+ * @param {{tipoMedicion: string, condicion: object}} configuracion - Medición y condición.
+ * @returns {string} Texto.
+ */
+export function textoConfiguracion(configuracion) {
+  return `${NOMBRES_MEDICION[configuracion.tipoMedicion]}, ${nombreCortoCondicion(configuracion.condicion)}`;
+}
+
+/**
+ * Clave única de una configuración (medición + condición), por ejemplo "contacto|normal|abierta|cerrado".
+ * @param {{tipoMedicion: string, condicion: object}} configuracion - Lectura o configuración.
+ * @returns {string} Clave.
+ */
+export function claveConfiguracion(configuracion) {
+  const { polaridad, tierra, neutro } = configuracion.condicion;
+  return `${configuracion.tipoMedicion}|${polaridad}|${tierra}|${neutro}`;
+}
+
+/**
+ * Resume el avance de la práctica frente a las configuraciones que simula la
+ * herramienta (función pura): cuántas se midieron, cuáles faltan y cuáles se
+ * midieron más de una vez (con cuántas veces), en el orden de la lista.
+ * @param {object[]} registros - Lecturas del historial.
+ * @param {ReadonlyArray<{tipoMedicion: string, condicion: object}>} configuraciones - Las 16 configuraciones (M4).
+ * @returns {{medidas: number, total: number, faltantes: object[], repetidas: {configuracion: object, veces: number}[]}}
+ */
+export function resumirAvance(registros, configuraciones) {
+  const vecesPorClave = new Map();
+  // Cuenta cuántas veces se midió cada configuración
+  for (const registro of registros) {
+    const clave = claveConfiguracion(registro);
+    vecesPorClave.set(clave, (vecesPorClave.get(clave) ?? 0) + 1);
+  }
+  const veces = (configuracion) => vecesPorClave.get(claveConfiguracion(configuracion)) ?? 0;
+  const faltantes = configuraciones.filter((configuracion) => veces(configuracion) === 0);
+  const repetidas = configuraciones
+    .filter((configuracion) => veces(configuracion) > 1)
+    .map((configuracion) => ({ configuracion, veces: veces(configuracion) }));
+  return { medidas: configuraciones.length - faltantes.length, total: configuraciones.length, faltantes, repetidas };
+}
+
+/**
  * Texto del % del límite, por ejemplo "2.9 %".
  * @param {number} porcentaje - Porcentaje del límite usado.
  * @returns {string} Texto con el símbolo %.
@@ -81,7 +146,7 @@ export function filaDeRegistro(registro) {
     medicion: NOMBRES_MEDICION[registro.tipoMedicion],
     condicion: nombreCortoCondicion(registro.condicion),
     lectura: `${textoLectura(registro)} ${UNIDAD_CORRIENTE}`,
-    limite: `${registro.limite_uA} ${UNIDAD_CORRIENTE}`,
+    limite: textoLimite(registro.limite_uA),
     porcentaje: textoPorcentaje(registro.porcentajeDelLimite),
     veredicto: registro.veredicto,
   };

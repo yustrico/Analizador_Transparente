@@ -24,7 +24,7 @@ Método de verificación de cada requerimiento: I = inspección (se mira que exi
 | RF01 | Guiar la prueba completa y en orden: inspección visual → resistencia de tierra → aislamiento → corrientes de fuga, de forma que cada estudiante la recorra solo y entera | N01, N02 | D | No (antes E01) |
 | RF02 | Mostrar el propósito de seguridad de cada paso antes de ejecutarlo | N03 | I | No (antes E01) |
 | RF03 | Permitir imponer, una a la vez, las condiciones: normal, polaridad invertida, tierra abierta y neutro abierto (cada falla es un primer defecto, nunca dos al tiempo) | N05, N27 (parcial: tierra rota) | D | No (antes E02) |
-| RF04 | Calcular la corriente de contacto Y la corriente de paciente (parte aplicada CF) en cada condición, con el modelo del equipo (tensión, frecuencia, capacitancias de fuga, red MD) | N06, N14 | A | Sí: E07 (exactitud) y E08 (concordancia con el analizador) |
+| RF04 | Calcular la corriente de contacto, la corriente de paciente (parte aplicada CF) y la corriente de fuga a tierra en cada condición en que existen, con el modelo del equipo (tensión, frecuencia, capacitancias de fuga, red MD; para la fuga a tierra, factor empírico k_N con neutro abierto). La fuga a tierra solo existe con la tierra conectada: normal y neutro abierto, cada una con las 2 polaridades (16 configuraciones en total) | N06, N14 (la fuga a tierra muestra a dónde va la fuga cuando la tierra está conectada y por qué la corriente de contacto es ≈ 0), N05 (es una de las mediciones de la inspección del R12 según su manual) | A | Sí: E07 (exactitud) y E08 (concordancia con el analizador) |
 | RF05 | Mostrar el circuito interno del analizador y el camino de la corriente, actualizado con cada condición (red MD, conmutadores L/N/PE, tierra de protección) | N12, N13, N18 | D | No (antes E05) |
 | RF06 | Mostrar junto a cada lectura su explicación física (fórmula y fenómeno) con la terminología de IEC 60601-1 | N11, N14, N26 | I | No (antes E06) |
 | RF07 | Comparar cada lectura con el límite aplicable (contacto o paciente, condición normal o primer defecto, Clase I, parte CF), mostrar Cumple o No cumple y mostrar al lado el límite equivalente para partes B y BF | N09, N10, N11 | I | No (antes E03) |
@@ -83,7 +83,8 @@ Método de verificación de cada requerimiento: I = inspección (se mira que exi
 - Trabajo futuro, con justificación:
   - N04 (diferenciar IEC 60601-1 de IEC 62353): cambia los límites y los métodos; se deja para no agrandar el alcance.
   - N23 (repetibilidad e incertidumbre): requiere datos reales repetidos.
-  - "Red en parte aplicada" (de N05) y "aislamiento degradado" (de N27): requieren un modelo adicional.
+  - "Red en parte aplicada" y "corriente auxiliar de paciente" (de N05): se miden con el analizador sin abrir el equipo y están en la inspección del manual del R12, pero no se midieron en la práctica; sin datos no se pueden simular ni validar (ES02). "Aislamiento degradado" (de N27): requiere un modelo adicional.
+  - Actualización 14/11/2026: la fuga a tierra (de N05) se agregó a RF04, porque sí hay mediciones reales del R12 (docs/06 §1) para calibrarla y validarla.
 
 ## 8. Decisiones tomadas en esta corrección (revisar en equipo)
 1. Se AGREGA RF09 (predecir antes de medir), porque los expertos calificaron alto N21 y ataca directo el hallazgo central (12/12 atribuyen el cambio de lectura a error). Es la estrategia Predecir–Observar–Explicar de White y Gunstone, que ya está en las referencias del Word [18].

@@ -28,6 +28,12 @@ export const VEREDICTO_NO_CUMPLE = "No cumple";
 /** Factor para pasar una fracción a porcentaje. */
 const PORCENTAJE_POR_FRACCION = 100;
 
+/**
+ * Mediciones cuyo límite es el mismo para partes B, BF y CF (grupo de límites
+ * del JSON). La fuga a tierra es del equipo completo.
+ */
+const GRUPO_LIMITE_UNICO = Object.freeze({ contacto: "contacto", fuga_tierra: "fuga_tierra" });
+
 /** Grupo de límites del JSON para cada tipo de parte aplicada, en la corriente de paciente. */
 const GRUPO_PACIENTE_POR_TIPO_DE_PARTE = Object.freeze({ B: "paciente_B", BF: "paciente_BF", CF: "paciente_CF" });
 
@@ -135,7 +141,7 @@ export function clasificarCondicion(condicion) {
 
 /**
  * Límites de la misma medición y condición para partes aplicadas B, BF y CF.
- * La corriente de contacto tiene el mismo límite para los tres tipos.
+ * La corriente de contacto y la fuga a tierra tienen el mismo límite para los tres tipos.
  * @param {string} tipoMedicion - "contacto" o "paciente".
  * @param {object} condicion - Condición de prueba.
  * @param {object} parametros - Parámetros validados por M3.
@@ -147,7 +153,7 @@ export function obtenerLimitesPorTipoDeParte_uA(tipoMedicion, condicion, paramet
   const limites = {};
   // Busca el límite de cada tipo de parte aplicada (B, BF y CF)
   for (const [tipoDeParte, grupoPaciente] of Object.entries(GRUPO_PACIENTE_POR_TIPO_DE_PARTE)) {
-    const grupo = tipoMedicion === "contacto" ? "contacto" : grupoPaciente;
+    const grupo = GRUPO_LIMITE_UNICO[tipoMedicion] ?? grupoPaciente;
     limites[tipoDeParte] = parametros.limites_uA[grupo][estado];
   }
   return Object.freeze(limites);

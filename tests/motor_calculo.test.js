@@ -7,7 +7,7 @@
  *   inválidas con mensajes claros.
  * Módulo: M4 – Motor de cálculo (pruebas)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-13
+ * Creado: 2026-11-13 · Modificado: 2026-11-14
  * ============================================================================
  */
 
@@ -15,7 +15,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { validarParametros } from "../js/nucleo/modelo_equipo.js";
-import { calcularMedicion, validarCondicion } from "../js/nucleo/motor_calculo.js";
+import { calcularMedicion, validarCondicion, listarConfiguraciones } from "../js/nucleo/motor_calculo.js";
 
 /** Error relativo máximo permitido por ES01 (1 %). */
 const ERROR_RELATIVO_MAXIMO_PORCENTAJE = 1;
@@ -55,6 +55,11 @@ const TABLA_REFERENCIA = [
   { tipo: "paciente", nombre: "tierraAbiertaPolInvertida", I_uA: 2.097, U_uA: 1.18 },
   { tipo: "paciente", nombre: "neutroAbiertoPolNormal", I_uA: 1.267, U_uA: 1.17 },
   { tipo: "paciente", nombre: "neutroAbiertoPolInvertida", I_uA: 1.267, U_uA: 1.17 },
+  // Fuga a tierra: normal I = V·2πf·C_activa; neutro abierto I = V·2πf·(C_activa + k_N·C_otra), k_N = 0.8418
+  { tipo: "fuga_tierra", nombre: "normalPolNormal", I_uA: 14.734, U_uA: 1.32 },
+  { tipo: "fuga_tierra", nombre: "normalPolInvertida", I_uA: 14.734, U_uA: 1.32 },
+  { tipo: "fuga_tierra", nombre: "neutroAbiertoPolNormal", I_uA: 27.138, U_uA: 1.47 },
+  { tipo: "fuga_tierra", nombre: "neutroAbiertoPolInvertida", I_uA: 27.138, U_uA: 1.47 },
 ];
 
 /**
@@ -115,7 +120,7 @@ test("Rechaza valores de condición que no existen", () => {
 });
 
 test("Rechaza un tipo de medición desconocido o parámetros faltantes", () => {
-  assert.throws(() => calcularMedicion("fuga_tierra", CONDICIONES.normalPolNormal, parametros), /medición/);
+  assert.throws(() => calcularMedicion("red_en_parte_aplicada", CONDICIONES.normalPolNormal, parametros), /medición/);
   assert.throws(() => calcularMedicion("contacto", CONDICIONES.normalPolNormal, undefined), /parámetros/);
 });
 
@@ -123,4 +128,33 @@ test("El resultado no se puede modificar por accidente (objeto congelado)", () =
   const medicion = calcularMedicion("contacto", CONDICIONES.normalPolNormal, parametros);
   assert.ok(Object.isFrozen(medicion));
   assert.ok(Object.isFrozen(medicion.ramas));
+});
+
+/* ---- Fuga a tierra ---- */
+
+test("Fuga a tierra: toda la fuga vuelve por el conductor de protección, nada por la persona", () => {
+  const medicion = calcularMedicion("fuga_tierra", CONDICIONES.neutroAbiertoPolInvertida, parametros);
+  assert.equal(medicion.ramas.porTierra_uA, medicion.corriente_uA);
+  assert.equal(medicion.ramas.porPersona_uA, 0);
+});
+
+test("Fuga a tierra con neutro abierto usa el factor empírico k_N del JSON", () => {
+  const normal = calcularMedicion("fuga_tierra", CONDICIONES.normalPolNormal, parametros).corriente_uA;
+  const neutroAbierto = calcularMedicion("fuga_tierra", CONDICIONES.neutroAbiertoPolNormal, parametros).corriente_uA;
+  // Con C_L = C_N: I_neutro_abierto / I_normal = 1 + k_N
+  assert.ok(Math.abs(neutroAbierto / normal - (1 + parametros.factor_neutro_abierto_fuga_tierra)) < 1e-12);
+});
+
+test("Fuga a tierra no se puede medir con la tierra abierta", () => {
+  assert.throws(() => calcularMedicion("fuga_tierra", CONDICIONES.tierraAbiertaPolNormal, parametros), /conductor de protección/);
+  assert.throws(() => calcularMedicion("fuga_tierra", CONDICIONES.tierraAbiertaPolInvertida, parametros), /conductor de protección/);
+});
+
+test("La herramienta simula 16 configuraciones: 6 de contacto, 6 de paciente y 4 de fuga a tierra", () => {
+  const configuraciones = listarConfiguraciones();
+  assert.equal(configuraciones.length, 16);
+  const contar = (tipo) => configuraciones.filter((configuracion) => configuracion.tipoMedicion === tipo).length;
+  assert.deepEqual([contar("contacto"), contar("paciente"), contar("fuga_tierra")], [6, 6, 4]);
+  assert.ok(configuraciones.every((configuracion) =>
+    !(configuracion.tipoMedicion === "fuga_tierra" && configuracion.condicion.tierra === "abierta")));
 });

@@ -9,6 +9,8 @@
   "red": { "V_rms": 120, "f_Hz": 60 },
   "capacitancias_F": { "C_L": 325.7e-12, "C_N": 325.7e-12, "C_AP": 28.0e-12 },
   "delta_paciente_tierra_abierta_A": 0.83e-6,
+  "factor_neutro_abierto_fuga_tierra": 0.8418,
+  "origen_factor_neutro_abierto": "Factor empírico k_N de la fuga a tierra con neutro abierto, calibrado con la polaridad normal: k_N = 27.13 µA / 14.73 µA − 1 (fuga a tierra con neutro abierto / fuga a tierra normal, medias de 3 repeticiones con el Fluke ESA620; docs/06 §1)",
   "R_PE_ohm": 0.0026,
   "R_MD_ohm": 1000,
   "exactitud_analizador": { "porcentaje_lectura": 1.0, "piso_uA": 1.0, "k": 2 },
@@ -16,7 +18,8 @@
     "contacto": { "normal": 100, "primer_defecto": 500 },
     "paciente_B": { "normal": 100, "primer_defecto": 500 },
     "paciente_BF": { "normal": 100, "primer_defecto": 500 },
-    "paciente_CF": { "normal": 10, "primer_defecto": 50 }
+    "paciente_CF": { "normal": 10, "primer_defecto": 50 },
+    "fuga_tierra": { "normal": 5000, "primer_defecto": 10000 }
   },
   "pasos_previos_medidos": {
     "inspeccion_visual": "Sin hallazgos (carcasa, contaminación, cableado, etiquetas, piezas: Bien)",
