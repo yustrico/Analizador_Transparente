@@ -15,10 +15,10 @@
  * ============================================================================
  */
 
-import { VEREDICTO_CUMPLE } from "../nucleo/evaluador_limites.js";
-import { filaDeRegistro, textoLectura, textoPorcentaje, textoLimite, NOMBRES_MEDICION, nombreCortoCondicion } from "./historial.js";
-import { crearDocumentoPdf } from "./pdf.js";
-import { textoTiempoCarga, detalleCarga } from "./tiempo_carga.js";
+import { VEREDICTO_CUMPLE } from "../nucleo/evaluador_limites.js?v=9c30cc64cc";
+import { filaDeRegistro, textoLectura, textoPorcentaje, textoLimite, NOMBRES_MEDICION, nombreCortoCondicion } from "./historial.js?v=37beb88db5";
+import { crearDocumentoPdf } from "./pdf.js?v=d9bb1aa981";
+import { textoTiempoCarga, detalleCarga } from "./tiempo_carga.js?v=1c9699f3b9";
 
 /** Explicación de la incertidumbre (se usa en Comparar y en el reporte). */
 /** Nota debajo de la tabla de lecturas (columna "Qué tan cerca del límite"). */

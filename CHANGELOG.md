@@ -5,6 +5,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Cambiado (14/11/2026, sexta ronda: evitar fallas en la página publicada)
+- `tools/sri.mjs` agrega a cada URL de CSS y JS (link, script y modulepreload, en index.html y ayuda.html) un parámetro de versión con los primeros 10 caracteres de su huella (`css/estilos.css?v=…`). Los `import` entre módulos llevan la misma URL versionada que su modulepreload, para que cada módulo se descargue una sola vez y con su integrity; la versión se calcula de abajo hacia arriba (primero lo importado). La ruta del JSON en main.js también lleva su versión. Motivo: durante un despliegue la página publicada se vio sin CSS ni JS porque el navegador usó archivos viejos en caché y el SRI los bloqueó.
+- `tests/sri.test.js` revisa también las versiones y que cada import pida exactamente una URL precargada en index.html.
+
+### Agregado (14/11/2026, sexta ronda)
+- `tests/sintaxis.test.js`: `node --check` de todos los .js y .mjs (js/, tests/, tools/), importación sin navegador de cada módulo del núcleo y de los adaptadores, y revisión de los nombres que importa main.js. Habría detectado la función `mostrarExplicacion` duplicada. 121 pruebas en verde.
+- docs/mantenimiento.md: no subir cambios el mismo día de una prueba con usuarios; después de cada push, esperar a que GitHub Pages termine (Actions en verde) antes de compartir el enlace. docs/solucion_problemas.md: caso «página sin estilos justo después de un push».
+
 ### Agregado (14/11/2026, quinta ronda)
 - Nueva medición: **corriente de fuga a tierra** (la que circula por el conductor de protección). Modelo: I = V·2πf·C_activa en condición normal e I = V·2πf·(C_activa + k_N·C_otra) con neutro abierto. k_N = 27.13/14.73 − 1 = 0.8418 es un factor empírico calibrado con la polaridad normal; queda en `datos/parametros_r12.json` (`factor_neutro_abierto_fuga_tierra` y `origen_factor_neutro_abierto`) y M3 lo valida.
 - Solo existen 4 configuraciones de fuga a tierra (normal y neutro abierto, con las 2 polaridades): con fuga a tierra se deshabilita «tierra abierta» y se explica por qué; M4 la rechaza con el mismo mensaje (`medicionPosible`).

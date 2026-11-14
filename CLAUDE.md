@@ -152,8 +152,8 @@ index.html · ayuda.html (manual en HTML, sin scripts) · css/estilos.css · js/
 js/nucleo/{secuencia,modelo_equipo,motor_calculo,evaluador_limites}.js
 js/adaptadores/{interfaz,visualizador,historial,reporte,pdf,tiempo_carga}.js
 datos/parametros_r12.json
-tests/{motor_calculo,evaluador_limites,secuencia,modelo_equipo,es02_validacion,historial,pdf,sri,tiempo_carga}.test.js
-tools/sri.mjs (calcula los hashes SHA-384 de los JS y CSS y los escribe en index.html) · tools/peso.mjs (suma el peso descargado, ES05)
+tests/{motor_calculo,evaluador_limites,secuencia,modelo_equipo,es02_validacion,historial,pdf,sri,sintaxis,tiempo_carga}.test.js
+tools/sri.mjs (calcula los hashes SHA-384 de los JS y CSS y los escribe en index.html y ayuda.html; agrega "?v=" con parte del hash a cada URL y a los import entre módulos) · tools/peso.mjs (suma el peso descargado, ES05)
 docs/ (nuestros documentos + manual_usuario.md, solucion_problemas.md, mantenimiento.md, verificacion.md)
 README.md · LICENSE (MIT) · CHANGELOG.md · CLAUDE.md · .gitignore
 ```
@@ -169,7 +169,8 @@ JavaScript moderno con módulos ES (import/export), sin frameworks ni dependenci
 
 ## 9. Seguridad (obligatoria)
 - Content-Security-Policy en una meta etiqueta de index.html: `default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'` (frame-ancestors no funciona en meta; GitHub Pages no permite cabeceras propias, así que no se incluye). Por eso NO uses scripts ni estilos en línea ni atributos onclick.
-- Integridad de subrecursos (SRI): atributos integrity (sha384) en los script y link, generados por tools/sri.mjs antes de cada versión.
+- Integridad de subrecursos (SRI): atributos integrity (sha384) en los script y link, generados por tools/sri.mjs antes de cada versión. Cada URL de JS y CSS (y cada import entre módulos) lleva "?v=" con parte del hash, para que el navegador no use copias viejas en caché durante un despliegue.
+- No subir cambios el mismo día de una prueba con usuarios; después de cada push, esperar a que GitHub Pages termine (Actions en verde) antes de compartir el enlace.
 - Nunca uses innerHTML con texto del usuario (el nombre): usa textContent. Sin eval ni new Function.
 - 0 peticiones de red fuera de los archivos propios: sin CDN, fuentes, analítica ni APIs (ES13).
 - HTTPS: lo da GitHub Pages (activar "Enforce HTTPS").

@@ -43,7 +43,7 @@ Esto corre las pruebas de la carpeta `tests/` con el ejecutor de pruebas que tra
 
 ## Antes de publicar una versión (seguridad y peso)
 ```bash
-npm run sri      # recalcula las huellas SHA-384 (SRI) de los JS y el CSS en index.html y ayuda.html
+npm run sri      # recalcula las huellas SHA-384 (SRI) y las versiones ?v= de los JS, el CSS y el JSON en index.html, ayuda.html y los import
 npm run peso     # suma lo que descarga la página y lo compara con la meta ES05 (≤ 1 600 KiB)
 ```
 

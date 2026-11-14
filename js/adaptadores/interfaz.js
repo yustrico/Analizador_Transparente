@@ -17,24 +17,24 @@
 import {
   PASOS_PRUEBA, crearEstadoInicial, crearEstadoDesdeAvance, obtenerPasoActual, obtenerPasoVisto, completarPaso,
   pasoDisponible, pasoCompletado, verPaso,
-} from "../nucleo/secuencia.js";
+} from "../nucleo/secuencia.js?v=bffe121e07";
 import {
   calcularMedicion, corrientePorFaradio_A_F, capacitanciaDeFuga_F, capacitanciaFugaATierra_F, listarConfiguraciones,
   medicionPosible, MENSAJE_FUGA_SIN_TIERRA,
-} from "../nucleo/motor_calculo.js";
+} from "../nucleo/motor_calculo.js?v=efa73aed55";
 import {
   evaluarMedicion, evaluarAislamiento, evaluarResistenciaTierra, VEREDICTO_CUMPLE,
-} from "../nucleo/evaluador_limites.js";
-import { crearVisualizador, describirPartesDelCircuito, formatearCorriente_uA } from "./visualizador.js";
+} from "../nucleo/evaluador_limites.js?v=9c30cc64cc";
+import { crearVisualizador, describirPartesDelCircuito, formatearCorriente_uA } from "./visualizador.js?v=a5acde3349";
 import {
   crearHistorial, guardarAvancePrueba, leerAvancePrueba, filaDeRegistro, nombreCortoCondicion, textoLectura, textoPorcentaje, NOMBRES_MEDICION, UNIDAD_CORRIENTE,
   textoLimite, textoConfiguracion, resumirAvance, claveConfiguracion,
-} from "./historial.js";
+} from "./historial.js?v=37beb88db5";
 import {
   generarReporte, crearPdfReporte, nombreArchivoReporte, armarResumen, limpiarNombre, TEXTO_INCERTIDUMBRE, TEXTO_CERCA_DEL_LIMITE,
-} from "./reporte.js";
-import { descargarPdf } from "./pdf.js";
-import { medirCargaPagina, textoTiempoCarga, detalleCarga } from "./tiempo_carga.js";
+} from "./reporte.js?v=4ba5679c64";
+import { descargarPdf } from "./pdf.js?v=d9bb1aa981";
+import { medirCargaPagina, textoTiempoCarga, detalleCarga } from "./tiempo_carga.js?v=1c9699f3b9";
 
 /* ------------------------------------------------------------------------ */
 /* Constantes                                                               */
