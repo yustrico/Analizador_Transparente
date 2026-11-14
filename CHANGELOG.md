@@ -11,6 +11,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ### Cambiado
 - ES03 se medirá con 30 usuarios reales simultáneos (docs/03, docs/verificacion.md: «Pendiente: prueba con 30 usuarios reales»). Motivo: la prueba con autocannon (30 conexiones sin pausa, ≈ 28 500 solicitudes en un minuto) no representaba el uso real, y GitHub Pages la bloqueó con 429 «Too Many Requests» (67 % de las solicitudes). Se deja documentada en docs/verificacion.md.
+- Correcciones de textos (sin cambios en cálculos ni en las pruebas del núcleo):
+  - Subtítulo: «Pruebas de seguridad eléctrica del electrocardiógrafo Mindray BeneHeart R12 (IEC 60601-1)».
+  - Ficha del equipo, fila Normas: qué aporta cada norma (IEC 60601-1, norma general de la que salen los límites; IEC 60601-2-25, norma particular para electrocardiógrafos).
+  - Unidades: cada valor de las tablas lleva su unidad («100 µA», «0.00 ± 1.15 µA») en la tabla de límites, la tabla B/BF/CF del Analizador, Comparar, el historial, el reporte y el PDF; se quita «(µA)» de títulos y encabezados de tabla. Los títulos de las gráficas de Comparar conservan «(µA)» porque las marcas del eje son números sin unidad. En el PDF cada lectura y cada límite siguen cabiendo en un solo renglón.
+  - Bloque plegable (cerrado por defecto) con el significado de «corriente de contacto», «corriente de paciente», «condición normal» y «primer defecto»: «¿Qué significan estos términos?» debajo de la tabla de límites y «¿Qué estoy midiendo?» junto al selector de Medición. Los dos salen de la misma lista de textos en `interfaz.js`.
+  - «¿Por qué CF es la más estricta?»: frase del microchoque corregida (decenas de microamperios, unas mil veces menos que el macrochoque).
 
 ## [1.0.0] - 2026-11-13
 Primera versión publicada en GitHub Pages: https://yustrico.github.io/Analizador_Transparente/

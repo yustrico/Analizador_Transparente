@@ -19,7 +19,7 @@ import { calcularMedicion, corrientePorFaradio_A_F, capacitanciaDeFuga_F } from 
 import { evaluarMedicion, VEREDICTO_CUMPLE } from "../nucleo/evaluador_limites.js";
 import { crearVisualizador, describirPartesDelCircuito, formatearCorriente_uA } from "./visualizador.js";
 import {
-  crearHistorial, guardarAvancePrueba, leerAvancePrueba, filaDeRegistro, nombreCortoCondicion, textoLectura, textoPorcentaje, NOMBRES_MEDICION,
+  crearHistorial, guardarAvancePrueba, leerAvancePrueba, filaDeRegistro, nombreCortoCondicion, textoLectura, textoPorcentaje, NOMBRES_MEDICION, UNIDAD_CORRIENTE,
 } from "./historial.js";
 import {
   generarReporte, crearPdfReporte, nombreArchivoReporte, armarResumen, limpiarNombre, TEXTO_INCERTIDUMBRE,
@@ -89,6 +89,22 @@ const TEXTOS_EXPLICACION = Object.freeze({
   bandaIncertidumbre: "Es la exactitud del analizador real (±(1 % + 1 µA), k = 2). Si dos lecturas difieren menos que esta banda, la diferencia puede ser del instrumento y no de la condición.",
   dobleFalla: "No se pueden abrir la tierra y el neutro al mismo tiempo: serían dos fallas a la vez (doble falla). La norma evalúa una sola falla a la vez (primer defecto), por eso esa opción está deshabilitada.",
 });
+
+/**
+ * Significado de los términos de las mediciones: [término, explicación].
+ * Es la única fuente de este texto; se muestra en los dos bloques plegables
+ * (debajo de la tabla de límites y junto al selector de Medición).
+ */
+const TERMINOS_GLOSARIO = Object.freeze([
+  ["Corriente de contacto", "la que pasaría por una persona que toca la carcasa del equipo."],
+  ["Corriente de paciente", "la que pasaría desde los electrodos, a través del paciente, hacia tierra."],
+  ["Condición normal", "todas las protecciones del equipo funcionan."],
+  ["Primer defecto", "falla UNA sola protección (tierra de protección abierta o neutro abierto). La norma permite un límite más alto porque es una situación temporal; dos fallas a la vez no se evalúan."],
+]);
+
+/** Qué aporta cada norma, para la ficha del equipo. */
+const PAPEL_NORMA_GENERAL = "norma general; de aquí salen los límites";
+const PAPEL_NORMA_PARTICULAR = "norma particular para electrocardiógrafos";
 
 /* ------------------------------------------------------------------------ */
 /* Utilidades de la página                                                  */
@@ -162,7 +178,7 @@ function mostrarEquipo(parametros) {
   elemento("ficha-nombre").textContent = equipo.nombre;
   elemento("ficha-clase").textContent = equipo.clase;
   elemento("ficha-parte").textContent = equipo.parte_aplicada;
-  elemento("ficha-normas").textContent = `${equipo.norma_general} y ${equipo.norma_particular}`;
+  elemento("ficha-normas").textContent = `${equipo.norma_general} (${PAPEL_NORMA_GENERAL}) · ${equipo.norma_particular} (${PAPEL_NORMA_PARTICULAR})`;
   elemento("ficha-fuente").textContent = `Fuente de los datos: ${parametros.fuente}.`;
 
   const cuerpo = elemento("tabla-limites-equipo").querySelector("tbody");
@@ -179,9 +195,24 @@ function mostrarEquipo(parametros) {
       // Límite de cada tipo de parte aplicada (B, BF, CF)
       for (const [indice, grupo] of grupos.entries()) {
         const esColumnaCF = indice === grupos.length - 1;
-        crearConTexto("td", String(limites[grupo][estado]), fila, esColumnaCF ? "columna-destacada" : "");
+        crearConTexto("td", `${limites[grupo][estado]} ${UNIDAD_CORRIENTE}`, fila, esColumnaCF ? "columna-destacada" : "");
       }
       cuerpo.appendChild(fila);
+    }
+  }
+}
+
+/**
+ * Llena los bloques plegables del glosario (marcados con data-glosario) con
+ * los mismos términos, para que el texto sea igual en todos.
+ */
+function mostrarGlosario() {
+  // Cada bloque recibe la lista completa de términos
+  for (const lista of document.querySelectorAll("[data-glosario]")) {
+    lista.replaceChildren();
+    for (const [termino, explicacion] of TERMINOS_GLOSARIO) {
+      crearConTexto("dt", termino, lista);
+      crearConTexto("dd", explicacion, lista);
     }
   }
 }
@@ -1056,6 +1087,7 @@ export function iniciarInterfaz(parametros) {
     elemento("tiempo-carga").textContent = `${textoTiempoCarga(carga)} (${detalleCarga(carga)})`;
   });
   mostrarEquipo(parametros);
+  mostrarGlosario();
   configurarNavegacion(estado);
   elemento("boton-siguiente-paso").addEventListener("click", () => avanzarPaso(estado));
   mostrarPasoActual(estado);

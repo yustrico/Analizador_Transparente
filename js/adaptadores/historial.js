@@ -27,6 +27,9 @@ const CLAVE_AVANCE_PRUEBA = "analizador_transparente.avance_prueba.v1";
 const DECIMALES_LECTURA = 2;
 const DECIMALES_PORCENTAJE = 1;
 
+/** Unidad de las corrientes que se muestran en las tablas. */
+export const UNIDAD_CORRIENTE = "µA";
+
 /** Nombres para mostrar de cada medición. */
 export const NOMBRES_MEDICION = Object.freeze({ contacto: "Corriente de contacto", paciente: "Corriente de paciente CF" });
 
@@ -77,8 +80,8 @@ export function filaDeRegistro(registro) {
     hora: new Date(registro.hora).toLocaleTimeString(IDIOMA_FECHAS, FORMATO_HORA),
     medicion: NOMBRES_MEDICION[registro.tipoMedicion],
     condicion: nombreCortoCondicion(registro.condicion),
-    lectura: textoLectura(registro),
-    limite: String(registro.limite_uA),
+    lectura: `${textoLectura(registro)} ${UNIDAD_CORRIENTE}`,
+    limite: `${registro.limite_uA} ${UNIDAD_CORRIENTE}`,
     porcentaje: textoPorcentaje(registro.porcentajeDelLimite),
     veredicto: registro.veredicto,
   };

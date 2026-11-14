@@ -63,8 +63,8 @@ const COLUMNAS_REPORTE = Object.freeze([
   ["Hora", "hora", 0.14],
   ["Medición", "medicion", 0.17],
   ["Condición", "condicion", 0.19],
-  ["Lectura ± incertidumbre (µA)", "lectura", 0.16],
-  ["Límite (µA)", "limite", 0.08],
+  ["Lectura ± incertidumbre", "lectura", 0.16],
+  ["Límite", "limite", 0.08],
   ["% del límite", "porcentaje", 0.09],
   ["Veredicto", "veredicto", 0.13],
 ]);

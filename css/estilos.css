@@ -115,6 +115,13 @@ h4 { margin: 14px 0 6px; font-size: 1rem; }
 .tabla--compacta th, .tabla--compacta td { padding: 4px 8px; text-align: center; }
 .tabla .columna-destacada { font-weight: 700; }
 
+/* Bloque plegable con el significado de los términos (glosario) */
+.glosario { margin-top: 12px; border: 1px solid var(--borde); border-radius: var(--radio); padding: 6px 12px; }
+.glosario summary { cursor: pointer; font-weight: 600; color: var(--azul-principal); }
+.glosario__lista { margin: 8px 0 4px; }
+.glosario__lista dt { font-weight: 600; margin-top: 6px; }
+.glosario__lista dd { margin: 2px 0 0; }
+
 /* ---------- Botones ---------- */
 .boton {
   font: inherit;
