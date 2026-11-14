@@ -24,17 +24,17 @@
   <link rel="stylesheet" href="css/estilos.css?v=23935c02ff" integrity="sha384-I5NcAv+ri20s447U2m1sWj3gBHjRTxJ7/BLvTWoDXRI/v2kCnwSYuj4jOy6nCkL8">
   <!-- SRI: inicio (generado por tools/sri.mjs, no editar a mano) -->
   <link rel="modulepreload" href="js/adaptadores/historial.js?v=37beb88db5" integrity="sha384-N764jbU0sVhRC7ghKObyjTjXmaVMHHAPvVcAtTAhaCYpBXdSrwJZ+STKTxzDL19N">
-  <link rel="modulepreload" href="js/adaptadores/interfaz.js?v=1f186481b6" integrity="sha384-HxhkgbahKlrbNnTaFYjiop4J9/6ILUApc6fwbiq8NJzxcZz2ZvmD6tml2VynxDoK">
-  <link rel="modulepreload" href="js/adaptadores/pdf.js?v=d9bb1aa981" integrity="sha384-2bsaqYFrn7TfsVHh4NNg/UZ/TKFo9l/ML73tb0/wKUH5vbk0/s9G8wDUJ7o3lAWD">
-  <link rel="modulepreload" href="js/adaptadores/reporte.js?v=4ba5679c64" integrity="sha384-S6VnnGTlNhY5jwv/3OPmq6TgKo9RUpk24LK7p2TeLiVhXd007/EQnnL7sH9Q5s6+">
+  <link rel="modulepreload" href="js/adaptadores/interfaz.js?v=89ddd776d0" integrity="sha384-id3XdtBOY9xbf0Ca56mynyYIpEwJ46oiJOhW/3zd7YBdamgY3XujGWWV7GJleuYq">
+  <link rel="modulepreload" href="js/adaptadores/pdf.js?v=7d6a176698" integrity="sha384-fWoXZphhUcAxn9iKmsH+SuiY4iiO64h/DVeB1MgUdOlUFxGmjZdexpyI/cXHhcGw">
+  <link rel="modulepreload" href="js/adaptadores/reporte.js?v=0d6cd0542e" integrity="sha384-DWzQVC635IbiK02lc4bAnH0SGULItk4BbcqeZvbRL2YauUsLwIrodeGNCDds4HeN">
   <link rel="modulepreload" href="js/adaptadores/tiempo_carga.js?v=1c9699f3b9" integrity="sha384-HJaZ87n6slac+sCKpiv4PovGknwW6qIsYSbPkXqTEJSFVD0wGqJegnc9QHmWVjjg">
   <link rel="modulepreload" href="js/adaptadores/visualizador.js?v=a5acde3349" integrity="sha384-pazeM0knXrd79Z7TxwvuJWO7Q7gEqWRZVPdflahrC+XLbfYASsOB/w37A4GD+iir">
   <link rel="modulepreload" href="js/nucleo/evaluador_limites.js?v=9c30cc64cc" integrity="sha384-nDDMZMy/C2qiFp7Uh8hHwvQch7REXj0Vo0KCd9xComz3vIlNz0DoVXElk5uPqfLM">
-  <link rel="modulepreload" href="js/nucleo/modelo_equipo.js?v=80a1494303" integrity="sha384-gKFJQwP1A2DxCu/gNIXbgoQYjFHiACskueM9Kn5KsbziEzkTT5vHfTcclQruyLO+">
+  <link rel="modulepreload" href="js/nucleo/modelo_equipo.js?v=5ca0bfb4e4" integrity="sha384-XKC/tOSU1bnqnTxnVs08DWpna0bP1cGP24BbDWufMn06OygGyUBk3CswydIGWaBh">
   <link rel="modulepreload" href="js/nucleo/motor_calculo.js?v=efa73aed55" integrity="sha384-76c67VUxXI/+Dx+nZ2FVjBDKPq9e8YkcvFPa3CAQQR4D8ItL4ouxZ+3uEIrZXUoc">
   <link rel="modulepreload" href="js/nucleo/secuencia.js?v=bffe121e07" integrity="sha384-v/4SHgduYquka0rL7HHdb+Z7SFxlx6UnWtzSicOu2HWYIDc2nw7ylTx8duc2u5qj">
   <!-- SRI: fin -->
-  <script type="module" src="js/main.js?v=fafc7120f5" integrity="sha384-+vxxIPV5mRTCOv1ELRs+NGdBJ/BB3ecg4mu/j21uiSke3apWSf3C5ALMx3ePB3Fy"></script>
+  <script type="module" src="js/main.js?v=f25196bc5b" integrity="sha384-8lGWvFtFLpe3n1T9NF7HIk81HyXmtK7kjDchZlkd9Q2QUn971FpnkVxos/fmz7Ok"></script>
 </head>
 <body>
   <header class="encabezado">
@@ -67,17 +67,19 @@
           <h3>Ficha del equipo</h3>
           <dl class="ficha">
             <dt>Equipo</dt><dd id="ficha-nombre"></dd>
-            <dt>Clase (protección eléctrica)</dt><dd id="ficha-clase"></dd>
+            <dt>Clase</dt><dd id="ficha-clase"></dd>
             <dt>Parte aplicada</dt><dd id="ficha-parte"></dd>
             <dt>Normas</dt><dd id="ficha-normas"></dd>
           </dl>
           <details class="plegable">
-            <summary>¿Qué dicen estas normas?</summary>
+            <summary>¿Qué significa cada dato?</summary>
             <ul class="lista-simple plegable__lista">
+              <li><strong>Clase I:</strong> Según IEC 60601-1, equipo protegido contra choque eléctrico por el conductor de tierra. No es la clase de riesgo del Decreto 4725.</li>
+              <li><strong>Tipo CF:</strong> Parte aplicada flotante, apta para contacto directo con el corazón; tiene los límites de corriente de paciente más estrictos.</li>
+              <li><strong>A prueba de desfibrilación:</strong> La parte aplicada soporta la descarga de un desfibrilador sin dañarse ni poner en riesgo a quien opera el equipo.</li>
               <li><strong>IEC 60601-1:</strong> Norma general de seguridad de equipos electromédicos. De aquí salen los límites de corriente de contacto, de paciente y de fuga a tierra.</li>
               <li><strong>IEC 60601-2-25:</strong> Norma particular para electrocardiógrafos; complementa a la general.</li>
-              <li><strong>IEC 62353:</strong> Norma para las pruebas periódicas y después de reparación de equipos ya en uso. De aquí salen los valores mínimos de resistencia de aislamiento del paso 3.</li>
-              <li><strong>Clase I:</strong> Según IEC 60601-1, equipo protegido contra choque eléctrico por el conductor de tierra. No es la clase de riesgo del Decreto 4725.</li>
+              <li><strong>IEC 62353:</strong> Norma para las pruebas periódicas y después de reparación de equipos en uso. De aquí salen los valores mínimos de resistencia de aislamiento del paso 3.</li>
             </ul>
           </details>
         </div>

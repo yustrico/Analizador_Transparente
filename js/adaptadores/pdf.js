@@ -21,7 +21,7 @@
  *   que M10 (reporte.js) usa para armar el reporte.
  * Módulo: M10 – Reporte (adaptador)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-13
+ * Creado: 2026-11-13 · Modificado: 2026-11-14
  * ============================================================================
  */
 
@@ -625,6 +625,16 @@ export function crearDocumentoPdf(opciones) {
       cursor_pt += ESPACIO_DESPUES_BLOQUE;
     },
     /**
+     * Párrafo que nunca queda partido entre dos páginas: si no cabe
+     * completo en lo que queda de la página, pasa entero a la siguiente.
+     * @param {string} texto - Párrafo.
+     */
+    parrafoSinPartir(texto) {
+      const renglones = partirEnRenglones(texto, ANCHO_UTIL_PT, TAMANO_TEXTO, false);
+      asegurarEspacio(renglones.length * TAMANO_TEXTO * FACTOR_INTERLINEADO);
+      this.parrafo(texto);
+    },
+    /**
      * Lista de datos: término en negrita a la izquierda y valor a la derecha.
      * @param {[string, string][]} pares - Pares [término, valor].
      */
@@ -634,7 +644,8 @@ export function crearDocumentoPdf(opciones) {
       // Un par por fila; el valor largo se parte en renglones
       for (const [termino, valor] of pares) {
         const renglonesTermino = partirEnRenglones(termino, ANCHO_TERMINO_PT - RELLENO_CELDA_X_PT, TAMANO_TEXTO, true);
-        const renglonesValor = partirEnRenglones(valor, anchoValor_pt, TAMANO_TEXTO, false);
+        // Un valor con "\n" (por ejemplo, las normas) empieza un renglón nuevo en cada salto
+        const renglonesValor = valor.split("\n").flatMap((parte) => partirEnRenglones(parte, anchoValor_pt, TAMANO_TEXTO, false));
         const alto_pt = Math.max(renglonesTermino.length, renglonesValor.length) * interlineado_pt;
         asegurarEspacio(alto_pt);
         escribirRenglones(renglonesTermino, MARGEN_PT, cursor_pt, { tamano: TAMANO_TEXTO, negrita: true, color: COLOR_TEXTO });

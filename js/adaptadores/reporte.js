@@ -17,7 +17,7 @@
 
 import { VEREDICTO_CUMPLE } from "../nucleo/evaluador_limites.js?v=9c30cc64cc";
 import { filaDeRegistro, textoLectura, textoPorcentaje, textoLimite, NOMBRES_MEDICION, nombreCortoCondicion } from "./historial.js?v=37beb88db5";
-import { crearDocumentoPdf } from "./pdf.js?v=d9bb1aa981";
+import { crearDocumentoPdf } from "./pdf.js?v=7d6a176698";
 import { textoTiempoCarga, detalleCarga } from "./tiempo_carga.js?v=1c9699f3b9";
 
 /** Explicación de la incertidumbre (se usa en Comparar y en el reporte). */
@@ -30,10 +30,10 @@ export const TEXTO_INCERTIDUMBRE = "La incertidumbre (U) indica cuánto podría 
 const TEXTO_AVISO = "Herramienta educativa, no certifica equipos. Complementa la práctica con el analizador real.";
 
 /** Títulos del reporte (iguales en pantalla y en el PDF). */
-const TITULO_REPORTE = "Reporte de práctica: prueba de seguridad eléctrica";
+const TITULO_REPORTE = "Reporte de práctica: pruebas de seguridad eléctrica";
 const SUBTITULO_REPORTE = "Analizador transparente (simulador educativo de IEC 60601-1)";
 const TITULO_LECTURAS = "Lecturas de la práctica";
-const TITULO_INCERTIDUMBRE = "Cómo leer la incertidumbre";
+const TITULO_INCERTIDUMBRE = "¿Cómo se lee la incertidumbre?";
 
 /** Pie de cada página del PDF. */
 const PIE_PDF = "Analizador transparente · Herramienta educativa, no certifica equipos";
@@ -111,6 +111,28 @@ function textoResumen(resumen) {
   return `${resumen.total} lecturas (${resumen.configuraciones} configuraciones distintas): ${resumen.cumplen} cumplen, ${resumen.noCumplen} no cumplen.`;
 }
 
+/** Separa los renglones de un valor que va en varias líneas (por ejemplo, las normas). */
+const SALTO_DE_RENGLON = "\n";
+
+/**
+ * Las normas del equipo, en el orden de la ficha: general, particular y de pruebas periódicas.
+ * @param {object} equipo - Datos del equipo (parametros.equipo).
+ * @returns {string[]} Normas.
+ */
+export function normasDelEquipo(equipo) {
+  return [equipo.norma_general, equipo.norma_particular, equipo.norma_pruebas_periodicas];
+}
+
+/**
+ * Convierte varios renglones en nodos para la pantalla: texto, <br>, texto…
+ * (siempre como texto plano, nunca como HTML).
+ * @param {string[]} renglones - Renglones.
+ * @returns {(string|HTMLElement)[]} Nodos para replaceChildren.
+ */
+export function conSaltosDeLinea(renglones) {
+  return renglones.flatMap((renglon, indice) => (indice === 0 ? [renglon] : [document.createElement("br"), renglon]));
+}
+
 /**
  * Texto de la lectura que más se acercó a su límite.
  * @param {object} registro - Registro con el mayor % del límite.
@@ -135,13 +157,9 @@ export function contenidoDelReporte(datos) {
     ["Fecha y hora", fecha.toLocaleString(IDIOMA_FECHAS, FORMATO_FECHA)],
     ["Equipo", parametros.equipo.nombre],
     ["Clasificación", `Clase ${parametros.equipo.clase}, parte aplicada ${parametros.equipo.parte_aplicada}`],
-    ["Normas", `${parametros.equipo.norma_general} y ${parametros.equipo.norma_particular}`],
+    ["Normas", normasDelEquipo(parametros.equipo).join(SALTO_DE_RENGLON)],
     ["Resumen", textoResumen(resumen)],
   ];
-  // La lectura más cerca de su límite solo existe si hay lecturas
-  if (resumen.mayor !== null) {
-    datosGenerales.push(["Más cerca del límite", textoMayorPorcentaje(resumen.mayor)]);
-  }
   const columnas = [COLUMNA_NUMERO[0], ...COLUMNAS_REPORTE.map(([titulo]) => titulo)];
   // Una fila de texto por lectura, en orden
   const filas = registros.map((registro, indice) => {
@@ -212,7 +230,8 @@ export function generarReporte(contenedor, datos) {
   listaDatos.className = "ficha";
   for (const [termino, valor] of contenido.datosGenerales) {
     agregar("dt", termino, listaDatos);
-    agregar("dd", valor, listaDatos);
+    // Un valor con varios renglones (las normas) se muestra con un renglón por línea
+    agregar("dd", "", listaDatos).replaceChildren(...conSaltosDeLinea(valor.split(SALTO_DE_RENGLON)));
   }
   contenedor.appendChild(listaDatos);
 
@@ -245,7 +264,8 @@ export function crearPdfReporte(datos) {
   documento.listaDatos(contenido.datosGenerales);
   documento.seccion(TITULO_LECTURAS);
   documento.tabla(columnas, contenido.filas);
-  documento.parrafo(TEXTO_CERCA_DEL_LIMITE);
+  // La nota va completa en una sola página (si no cabe, pasa entera a la siguiente)
+  documento.parrafoSinPartir(TEXTO_CERCA_DEL_LIMITE);
   documento.seccion(TITULO_INCERTIDUMBRE);
   documento.parrafo(TEXTO_INCERTIDUMBRE);
   documento.aviso(TEXTO_AVISO);

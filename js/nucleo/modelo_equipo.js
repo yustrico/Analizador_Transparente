@@ -41,6 +41,8 @@ const CAMPOS_TEXTO = Object.freeze([
   ["equipo", "clase"],
   ["equipo", "parte_aplicada"],
   ["equipo", "norma_general"],
+  ["equipo", "norma_particular"],
+  ["equipo", "norma_pruebas_periodicas"],
   ["pasos_previos_medidos", "inspeccion_visual"],
   ["pasos_previos_medidos", "fuente_minimos_aislamiento"],
   ["origen_factor_neutro_abierto"],

@@ -9,7 +9,7 @@
  *   µ, ±, paréntesis) y el nombre del archivo.
  * Módulo: M10 – Reporte (pruebas)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-13
+ * Creado: 2026-11-13 · Modificado: 2026-11-14
  * ============================================================================
  */
 
@@ -114,7 +114,7 @@ test("El PDF contiene todas las lecturas, la incertidumbre y el aviso", () => {
     assert.ok(texto.includes(textoLectura(registro)), `Falta la lectura ${textoLectura(registro)}`);
   }
   assert.ok(texto.includes("14.73 ± 1.32"));
-  assert.ok(texto.includes("Cómo leer la incertidumbre"));
+  assert.ok(texto.includes("se lee la incertidumbre"));
   assert.ok(texto.includes("Herramienta educativa, no certifica equipos"));
   assert.ok(texto.includes("Electrocardiógrafo Mindray BeneHeart R12"));
 });
@@ -159,4 +159,32 @@ test("Validación: sin opciones o con columnas que no suman 1, lanza un error cl
 test("Nombre del archivo con la fecha local AAAA-MM-DD", () => {
   assert.equal(nombreArchivoReporte(new Date(2026, 10, 13, 23, 30)), "reporte_seguridad_electrica_2026-11-13.pdf");
   assert.equal(nombreArchivoReporte(new Date(2026, 0, 5, 0, 10)), "reporte_seguridad_electrica_2026-01-05.pdf");
+});
+
+test("parrafoSinPartir nunca deja un párrafo partido entre dos páginas", () => {
+  const largo = `INICIO ${"palabra ".repeat(60)}FINAL`;
+  /**
+   * Arma un PDF con párrafos de relleno y al final el párrafo largo.
+   * @param {number} relleno - Párrafos de relleno antes.
+   * @param {boolean} sinPartir - true para usar parrafoSinPartir.
+   * @returns {string[]} Flujos de contenido (uno por página).
+   */
+  const flujos = (relleno, sinPartir) => {
+    const documento = crearDocumentoPdf({ titulo: "Prueba", pie: "Pie", fecha: FECHA_PRUEBA });
+    // Relleno para que el párrafo largo caiga en distintas alturas de la página
+    for (let indice = 0; indice < relleno; indice += 1) {
+      documento.parrafo("Relleno");
+    }
+    documento[sinPartir ? "parrafoSinPartir" : "parrafo"](largo);
+    return comoTexto(documento.generar()).split("endstream").filter((flujo) => flujo.includes(" Tj") || flujo.includes("TJ"));
+  };
+  const mismaPagina = (paginas) => paginas.some((pagina) => pagina.includes("INICIO") && pagina.includes("FINAL"));
+  let partidoConParrafoNormal = false;
+  // Prueba el párrafo en muchas alturas de la página
+  for (let relleno = 20; relleno < 60; relleno += 1) {
+    assert.ok(mismaPagina(flujos(relleno, true)), `Con ${relleno} párrafos de relleno el párrafo quedó partido`);
+    partidoConParrafoNormal ||= !mismaPagina(flujos(relleno, false));
+  }
+  // Control: con el párrafo normal sí se parte en alguna altura (la prueba sí mide algo)
+  assert.ok(partidoConParrafoNormal);
 });

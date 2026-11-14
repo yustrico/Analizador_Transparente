@@ -5,6 +5,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Cambiado (14/11/2026, octava ronda: textos y PDF, sin cambios en cálculos)
+- Ficha del equipo: «Clase: Clase I (protección contra choque eléctrico)» en un renglón; Normas con IEC 60601-1, IEC 60601-2-25 e IEC 62353, una por renglón (IEC 62353 se agrega al JSON como `equipo.norma_pruebas_periodicas` y M3 la valida). El bloque plegable se llama «¿Qué significa cada dato?»: Clase I, Tipo CF, A prueba de desfibrilación, IEC 60601-1, IEC 60601-2-25 e IEC 62353.
+- Reporte (pantalla y PDF): título «Reporte de práctica: pruebas de seguridad eléctrica»; Normas con las tres normas, una por renglón; sin la fila «Más cerca del límite» (sigue en «Copiar resumen»); «¿Cómo se lee la incertidumbre?».
+- PDF: la nota «Una corriente pequeña puede estar más cerca de su límite…» nunca queda partida entre dos páginas: si no cabe completa, pasa entera a la siguiente (`parrafoSinPartir` en pdf.js, con prueba). 122 pruebas en verde.
+
 ### Cambiado (14/11/2026, séptima ronda: textos, sin cambios en cálculos)
 - Ficha del equipo: «Clase (protección eléctrica): Clase I»; una sola fila «Parte aplicada: Tipo CF a prueba de desfibrilación (electrodos de ECG y cable de paciente)»; Normas solo con «IEC 60601-1» e «IEC 60601-2-25». Debajo, el bloque cerrado «¿Qué dicen estas normas?» (IEC 60601-1, IEC 60601-2-25, IEC 62353 y Clase I, que no es la clase de riesgo del Decreto 4725).
 - Se quita de la ficha «Fuente de los datos: …»; pasa a la sección «Origen de los datos» de ayuda.html y del manual (sigue en docs/06).

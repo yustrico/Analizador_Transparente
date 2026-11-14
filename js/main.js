@@ -11,11 +11,11 @@
  * ============================================================================
  */
 
-import { cargarParametros } from "./nucleo/modelo_equipo.js?v=80a1494303";
-import { iniciarInterfaz, mostrarError } from "./adaptadores/interfaz.js?v=1f186481b6";
+import { cargarParametros } from "./nucleo/modelo_equipo.js?v=5ca0bfb4e4";
+import { iniciarInterfaz, mostrarError } from "./adaptadores/interfaz.js?v=89ddd776d0";
 
 /** Ruta del archivo de parámetros, relativa a index.html. */
-const RUTA_PARAMETROS = "datos/parametros_r12.json?v=5bd676506d";
+const RUTA_PARAMETROS = "datos/parametros_r12.json?v=350fa3291d";
 
 /**
  * Carga los parámetros y arranca la interfaz.

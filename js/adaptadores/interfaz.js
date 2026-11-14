@@ -32,8 +32,9 @@ import {
 } from "./historial.js?v=37beb88db5";
 import {
   generarReporte, crearPdfReporte, nombreArchivoReporte, armarResumen, limpiarNombre, TEXTO_INCERTIDUMBRE, TEXTO_CERCA_DEL_LIMITE,
-} from "./reporte.js?v=4ba5679c64";
-import { descargarPdf } from "./pdf.js?v=d9bb1aa981";
+  normasDelEquipo, conSaltosDeLinea,
+} from "./reporte.js?v=0d6cd0542e";
+import { descargarPdf } from "./pdf.js?v=7d6a176698";
 import { medirCargaPagina, textoTiempoCarga, detalleCarga } from "./tiempo_carga.js?v=1c9699f3b9";
 
 /* ------------------------------------------------------------------------ */
@@ -173,6 +174,9 @@ const GRUPO_CON_EJEMPLO_DE_LIMITE = "condiciones";
 /** Partes aplicadas del R12 según su manual (ficha del equipo). */
 const PARTES_APLICADAS_R12 = "electrodos de ECG y cable de paciente";
 
+/** Qué protege la clase del equipo (ficha del equipo). */
+const SIGNIFICADO_CLASE = "protección contra choque eléctrico";
+
 /* ------------------------------------------------------------------------ */
 /* Utilidades de la página                                                  */
 /* ------------------------------------------------------------------------ */
@@ -243,10 +247,10 @@ function describirCondicion(condicion) {
 function mostrarEquipo(parametros) {
   const { equipo, limites_uA: limites } = parametros;
   elemento("ficha-nombre").textContent = equipo.nombre;
-  elemento("ficha-clase").textContent = `Clase ${equipo.clase}`;
+  elemento("ficha-clase").textContent = `Clase ${equipo.clase} (${SIGNIFICADO_CLASE})`;
   elemento("ficha-parte").textContent = `Tipo ${equipo.parte_aplicada} (${PARTES_APLICADAS_R12})`;
-  // Cada norma en su propio renglón (qué dice cada una va en «¿Qué dicen estas normas?»)
-  elemento("ficha-normas").replaceChildren(equipo.norma_general, document.createElement("br"), equipo.norma_particular);
+  // Cada norma en su propio renglón (qué dice cada una va en «¿Qué significa cada dato?»)
+  elemento("ficha-normas").replaceChildren(...conSaltosDeLinea(normasDelEquipo(equipo)));
 
   const cuerpo = elemento("tabla-limites-equipo").querySelector("tbody");
   cuerpo.replaceChildren();

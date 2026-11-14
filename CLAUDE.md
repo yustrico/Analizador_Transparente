@@ -50,7 +50,8 @@ datos/parametros_r12.json (todo en unidades SI):
 ```json
 {
   "equipo": {"nombre": "Electrocardiógrafo Mindray BeneHeart R12", "clase": "I", "parte_aplicada": "CF a prueba de desfibrilación",
-             "norma_general": "IEC 60601-1", "norma_particular": "IEC 60601-2-25"},
+             "norma_general": "IEC 60601-1", "norma_particular": "IEC 60601-2-25",
+             "norma_pruebas_periodicas": "IEC 62353"},
   "red": {"V_rms": 120, "f_Hz": 60},
   "capacitancias_F": {"C_L": 325.7e-12, "C_N": 325.7e-12, "C_AP": 28.0e-12},
   "delta_paciente_tierra_abierta_A": 0.83e-6,
