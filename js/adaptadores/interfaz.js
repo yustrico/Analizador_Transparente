@@ -14,7 +14,10 @@
  * ============================================================================
  */
 
-import { PASOS_PRUEBA, crearEstadoInicial, obtenerPasoActual, completarPaso, pasoDisponible } from "../nucleo/secuencia.js";
+import {
+  PASOS_PRUEBA, crearEstadoInicial, crearEstadoDesdeAvance, obtenerPasoActual, obtenerPasoVisto, completarPaso,
+  pasoDisponible, pasoCompletado, verPaso,
+} from "../nucleo/secuencia.js";
 import { calcularMedicion, corrientePorFaradio_A_F, capacitanciaDeFuga_F } from "../nucleo/motor_calculo.js";
 import {
   evaluarMedicion, evaluarAislamiento, evaluarResistenciaTierra, VEREDICTO_CUMPLE,
@@ -404,7 +407,7 @@ function escribirTablaAislamiento(aislamiento) {
     const fila = cuerpo.insertRow();
     crearConTexto("td", ETIQUETAS_AISLAMIENTO[clave] ?? clave, fila);
     crearConTexto("td", textoConUnidad(par.valor, UNIDAD_AISLAMIENTO), fila);
-    crearConTexto("td", `≥ ${par.minimo} ${UNIDAD_AISLAMIENTO} (Figura ${par.figura_IEC_62353})`, fila);
+    crearConTexto("td", `≥ ${par.minimo} ${UNIDAD_AISLAMIENTO}`, fila);
     crearConTexto("td", veredicto, fila, veredicto === VEREDICTO_CUMPLE ? "veredicto--cumple" : "veredicto--no-cumple");
   }
   return todosCumplen;
@@ -470,96 +473,183 @@ function escribirResultadoPaso(claveDato, pasosPrevios) {
   }
 }
 
+/** Marca que se antepone a los pasos completados en la lista. */
+const MARCA_COMPLETADO = "✓";
+
+/** Textos de la tarjeta del paso en modo repaso y al terminar la prueba. */
+const TEXTOS_PRUEBA_GUIADA = Object.freeze({
+  repaso: "Estás repasando un paso ya completado. Tu avance no cambia.",
+  completaTitulo: "Prueba guiada completa",
+  completaTexto: "Ya recorriste los 4 pasos. Puedes abrir cualquiera de ellos para repasarlo, o medir todas las condiciones que quieras en el Analizador y compararlas.",
+  botonSiguiente: "Entendido, siguiente paso",
+  botonAnalizador: "Ir al Analizador",
+});
+
 /**
- * Dibuja la lista de los 4 pasos con su estado (completado, actual o bloqueado).
+ * Estado de un paso para la lista: "completado", "pendiente" (el que toca) o "bloqueado".
+ * @param {object} secuencia - Estado de la secuencia (M2).
+ * @param {object} paso - Paso de PASOS_PRUEBA.
+ * @returns {"completado"|"pendiente"|"bloqueado"} Estado del paso.
+ */
+function estadoDelPaso(secuencia, paso) {
+  if (pasoCompletado(secuencia, paso.id)) {
+    return "completado";
+  }
+  return pasoDisponible(secuencia, paso.id) ? "pendiente" : "bloqueado";
+}
+
+/**
+ * Dibuja la lista de los 4 pasos como botones: ✓ en los completados, el paso
+ * que se está viendo resaltado (aria-current) y los bloqueados deshabilitados.
  * @param {object} estado - Estado de la interfaz.
  */
 function mostrarListaPasos(estado) {
   const lista = elemento("lista-pasos");
-  const pasoActual = obtenerPasoActual(estado.secuencia);
+  const pasoVisto = obtenerPasoVisto(estado.secuencia);
   lista.replaceChildren();
-  // Un elemento por paso
+  // Un botón por paso
   for (const [indice, paso] of PASOS_PRUEBA.entries()) {
-    const elementoPaso = crearConTexto("li", `${indice + 1}. ${paso.titulo}`, lista);
-    let estadoPaso = "bloqueado";
-    if (pasoActual !== null && paso.id === pasoActual.id) {
-      estadoPaso = "actual";
-    } else if (pasoDisponible(estado.secuencia, paso.id)) {
-      estadoPaso = "completado";
+    const elementoPaso = document.createElement("li");
+    const estadoPaso = estadoDelPaso(estado.secuencia, paso);
+    const marca = estadoPaso === "completado" ? `${MARCA_COMPLETADO} ` : "";
+    const boton = crearConTexto("button", `${marca}${indice + 1}. ${paso.titulo}`, elementoPaso, "pasos__boton");
+    boton.type = "button";
+    boton.dataset.paso = paso.id;
+    boton.disabled = estadoPaso === "bloqueado";
+    if (pasoVisto !== null && paso.id === pasoVisto.id) {
+      boton.setAttribute("aria-current", "step");
     }
     elementoPaso.dataset.estado = estadoPaso;
+    lista.appendChild(elementoPaso);
   }
 }
 
 /**
- * Muestra la tarjeta del paso actual: primero el propósito y luego el resultado.
+ * Texto del botón de la tarjeta según el paso que se ve.
+ * @param {object} secuencia - Estado de la secuencia (M2).
+ * @param {object} paso - Paso que se está viendo.
+ * @returns {string} Texto del botón.
+ */
+function textoBotonPaso(secuencia, paso) {
+  if (pasoCompletado(secuencia, paso.id)) {
+    // En repaso, el botón lleva de vuelta al paso pendiente (o al Analizador si ya terminó)
+    const pendiente = obtenerPasoActual(secuencia);
+    return pendiente === null
+      ? TEXTOS_PRUEBA_GUIADA.botonAnalizador
+      : `Volver al paso ${PASOS_PRUEBA.indexOf(pendiente) + 1}: ${pendiente.titulo}`;
+  }
+  return paso.id === PASO_CORRIENTES_FUGA ? TEXTOS_PRUEBA_GUIADA.botonAnalizador : TEXTOS_PRUEBA_GUIADA.botonSiguiente;
+}
+
+/**
+ * Muestra la tarjeta del paso que se está viendo: primero el propósito y
+ * luego el resultado. Si es un paso completado, avisa que es un repaso.
  * @param {object} estado - Estado de la interfaz.
  */
-function mostrarPasoActual(estado) {
-  const paso = obtenerPasoActual(estado.secuencia);
+function mostrarPasoVisto(estado) {
+  const paso = obtenerPasoVisto(estado.secuencia);
   const bloqueResultado = elemento("paso-bloque-resultado");
   const boton = elemento("boton-siguiente-paso");
+  const avisoRepaso = elemento("paso-repaso");
   mostrarListaPasos(estado);
   actualizarNavegacion(estado);
 
-  // Prueba terminada
+  // Pantalla final: prueba completa
   if (paso === null) {
-    elemento("paso-titulo").textContent = "Prueba guiada completa";
-    elemento("paso-proposito").textContent = "Ya recorriste los 4 pasos. Puedes medir todas las condiciones que quieras en el Analizador y compararlas.";
+    elemento("paso-titulo").textContent = TEXTOS_PRUEBA_GUIADA.completaTitulo;
+    elemento("paso-proposito").textContent = TEXTOS_PRUEBA_GUIADA.completaTexto;
+    avisoRepaso.hidden = true;
     bloqueResultado.hidden = true;
-    boton.textContent = "Ir al Analizador";
+    boton.textContent = TEXTOS_PRUEBA_GUIADA.botonAnalizador;
     return;
   }
 
   const numeroPaso = PASOS_PRUEBA.indexOf(paso) + 1;
   elemento("paso-titulo").textContent = `Paso ${numeroPaso} de ${PASOS_PRUEBA.length}: ${paso.titulo}`;
   elemento("paso-proposito").textContent = paso.proposito;
+  avisoRepaso.textContent = TEXTOS_PRUEBA_GUIADA.repaso;
+  avisoRepaso.hidden = !pasoCompletado(estado.secuencia, paso.id);
   // Los pasos 1 a 3 muestran su valor medido; el 4 lleva al Analizador
   bloqueResultado.hidden = paso.claveDatoMedido === null;
   if (paso.claveDatoMedido !== null) {
     escribirResultadoPaso(paso.claveDatoMedido, estado.parametros.pasos_previos_medidos);
   }
-  boton.textContent = paso.claveDatoMedido === null ? "Ir al Analizador" : "Entendido, siguiente paso";
+  boton.textContent = textoBotonPaso(estado.secuencia, paso);
 }
 
 /**
  * Recupera el avance de la prueba guiada guardado en esta pestaña. Antes de
  * usarlo lo valida con M2; si está dañado, la prueba empieza desde el paso 1.
- * @returns {Readonly<{pasosCompletados: number}>} Estado de la secuencia.
+ * @returns {Readonly<{pasosCompletados: number, pasoVisto: number}>} Estado de la secuencia.
  */
 function recuperarSecuencia() {
   const pasosGuardados = leerAvancePrueba();
   if (pasosGuardados === null) {
     return crearEstadoInicial();
   }
-  const estadoGuardado = Object.freeze({ pasosCompletados: pasosGuardados });
   try {
-    obtenerPasoActual(estadoGuardado);
-    return estadoGuardado;
+    return crearEstadoDesdeAvance(pasosGuardados);
   } catch {
     return crearEstadoInicial();
   }
 }
 
 /**
- * Atiende el botón del paso: completa el paso actual (M2) y avanza.
+ * Abre un paso de la lista (completado o pendiente) sin cambiar el avance (M2).
+ * @param {object} estado - Estado de la interfaz.
+ * @param {string} idPaso - Paso que se quiere ver.
+ */
+function abrirPaso(estado, idPaso) {
+  try {
+    estado.secuencia = verPaso(estado.secuencia, idPaso);
+    mostrarPasoVisto(estado);
+  } catch (error) {
+    mostrarError(error.message);
+  }
+}
+
+/**
+ * Atiende el botón de la tarjeta:
+ * - en el paso pendiente, lo completa (M2) y muestra el siguiente;
+ * - en un repaso, vuelve al paso pendiente sin cambiar el avance;
+ * - en el paso 4 o con la prueba completa, lleva al Analizador.
  * @param {object} estado - Estado de la interfaz.
  */
 function avanzarPaso(estado) {
-  const paso = obtenerPasoActual(estado.secuencia);
+  const paso = obtenerPasoVisto(estado.secuencia);
+  const pendiente = obtenerPasoActual(estado.secuencia);
   try {
-    if (paso !== null) {
+    const esRepaso = paso !== null && pasoCompletado(estado.secuencia, paso.id);
+    if (esRepaso && pendiente !== null) {
+      estado.secuencia = verPaso(estado.secuencia, pendiente.id);
+    } else if (!esRepaso && paso !== null) {
       estado.secuencia = completarPaso(estado.secuencia, paso.id);
       guardarAvancePrueba(estado.secuencia.pasosCompletados);
     }
-    mostrarPasoActual(estado);
-    // El paso 4 (o la prueba ya completa) lleva a la sección Analizador
-    if (paso === null || paso.id === PASO_CORRIENTES_FUGA) {
+    mostrarPasoVisto(estado);
+    // El paso 4, o cualquier botón con la prueba ya completa, lleva al Analizador
+    if (paso === null || paso.id === PASO_CORRIENTES_FUGA || (esRepaso && pendiente === null)) {
       mostrarSeccion(estado, "analizador");
     }
   } catch (error) {
     mostrarError(error.message);
   }
+}
+
+/**
+ * Conecta la lista de pasos (un solo escuchador para todos los botones) y el
+ * botón de la tarjeta.
+ * @param {object} estado - Estado de la interfaz.
+ */
+function configurarPruebaGuiada(estado) {
+  elemento("lista-pasos").addEventListener("click", (evento) => {
+    const boton = evento.target.closest("button[data-paso]");
+    if (boton && !boton.disabled) {
+      abrirPaso(estado, boton.dataset.paso);
+    }
+  });
+  elemento("boton-siguiente-paso").addEventListener("click", () => avanzarPaso(estado));
+  mostrarPasoVisto(estado);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -1247,8 +1337,7 @@ export function iniciarInterfaz(parametros) {
   mostrarEquipo(parametros);
   mostrarGlosario(parametros);
   configurarNavegacion(estado);
-  elemento("boton-siguiente-paso").addEventListener("click", () => avanzarPaso(estado));
-  mostrarPasoActual(estado);
+  configurarPruebaGuiada(estado);
   configurarAnalizador(estado);
   elemento("comparar-incertidumbre").textContent = TEXTO_INCERTIDUMBRE;
   configurarHistorial(estado);

@@ -34,7 +34,7 @@ La prueba tiene **4 pasos en orden fijo**: inspección visual → resistencia de
 2. Mira el **valor medido** en el laboratorio.
 3. Presiona **«Entendido, siguiente paso»**.
 
-No se puede saltar pasos. Al llegar al paso 4 se habilitan las pestañas *Analizador* y *Comparar*. Si recargas la página, tu avance se conserva.
+No se puede saltar pasos hacia adelante: un paso nuevo se habilita al completar el anterior. Los pasos completados quedan marcados con ✓ y puedes abrirlos con un clic para repasarlos sin perder tu avance (el botón te devuelve al paso pendiente). Al completar los 4, todos quedan libres. Al llegar al paso 4 se habilitan las pestañas *Analizador* y *Comparar*. Si recargas la página, tu avance se conserva.
 
 📷 *Captura sugerida 3: un paso de la prueba guiada con su propósito, el valor medido y el botón.*
 

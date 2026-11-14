@@ -50,7 +50,7 @@ const CAMPOS_OBJETO_PASOS_PREVIOS = Object.freeze([
   ["pasos_previos_medidos", "aislamiento_Mohm"],
 ]);
 
-/** Pares de puntos donde se mide el aislamiento (paso 3); cada uno trae valor, mínimo y figura de IEC 62353. */
+/** Pares de puntos donde se mide el aislamiento (paso 3); cada uno trae valor medido y mínimo de IEC 62353. */
 const PARES_AISLAMIENTO = Object.freeze(["red_tierra", "partes_aplicadas_tierra", "red_partes_aplicadas"]);
 
 /** Grupos de límites de IEC 60601-1 que debe traer el archivo. */
@@ -161,8 +161,8 @@ function validarTextosYPasosPrevios(datos) {
 
 /**
  * Revisa el aislamiento del paso 3: cada par de puntos debe traer el valor
- * medido (número o texto como "> 100 (OL)"), el mínimo esperado de IEC 62353
- * (MΩ, mayor que cero) y el número de la figura de esa norma (entero positivo).
+ * medido (número o texto como "> 100 (OL)") y el mínimo esperado de
+ * IEC 62353:2014, Tabla 2 (MΩ, mayor que cero).
  * @param {object} datos - Objeto de parámetros.
  * @throws {Error} Si falta un par o algún dato está mal.
  */
@@ -178,10 +178,6 @@ function validarAislamiento(datos) {
     }
     if (leerNumero(datos, [...ruta, "minimo"]) <= 0) {
       throw new Error(`Parámetros del equipo: "${ruta.join(".")}.minimo" debe ser mayor que cero.`);
-    }
-    const figura = leerNumero(datos, [...ruta, "figura_IEC_62353"]);
-    if (!Number.isInteger(figura) || figura <= 0) {
-      throw new Error(`Parámetros del equipo: "${ruta.join(".")}.figura_IEC_62353" debe ser un número entero positivo.`);
     }
   }
 }

@@ -6,12 +6,15 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 ## [Sin publicar]
 
 ### Agregado (14/11/2026)
-- Paso 3 de la prueba guiada (aislamiento) con veredicto: mínimos esperados de IEC 62353:2014, Tabla 2, para equipo Clase I con parte CF (red–tierra ≥ 2 MΩ, Figura 12; partes aplicadas–tierra ≥ 70 MΩ, Figura 14; red–partes aplicadas ≥ 70 MΩ, Figura 16). Tabla con valor medido, mínimo y «Cumple/No cumple» calculado, y nota sobre la fuente (medición opcional en IEC 62353; el manual del R12 no fija límite). Fuente anotada en docs/06 §7.
-- `datos/parametros_r12.json`: cada par de `aislamiento_Mohm` trae `valor`, `minimo` y `figura_IEC_62353`, más `fuente_minimos_aislamiento`. M3 los valida (mínimo > 0, figura entera).
+- Paso 3 de la prueba guiada (aislamiento) con veredicto: mínimos esperados de IEC 62353:2014, Tabla 2, para equipo Clase I con parte CF (red–tierra ≥ 2 MΩ; partes aplicadas–tierra ≥ 70 MΩ; red–partes aplicadas ≥ 70 MΩ). Tabla con valor medido, mínimo y «Cumple/No cumple» calculado, y nota sobre la fuente (medición opcional en IEC 62353; el manual del R12 no fija límite). Fuente anotada en docs/06 §7.
+- `datos/parametros_r12.json`: cada par de `aislamiento_Mohm` trae `valor` y `minimo`, más `fuente_minimos_aislamiento`. M3 los valida (mínimo > 0).
 - M5: `evaluarAislamiento` (mínimo) y `evaluarResistenciaTierra` (máximo) entienden «> 100 (OL)» y «< 0.015» como cotas; el veredicto del paso 2 pasa de la interfaz a M5. 8 pruebas nuevas (87 en verde). Sin cambios en los cálculos de corriente.
 - Analizador: nuevo bloque plegable «¿Qué pasa si abro la tierra o el neutro?» (debajo de Tierra y Neutro) con condición normal, primer defecto y el ejemplo del límite que sube (100 → 500 µA, tomados del JSON). «¿Qué estoy midiendo?» queda solo con las dos corrientes; en Equipo siguen los cuatro términos. Una sola lista de textos para los tres bloques.
 
 ### Cambiado (14/11/2026)
+- Prueba guiada: los pasos completados (marcados con ✓) se pueden volver a abrir con un clic para repasarlos, sin perder el avance; el botón de la tarjeta lleva de vuelta al paso pendiente. Un paso nuevo solo se habilita al completar el anterior y, al completar los 4, todos quedan libres. El paso que se está viendo se resalta. M2 separa el avance (`pasosCompletados`, guardado en sessionStorage) del paso que se ve (`pasoVisto`): nuevas funciones `verPaso`, `obtenerPasoVisto`, `pasoCompletado` y `crearEstadoDesdeAvance`, con 7 pruebas nuevas (94 en verde).
+- Paso 3: se quitan los números de figura («Figura 12/14/16»): eran del artículo de EBME, no de IEC 62353. Quedan par de puntos, valor, mínimo (2, 70 y 70 MΩ) y resultado; fuente: IEC 62353:2014, Tabla 2 (docs/06 §7).
+- «¿Por qué CF es la más estricta?»: la explicación de B, BF y CF empieza con mayúscula después de los dos puntos.
 - «Tiempo de carga de esta página» sale de la vista principal de Historial y reporte: queda en un bloque cerrado «Datos técnicos (para la prueba de carga ES03)» al final de la sección y en «Copiar resumen». Ya no va en el reporte en pantalla ni en el PDF. Protocolo ES03, manual, docs/03 y verificacion.md actualizados.
 
 ### Agregado

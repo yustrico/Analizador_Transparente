@@ -5,7 +5,7 @@
  *   paso tiene su propósito de seguridad y que no deja saltar pasos.
  * Módulo: M2 – Secuencia de la prueba (pruebas)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-13
+ * Creado: 2026-11-13 · Modificado: 2026-11-14
  * ============================================================================
  */
 
@@ -13,6 +13,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   PASOS_PRUEBA, crearEstadoInicial, obtenerPasoActual, completarPaso, pasoDisponible, secuenciaTerminada,
+  obtenerPasoVisto, verPaso, pasoCompletado, crearEstadoDesdeAvance,
 } from "../js/nucleo/secuencia.js";
 
 test("Los 4 pasos están en el orden fijo de la prueba", () => {
@@ -78,4 +79,77 @@ test("Rechaza pasos que no existen y estados dañados", () => {
   assert.throws(() => pasoDisponible(crearEstadoInicial(), "paso_inventado"), /no existe/);
   assert.throws(() => obtenerPasoActual({ pasosCompletados: 7 }), /estado/);
   assert.throws(() => obtenerPasoActual(null), /estado/);
+});
+
+/* ---- Volver a pasos ya completados (repaso) ---- */
+
+/**
+ * Completa los primeros pasos de la prueba, en orden.
+ * @param {number} cantidad - Cuántos pasos completar.
+ * @returns {object} Estado con esos pasos completados.
+ */
+function completarPrimeros(cantidad) {
+  let estado = crearEstadoInicial();
+  // Completa uno por uno, en orden
+  for (const paso of PASOS_PRUEBA.slice(0, cantidad)) {
+    estado = completarPaso(estado, paso.id);
+  }
+  return estado;
+}
+
+test("Al completar un paso se ve el siguiente", () => {
+  const estado = completarPrimeros(1);
+  assert.equal(obtenerPasoVisto(estado).id, "resistencia_tierra");
+  assert.equal(obtenerPasoVisto(crearEstadoInicial()).id, "inspeccion_visual");
+});
+
+test("Se puede volver a un paso completado sin perder el avance", () => {
+  const estado = completarPrimeros(2);
+  const repaso = verPaso(estado, "inspeccion_visual");
+  assert.equal(obtenerPasoVisto(repaso).id, "inspeccion_visual");
+  assert.equal(repaso.pasosCompletados, 2);
+  assert.equal(obtenerPasoActual(repaso).id, "aislamiento");
+  assert.equal(pasoCompletado(repaso, "inspeccion_visual"), true);
+  assert.equal(pasoCompletado(repaso, "aislamiento"), false);
+});
+
+test("Desde un repaso se puede completar el paso pendiente y el avance sigue en orden", () => {
+  const repaso = verPaso(completarPrimeros(2), "inspeccion_visual");
+  assert.throws(() => completarPaso(repaso, "inspeccion_visual"), /primero/);
+  const siguiente = completarPaso(repaso, "aislamiento");
+  assert.equal(siguiente.pasosCompletados, 3);
+  assert.equal(obtenerPasoVisto(siguiente).id, "corrientes_fuga");
+});
+
+test("No deja abrir un paso que todavía no está habilitado", () => {
+  const estado = completarPrimeros(1);
+  assert.equal(obtenerPasoVisto(verPaso(estado, "resistencia_tierra")).id, "resistencia_tierra");
+  assert.throws(() => verPaso(estado, "aislamiento"), /primero/);
+  assert.throws(() => verPaso(estado, "corrientes_fuga"), /primero/);
+});
+
+test("Al completar los 4 pasos todos quedan libres", () => {
+  const estado = completarPrimeros(PASOS_PRUEBA.length);
+  assert.equal(obtenerPasoVisto(estado), null);
+  // Cualquier paso se puede abrir y queda como completado
+  for (const paso of PASOS_PRUEBA) {
+    const repaso = verPaso(estado, paso.id);
+    assert.equal(obtenerPasoVisto(repaso).id, paso.id);
+    assert.ok(pasoCompletado(repaso, paso.id));
+    assert.ok(secuenciaTerminada(repaso));
+  }
+});
+
+test("Ver un paso no modifica el estado anterior (función pura)", () => {
+  const estado = completarPrimeros(3);
+  verPaso(estado, "inspeccion_visual");
+  assert.equal(obtenerPasoVisto(estado).id, "corrientes_fuga");
+});
+
+test("El avance guardado se recupera mostrando el paso pendiente y se valida", () => {
+  assert.equal(obtenerPasoVisto(crearEstadoDesdeAvance(2)).id, "aislamiento");
+  assert.equal(obtenerPasoVisto(crearEstadoDesdeAvance(4)), null);
+  assert.throws(() => crearEstadoDesdeAvance(5), /estado/);
+  assert.throws(() => crearEstadoDesdeAvance(-1), /estado/);
+  assert.throws(() => obtenerPasoVisto({ pasosCompletados: 1, pasoVisto: 3 }), /estado/);
 });

@@ -21,18 +21,18 @@
   <meta name="description" content="Simulador educativo de la prueba de seguridad eléctrica (IEC 60601-1) del electrocardiógrafo Mindray BeneHeart R12.">
   <link rel="icon" href="data:,">
   <!-- Integridad (SRI): las huellas SHA-384 las escribe tools/sri.mjs; correrlo después de cambiar JS o CSS -->
-  <link rel="stylesheet" href="css/estilos.css" integrity="sha384-oOF2FkHTYi8C8wvSFjvyygxCK1v4QSsCOojJ2A0DZx15Kfip3kmt98UeQ81SJiMs">
+  <link rel="stylesheet" href="css/estilos.css" integrity="sha384-crhOikeLkiS3e9shXEkwcRyJn62d5Ep2o2O2t2/2xzCS0Ql3ZoDqkCYMYJ9mioQJ">
   <!-- SRI: inicio (generado por tools/sri.mjs, no editar a mano) -->
   <link rel="modulepreload" href="js/adaptadores/historial.js" integrity="sha384-lP1BTg/WUcEge6kTrPlYyCfDRi3aMNAe3seNUXphw1M2tIxXuci8eaYV138PNcs3">
-  <link rel="modulepreload" href="js/adaptadores/interfaz.js" integrity="sha384-FTvYKvsaBMRmJKsu5AcCU+fLcbw8NIfomZkK0cSVhtG8juXcw+1xI/9X1HRwtJTu">
+  <link rel="modulepreload" href="js/adaptadores/interfaz.js" integrity="sha384-YzpcpvygVsL/8Aaqy9WVCsj8f6eXW07IGl/EiL1ZzXOJtTdZCm9wN5Cx304oR+5/">
   <link rel="modulepreload" href="js/adaptadores/pdf.js" integrity="sha384-2bsaqYFrn7TfsVHh4NNg/UZ/TKFo9l/ML73tb0/wKUH5vbk0/s9G8wDUJ7o3lAWD">
   <link rel="modulepreload" href="js/adaptadores/reporte.js" integrity="sha384-tPGzrWU7ymAr563jociUekbom1lkanbfLx9tTq6TvnpgCm6Qnhzo2shfvzW0A7zi">
   <link rel="modulepreload" href="js/adaptadores/tiempo_carga.js" integrity="sha384-HJaZ87n6slac+sCKpiv4PovGknwW6qIsYSbPkXqTEJSFVD0wGqJegnc9QHmWVjjg">
   <link rel="modulepreload" href="js/adaptadores/visualizador.js" integrity="sha384-BChwXZFE8xxYeuRAKjrWvaPet2N1m+30ddtFM2qRvag6PjZnnt1gRkEKLXV0K3Lp">
   <link rel="modulepreload" href="js/nucleo/evaluador_limites.js" integrity="sha384-YGRmK4mix2YZjUNY5HRq3XmSSRyOjGl/mQBQIOZM0J3KuAobvU5Oazi0lHwwjJT2">
-  <link rel="modulepreload" href="js/nucleo/modelo_equipo.js" integrity="sha384-Jl/reOup+TAQUmBWFCVz8CXHYRtMK4/NUmF5I8g8ivPXfDeq8lXq2pwTPjyMRpv6">
+  <link rel="modulepreload" href="js/nucleo/modelo_equipo.js" integrity="sha384-Jj/vyxFcOxO62uNLtXZDrq90gkX0YgTB6vUgWqUInIz4snQx9cf84kkAIEHMAQP/">
   <link rel="modulepreload" href="js/nucleo/motor_calculo.js" integrity="sha384-a+lAytkzsbOWOm4e2wyyJAo1ZYLGrVOtsf1NCxVn6lyGoQvBx01AhwIuTUHloY1R">
-  <link rel="modulepreload" href="js/nucleo/secuencia.js" integrity="sha384-FKIHpcwKbIcHPpb1DNC/WpLa64I34nlWYzBgeRUiiJJS3AJvLHzfc26JI8YUiK9G">
+  <link rel="modulepreload" href="js/nucleo/secuencia.js" integrity="sha384-v/4SHgduYquka0rL7HHdb+Z7SFxlx6UnWtzSicOu2HWYIDc2nw7ylTx8duc2u5qj">
   <!-- SRI: fin -->
   <script type="module" src="js/main.js" integrity="sha384-tNkb5vL2b5P1psSkVFlOiH62v7ps9hHJG2GjwrEuyRmJh+rzxChjuZeFBhNrpCkQ"></script>
 </head>
@@ -75,9 +75,9 @@
           <h3>¿Por qué CF es la más estricta?</h3>
           <p>Las partes aplicadas se clasifican según qué tan cerca del corazón pueden llegar:</p>
           <ul>
-            <li><strong>B</strong> (<em>body</em>): tocan el cuerpo y pueden estar conectadas a tierra.</li>
-            <li><strong>BF</strong> (<em>body floating</em>): tocan el cuerpo y están aisladas de tierra (flotantes).</li>
-            <li><strong>CF</strong> (<em>cardiac floating</em>): flotantes y aptas para contacto directo con el corazón o muy cerca de él.</li>
+            <li><strong>B</strong> (<em>body</em>): Tocan el cuerpo y pueden estar conectadas a tierra.</li>
+            <li><strong>BF</strong> (<em>body floating</em>): Tocan el cuerpo y están aisladas de tierra (flotantes).</li>
+            <li><strong>CF</strong> (<em>cardiac floating</em>): Flotantes y aptas para contacto directo con el corazón o muy cerca de él.</li>
           </ul>
           <p>Una corriente que entra directamente al corazón (<strong>microchoque</strong>) puede causar fibrilación ventricular con apenas decenas de microamperios, unas mil veces menos que la corriente necesaria cuando entra por la piel (<strong>macrochoque</strong>). Por eso la norma le permite a una parte CF diez veces menos corriente de paciente que a las partes B y BF.</p>
         </div>
@@ -100,10 +100,11 @@
     <!-- ========================= 2. Prueba guiada ========================= -->
     <section id="seccion-prueba" class="seccion" data-seccion="prueba" hidden>
       <h2>Prueba guiada</h2>
-      <p class="introduccion">La prueba de seguridad eléctrica se hace siempre en el mismo orden. Lee el propósito de cada paso antes de ver su resultado. No se puede avanzar sin completar el paso anterior.</p>
+      <p class="introduccion">La prueba de seguridad eléctrica se hace siempre en el mismo orden. Lee el propósito de cada paso antes de ver su resultado. No se puede avanzar sin completar el paso anterior; los pasos completados (✓) se pueden volver a abrir con un clic para repasarlos.</p>
       <ol class="pasos" id="lista-pasos"></ol>
       <article class="tarjeta paso-actual" id="tarjeta-paso" aria-live="polite">
         <h3 id="paso-titulo"></h3>
+        <p class="nota nota-repaso" id="paso-repaso" hidden></p>
         <div class="paso-bloque">
           <h4>Propósito de seguridad</h4>
           <p id="paso-proposito"></p>

@@ -89,16 +89,13 @@ test("Rechaza si faltan los datos de los pasos previos", () => {
   assert.throws(() => validarParametros(datos), /aislamiento_Mohm/);
 });
 
-test("Rechaza un mínimo de aislamiento faltante, cero o una figura no entera", () => {
+test("Rechaza un mínimo de aislamiento faltante o cero", () => {
   const sinMinimo = copiaDatosReales();
   delete sinMinimo.pasos_previos_medidos.aislamiento_Mohm.red_tierra.minimo;
   assert.throws(() => validarParametros(sinMinimo), /red_tierra\.minimo/);
   const minimoCero = copiaDatosReales();
   minimoCero.pasos_previos_medidos.aislamiento_Mohm.partes_aplicadas_tierra.minimo = 0;
   assert.throws(() => validarParametros(minimoCero), /mayor que cero/);
-  const figuraMala = copiaDatosReales();
-  figuraMala.pasos_previos_medidos.aislamiento_Mohm.red_partes_aplicadas.figura_IEC_62353 = 1.5;
-  assert.throws(() => validarParametros(figuraMala), /entero positivo/);
 });
 
 test("Rechaza un valor de aislamiento vacío o negativo", () => {
