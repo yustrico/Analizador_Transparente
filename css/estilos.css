@@ -106,7 +106,6 @@ h4 { margin: 14px 0 6px; font-size: 1rem; }
 .seccion > .rejilla-dos { margin-bottom: 16px; }
 
 .nota { color: var(--texto-secundario); font-size: 0.9rem; margin: 6px 0; }
-.nota--aviso { color: var(--ambar-no-cumple); }
 .mensaje-error {
   background: #FFF4E5;
   border: 1px solid var(--ambar-no-cumple);
@@ -213,6 +212,17 @@ h4 { margin: 14px 0 6px; font-size: 1rem; }
 .grupo legend { font-weight: 600; color: var(--azul-principal); padding: 0 4px; }
 .opcion { display: block; padding: 4px 0; cursor: pointer; }
 .opcion--deshabilitada { color: var(--gris-inactivo); cursor: not-allowed; }
+/* Explicación informativa debajo de una opción deshabilitada: azul neutro con ⓘ, no es un error */
+.nota-info {
+  color: var(--azul-principal);
+  background: var(--azul-claro);
+  border-left: 3px solid var(--azul-principal);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  margin: 4px 0 6px;
+  padding: 6px 8px;
+}
+.nota-info::before { content: "ⓘ "; font-weight: 600; }
 
 .lectura__etiqueta { margin: 0; color: var(--texto-secundario); }
 .lectura__valor {

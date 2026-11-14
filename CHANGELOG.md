@@ -16,6 +16,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 - `ayuda.html`: el manual de usuario en HTML (mismos estilos, misma CSP, SRI del CSS y sin scripts), con enlace «Ayuda» arriba a la derecha del encabezado y «Volver al simulador». `tools/sri.mjs` y `tests/sri.test.js` cubren también esta página.
 
 ### Cambiado (14/11/2026, quinta ronda)
+- Analizador: las explicaciones de las opciones deshabilitadas ya no salen en naranja (parecían un error). Son notas informativas en azul con ⓘ, justo debajo de la opción deshabilitada y solo cuando aplican: fuga a tierra debajo de «Abierta» en Tierra (solo con la fuga a tierra) y doble falla debajo de la opción que quedó deshabilitada (tierra o neutro). Si al elegir fuga a tierra la tierra se cierra sola, se muestra una vez «Se cerró la tierra porque la fuga a tierra se mide con el conductor de protección conectado.»
+- Analizador: «% del límite usado» pasa a «Qué tan cerca del límite», igual que en Comparar.
 - La columna «% del límite» se llama «Qué tan cerca del límite» en Comparar, Historial y el PDF, con la nota: «Una corriente pequeña puede estar más cerca de su límite que una grande: compara la corriente de paciente CF (límite 10 µA) con la de contacto (límite 100 µA).»
 - Documentos alineados: docs/02 (RF04 con la fuga a tierra y su trazabilidad), docs/03 (ES01 y ES02 con 16 configuraciones), docs/06 §8 (factor k_N y su validación), docs/08 y docs/verificacion.md (alcance; red en parte aplicada y corriente auxiliar como trabajo futuro), manual de usuario, solución de problemas, mantenimiento (mantener `ayuda.html` igual al manual), README y CLAUDE.md.
 

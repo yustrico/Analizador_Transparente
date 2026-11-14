@@ -141,6 +141,7 @@ const TEXTOS_EXPLICACION = Object.freeze({
   limiteEquipoCompleto: "Para la fuga a tierra el límite es del equipo completo, no depende de B, BF o CF.",
   bandaIncertidumbre: "Es la exactitud del analizador real (±(1 % + 1 µA), k = 2). Si dos lecturas difieren menos que esta banda, la diferencia puede ser del instrumento y no de la condición.",
   dobleFalla: "No se pueden abrir la tierra y el neutro al mismo tiempo: serían dos fallas a la vez (doble falla). La norma evalúa una sola falla a la vez (primer defecto), por eso esa opción está deshabilitada.",
+  tierraCerradaSola: "Se cerró la tierra porque la fuga a tierra se mide con el conductor de protección conectado.",
 });
 
 /**
@@ -699,9 +700,22 @@ function cambiarDisponibilidadOpcion(nombre, valor, deshabilitada) {
 }
 
 /**
- * Deshabilita las opciones que no se pueden medir y explica por qué:
- * - tierra abierta + neutro abierto (doble falla);
- * - tierra abierta en la fuga a tierra (no hay conductor por donde circule).
+ * Muestra u oculta una explicación informativa (debajo de una opción).
+ * @param {string} id - id del párrafo.
+ * @param {string} texto - Explicación.
+ * @param {boolean} visible - true si la explicación aplica ahora.
+ */
+function mostrarNotaInfo(id, texto, visible) {
+  const nota = elemento(id);
+  nota.textContent = texto;
+  nota.hidden = !visible;
+}
+
+/**
+ * Deshabilita las opciones que no se pueden medir y explica por qué, justo
+ * debajo de la opción deshabilitada y solo cuando aplica:
+ * - tierra abierta en la fuga a tierra (no hay conductor por donde circule);
+ * - doble falla: la tierra si el neutro está abierto, el neutro si la tierra está abierta.
  * @param {string} tipoMedicion - Medición elegida.
  * @param {{tierra: string, neutro: string}} condicion - Condición elegida.
  */
@@ -711,17 +725,9 @@ function aplicarRestricciones(tipoMedicion, condicion) {
   const sinTierraPosible = !medicionPosible(tipoMedicion, { ...condicion, tierra: "abierta" });
   cambiarDisponibilidadOpcion("neutro", "abierto", tierraAbierta);
   cambiarDisponibilidadOpcion("tierra", "abierta", neutroAbierto || sinTierraPosible);
-  // Cada restricción activa suma su explicación
-  const avisos = [];
-  if (sinTierraPosible) {
-    avisos.push(MENSAJE_FUGA_SIN_TIERRA);
-  }
-  if (tierraAbierta || neutroAbierto) {
-    avisos.push(TEXTOS_EXPLICACION.dobleFalla);
-  }
-  const aviso = elemento("aviso-doble-falla");
-  aviso.textContent = avisos.join(" ");
-  aviso.hidden = avisos.length === 0;
+  mostrarNotaInfo("info-tierra-fuga", MENSAJE_FUGA_SIN_TIERRA, sinTierraPosible);
+  mostrarNotaInfo("info-tierra-doble-falla", TEXTOS_EXPLICACION.dobleFalla, neutroAbierto);
+  mostrarNotaInfo("info-neutro-doble-falla", TEXTOS_EXPLICACION.dobleFalla, tierraAbierta);
 }
 
 /**
@@ -729,11 +735,14 @@ function aplicarRestricciones(tipoMedicion, condicion) {
  * tierra), vuelve a cerrar la tierra antes de seguir.
  * @param {string} tipoMedicion - Medición elegida.
  * @param {{tierra: string}} condicion - Condición elegida.
+ * @returns {boolean} true si se cerró la tierra (para avisarlo una vez).
  */
 function corregirCondicionImposible(tipoMedicion, condicion) {
-  if (!medicionPosible(tipoMedicion, condicion)) {
-    document.querySelector('input[name="tierra"][value="cerrada"]').checked = true;
+  if (medicionPosible(tipoMedicion, condicion)) {
+    return false;
   }
+  document.querySelector('input[name="tierra"][value="cerrada"]').checked = true;
+  return true;
 }
 
 /** Deja la lectura en blanco hasta que se vuelva a medir. */
@@ -777,16 +786,18 @@ function mostrarPartesDelCircuito(parametros) {
  */
 function alCambiarControles(estado) {
   const elegido = leerSeleccion();
-  corregirCondicionImposible(elegido.tipoMedicion, elegido.condicion);
+  const seCerroLaTierra = corregirCondicionImposible(elegido.tipoMedicion, elegido.condicion);
   const { tipoMedicion, condicion } = leerSeleccion();
   aplicarRestricciones(tipoMedicion, condicion);
+  // El aviso de la tierra cerrada sola se ve una vez: desaparece con el siguiente cambio
+  mostrarNotaInfo("info-tierra-cerrada-sola", TEXTOS_EXPLICACION.tierraCerradaSola, seCerroLaTierra);
   estado.visualizador.borrarCamino();
   estado.visualizador.mostrarCondicion(condicion, tipoMedicion);
   limpiarLectura();
 }
 
 /**
- * Muestra la lectura grande, el límite, el % del límite, el veredicto y los límites B/BF/CF.
+ * Muestra la lectura grande, el límite, qué tan cerca del límite está, el veredicto y los límites B/BF/CF.
  * @param {object} resultado - Resultado evaluado (M4 + M5).
  */
 function mostrarLectura(resultado) {
