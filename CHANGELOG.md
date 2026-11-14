@@ -17,6 +17,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
   - Unidades: cada valor de las tablas lleva su unidad («100 µA», «0.00 ± 1.15 µA») en la tabla de límites, la tabla B/BF/CF del Analizador, Comparar, el historial, el reporte y el PDF; se quita «(µA)» de títulos y encabezados de tabla. Los títulos de las gráficas de Comparar conservan «(µA)» porque las marcas del eje son números sin unidad. En el PDF cada lectura y cada límite siguen cabiendo en un solo renglón.
   - Bloque plegable (cerrado por defecto) con el significado de «corriente de contacto», «corriente de paciente», «condición normal» y «primer defecto»: «¿Qué significan estos términos?» debajo de la tabla de límites y «¿Qué estoy midiendo?» junto al selector de Medición. Los dos salen de la misma lista de textos en `interfaz.js`.
   - «¿Por qué CF es la más estricta?»: frase del microchoque corregida (decenas de microamperios, unas mil veces menos que el macrochoque).
+- Segunda ronda de correcciones de textos (sin cambios en cálculos ni en las pruebas del núcleo):
+  - Fila Normas: cada norma en su propio renglón.
+  - Glosarios plegables: un renglón por término con el formato «Término: Explicación» (explicación con mayúscula inicial); «UNA» pasa a «una». No quedan palabras en mayúsculas para dar énfasis en la página ni en el PDF.
+  - Columna Condición con mayúscula inicial en la tabla de límites («Condición normal», «Primer defecto»); las demás tablas y el PDF ya la tenían.
+  - Prueba guiada, pasos 1 a 3: cada resultado dice qué se revisó o midió, el valor con su unidad (un renglón por punto) y qué significa. Paso 1: los 5 puntos de la inspección con su estado. Paso 2: «< 0.015 Ω», límite ≤ 0.2 Ω (manual del fabricante) y «Cumple», calculado comparando el valor con el límite del JSON. Paso 3: los 3 valores en MΩ y qué significan; no se da veredicto porque los datos no tienen un límite de aislamiento.
 
 ## [1.0.0] - 2026-11-13
 Primera versión publicada en GitHub Pages: https://yustrico.github.io/Analizador_Transparente/

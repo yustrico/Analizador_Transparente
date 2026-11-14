@@ -119,8 +119,13 @@ h4 { margin: 14px 0 6px; font-size: 1rem; }
 .glosario { margin-top: 12px; border: 1px solid var(--borde); border-radius: var(--radio); padding: 6px 12px; }
 .glosario summary { cursor: pointer; font-weight: 600; color: var(--azul-principal); }
 .glosario__lista { margin: 8px 0 4px; }
-.glosario__lista dt { font-weight: 600; margin-top: 6px; }
-.glosario__lista dd { margin: 2px 0 0; }
+
+/* Lista sin viñetas: un renglón por elemento ("Término: explicación") */
+.lista-simple { list-style: none; margin: 8px 0; padding: 0; }
+.lista-simple li { margin: 4px 0; }
+
+/* Prueba guiada: frase que presenta el resultado de cada paso */
+.paso-resultado__intro { font-weight: 600; color: var(--azul-principal); margin: 0 0 6px; }
 
 /* ---------- Botones ---------- */
 .boton {

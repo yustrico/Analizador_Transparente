@@ -61,7 +61,39 @@ const DECIMALES_REACTANCIA = 1;
 const DECIMALES_CORRIENTE_POR_FARADIO = 2;
 
 /** Nombres para mostrar. */
-const NOMBRES_ESTADO = Object.freeze({ normal: "condición normal", primer_defecto: "primer defecto" });
+const NOMBRES_ESTADO = Object.freeze({ normal: "Condición normal", primer_defecto: "Primer defecto" });
+/**
+ * Paso 1 (inspección visual): puntos revisados y su estado. Es el detalle de
+ * "Sin hallazgos (carcasa, contaminación, cableado, etiquetas, piezas: Bien)"
+ * de pasos_previos_medidos.inspeccion_visual.
+ */
+const PUNTOS_INSPECCION = Object.freeze([
+  ["Carcasa", "Sin daños"],
+  ["Cable de poder y enchufe", "En buen estado"],
+  ["Etiquetas", "Legibles"],
+  ["Contaminación", "Limpio"],
+  ["Piezas", "Completas"],
+]);
+
+/** Textos del resultado de los pasos 1 a 3 de la prueba guiada. */
+const TEXTOS_RESULTADO_PASO = Object.freeze({
+  inspeccionIntro: "Resultado de la inspección del R12 del laboratorio: el equipo pasó la inspección. Estos fueron los puntos revisados:",
+  tierraIntro: "Resultado de la medición en el R12 del laboratorio: se midió la resistencia del conductor de protección, entre la clavija de tierra del cable de poder y el chasis metálico.",
+  tierraFuenteLimite: "manual del fabricante del R12",
+  tierraCumple: "Cumple: la resistencia es menor que el límite, así que el chasis está bien unido a tierra y la corriente de fuga tiene un camino de muy baja resistencia que no pasa por la persona. Se escribe «<» porque el valor real es tan pequeño que queda por debajo de la exactitud del analizador.",
+  tierraNoCumple: "No cumple: la resistencia supera el límite, así que la tierra no garantiza un camino de baja resistencia para la corriente de fuga.",
+  tierraSinComparar: "No se pudo comparar el valor medido con el límite.",
+  aislamientoIntro: "Resultado de la medición en el R12 del laboratorio: se midió la resistencia de aislamiento entre tres pares de puntos.",
+  aislamientoSignificado: "Qué significa: los tres valores son de megaohmios, es decir, el aislamiento es muy alto y casi no deja pasar corriente. OL quiere decir que la resistencia superó el rango del analizador. Los datos de esta herramienta no traen un límite para esta prueba, por eso aquí no se indica si cumple o no.",
+});
+
+/** Unidades de los pasos 2 y 3. */
+const UNIDAD_RESISTENCIA_TIERRA = "Ω";
+const UNIDAD_AISLAMIENTO = "MΩ";
+
+/** Valor escrito como cota superior, por ejemplo "< 0.015". */
+const PATRON_COTA_SUPERIOR = /^<\s*(\d+(?:\.\d+)?)$/;
+
 const ETIQUETAS_AISLAMIENTO = Object.freeze({
   red_tierra: "Red – tierra",
   partes_aplicadas_tierra: "Partes aplicadas – tierra",
@@ -96,10 +128,10 @@ const TEXTOS_EXPLICACION = Object.freeze({
  * (debajo de la tabla de límites y junto al selector de Medición).
  */
 const TERMINOS_GLOSARIO = Object.freeze([
-  ["Corriente de contacto", "la que pasaría por una persona que toca la carcasa del equipo."],
-  ["Corriente de paciente", "la que pasaría desde los electrodos, a través del paciente, hacia tierra."],
-  ["Condición normal", "todas las protecciones del equipo funcionan."],
-  ["Primer defecto", "falla UNA sola protección (tierra de protección abierta o neutro abierto). La norma permite un límite más alto porque es una situación temporal; dos fallas a la vez no se evalúan."],
+  ["Corriente de contacto", "La que pasaría por una persona que toca la carcasa del equipo."],
+  ["Corriente de paciente", "La que pasaría desde los electrodos, a través del paciente, hacia tierra."],
+  ["Condición normal", "Todas las protecciones del equipo funcionan."],
+  ["Primer defecto", "Falla una sola protección (tierra de protección abierta o neutro abierto). La norma permite un límite más alto porque es una situación temporal; dos fallas a la vez no se evalúan."],
 ]);
 
 /** Qué aporta cada norma, para la ficha del equipo. */
@@ -178,7 +210,12 @@ function mostrarEquipo(parametros) {
   elemento("ficha-nombre").textContent = equipo.nombre;
   elemento("ficha-clase").textContent = equipo.clase;
   elemento("ficha-parte").textContent = equipo.parte_aplicada;
-  elemento("ficha-normas").textContent = `${equipo.norma_general} (${PAPEL_NORMA_GENERAL}) · ${equipo.norma_particular} (${PAPEL_NORMA_PARTICULAR})`;
+  // Cada norma en su propio renglón
+  elemento("ficha-normas").replaceChildren(
+    `${equipo.norma_general} (${PAPEL_NORMA_GENERAL})`,
+    document.createElement("br"),
+    `${equipo.norma_particular} (${PAPEL_NORMA_PARTICULAR})`,
+  );
   elemento("ficha-fuente").textContent = `Fuente de los datos: ${parametros.fuente}.`;
 
   const cuerpo = elemento("tabla-limites-equipo").querySelector("tbody");
@@ -203,6 +240,19 @@ function mostrarEquipo(parametros) {
 }
 
 /**
+ * Agrega a una lista un renglón "Término: texto", con el término en negrita.
+ * @param {HTMLElement} lista - Elemento ul.
+ * @param {string} termino - Término.
+ * @param {string} texto - Explicación o valor.
+ */
+function agregarLineaTermino(lista, termino, texto) {
+  const linea = document.createElement("li");
+  crearConTexto("strong", `${termino}:`, linea);
+  linea.append(` ${texto}`);
+  lista.appendChild(linea);
+}
+
+/**
  * Llena los bloques plegables del glosario (marcados con data-glosario) con
  * los mismos términos, para que el texto sea igual en todos.
  */
@@ -211,8 +261,7 @@ function mostrarGlosario() {
   for (const lista of document.querySelectorAll("[data-glosario]")) {
     lista.replaceChildren();
     for (const [termino, explicacion] of TERMINOS_GLOSARIO) {
-      crearConTexto("dt", termino, lista);
-      crearConTexto("dd", explicacion, lista);
+      agregarLineaTermino(lista, termino, explicacion);
     }
   }
 }
@@ -287,28 +336,81 @@ function configurarNavegacion(estado) {
 /* ------------------------------------------------------------------------ */
 
 /**
- * Escribe en una lista de definiciones (dl) el resultado medido de un paso.
- * @param {HTMLElement} lista - Elemento dl.
+ * Escribe un valor con su unidad. Si el valor trae una nota entre paréntesis,
+ * la unidad va antes de la nota: "> 100 (OL)" → "> 100 MΩ (OL)".
+ * @param {number|string} valor - Valor del JSON.
+ * @param {string} unidad - Unidad.
+ * @returns {string} Texto con la unidad.
+ */
+function textoConUnidad(valor, unidad) {
+  const texto = String(valor);
+  const inicioNota = texto.indexOf(" (");
+  if (inicioNota === -1) {
+    return `${texto} ${unidad}`;
+  }
+  return `${texto.slice(0, inicioNota)} ${unidad}${texto.slice(inicioNota)}`;
+}
+
+/**
+ * Valor máximo que puede tener una medición: el número mismo, o el número de
+ * una cota superior como "< 0.015".
+ * @param {number|string} valor - Valor del JSON.
+ * @returns {number} Valor máximo, o NaN si no se puede interpretar.
+ */
+function valorMaximoMedido(valor) {
+  if (typeof valor === "number") {
+    return valor;
+  }
+  const coincidencia = PATRON_COTA_SUPERIOR.exec(String(valor).trim());
+  return coincidencia ? Number(coincidencia[1]) : Number.NaN;
+}
+
+/**
+ * Frase que dice si la resistencia de tierra cumple su límite y por qué.
+ * @param {{valor: number|string, limite: number}} dato - Resistencia medida y límite (Ω).
+ * @returns {string} Frase.
+ */
+function significadoResistenciaTierra(dato) {
+  const maximo_ohm = valorMaximoMedido(dato.valor);
+  if (!Number.isFinite(maximo_ohm)) {
+    return TEXTOS_RESULTADO_PASO.tierraSinComparar;
+  }
+  return maximo_ohm <= dato.limite ? TEXTOS_RESULTADO_PASO.tierraCumple : TEXTOS_RESULTADO_PASO.tierraNoCumple;
+}
+
+/**
+ * Escribe el resultado de un paso de la prueba guiada: una frase que dice qué
+ * se hizo, una lista "Punto: valor" (un renglón por punto) y, en los pasos 2
+ * y 3, una frase que explica qué significa.
  * @param {string} claveDato - Campo de pasos_previos_medidos.
  * @param {object} pasosPrevios - Objeto pasos_previos_medidos del JSON.
  */
-function escribirResultadoPaso(lista, claveDato, pasosPrevios) {
+function escribirResultadoPaso(claveDato, pasosPrevios) {
   const dato = pasosPrevios[claveDato];
+  const intro = elemento("paso-resultado-intro");
+  const lista = elemento("paso-resultado");
+  const significado = elemento("paso-resultado-significado");
   lista.replaceChildren();
+  significado.textContent = "";
+
   if (claveDato === "inspeccion_visual") {
-    crearConTexto("dt", "Hallazgos", lista);
-    crearConTexto("dd", dato, lista);
-  } else if (claveDato === "resistencia_tierra_ohm") {
-    crearConTexto("dt", "Resistencia medida", lista);
-    crearConTexto("dd", `${dato.valor} Ω`, lista);
-    crearConTexto("dt", "Límite", lista);
-    crearConTexto("dd", `≤ ${dato.limite} Ω`, lista);
-  } else if (claveDato === "aislamiento_Mohm") {
-    // Una fila por cada par de puntos medidos
-    for (const [clave, valor] of Object.entries(dato)) {
-      crearConTexto("dt", ETIQUETAS_AISLAMIENTO[clave] ?? clave, lista);
-      crearConTexto("dd", `${valor} MΩ`, lista);
+    intro.textContent = TEXTOS_RESULTADO_PASO.inspeccionIntro;
+    // Un renglón por cada punto revisado
+    for (const [punto, estadoPunto] of PUNTOS_INSPECCION) {
+      agregarLineaTermino(lista, punto, estadoPunto);
     }
+  } else if (claveDato === "resistencia_tierra_ohm") {
+    intro.textContent = TEXTOS_RESULTADO_PASO.tierraIntro;
+    agregarLineaTermino(lista, "Resistencia medida", textoConUnidad(dato.valor, UNIDAD_RESISTENCIA_TIERRA));
+    agregarLineaTermino(lista, "Límite", `≤ ${dato.limite} ${UNIDAD_RESISTENCIA_TIERRA} (${TEXTOS_RESULTADO_PASO.tierraFuenteLimite})`);
+    significado.textContent = significadoResistenciaTierra(dato);
+  } else if (claveDato === "aislamiento_Mohm") {
+    intro.textContent = TEXTOS_RESULTADO_PASO.aislamientoIntro;
+    // Un renglón por cada par de puntos medidos
+    for (const [clave, valor] of Object.entries(dato)) {
+      agregarLineaTermino(lista, ETIQUETAS_AISLAMIENTO[clave] ?? clave, textoConUnidad(valor, UNIDAD_AISLAMIENTO));
+    }
+    significado.textContent = TEXTOS_RESULTADO_PASO.aislamientoSignificado;
   }
 }
 
@@ -359,7 +461,7 @@ function mostrarPasoActual(estado) {
   // Los pasos 1 a 3 muestran su valor medido; el 4 lleva al Analizador
   bloqueResultado.hidden = paso.claveDatoMedido === null;
   if (paso.claveDatoMedido !== null) {
-    escribirResultadoPaso(elemento("paso-resultado"), paso.claveDatoMedido, estado.parametros.pasos_previos_medidos);
+    escribirResultadoPaso(paso.claveDatoMedido, estado.parametros.pasos_previos_medidos);
   }
   boton.textContent = paso.claveDatoMedido === null ? "Ir al Analizador" : "Entendido, siguiente paso";
 }
@@ -500,7 +602,7 @@ function alCambiarControles(estado) {
 function mostrarLectura(resultado) {
   elemento("lectura-etiqueta").textContent = `${NOMBRES_MEDICION[resultado.tipoMedicion]} · ${describirCondicion(resultado.condicion)}`;
   elemento("lectura-valor").textContent = `${textoLectura(resultado)} µA`;
-  elemento("lectura-limite").textContent = `${resultado.limite_uA} µA (parte CF, ${NOMBRES_ESTADO[resultado.estadoCondicion]})`;
+  elemento("lectura-limite").textContent = `${resultado.limite_uA} µA (parte CF, ${NOMBRES_ESTADO[resultado.estadoCondicion].toLowerCase()})`;
   elemento("lectura-porcentaje").textContent = textoPorcentaje(resultado.porcentajeDelLimite);
   const veredicto = elemento("lectura-veredicto");
   const cumple = resultado.veredicto === VEREDICTO_CUMPLE;
