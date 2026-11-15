@@ -153,7 +153,7 @@ index.html · ayuda.html (manual en HTML, sin scripts) · css/estilos.css · js/
 js/nucleo/{secuencia,modelo_equipo,motor_calculo,evaluador_limites}.js
 js/adaptadores/{interfaz,visualizador,historial,reporte,pdf,tiempo_carga}.js
 datos/parametros_r12.json
-tests/{motor_calculo,evaluador_limites,secuencia,modelo_equipo,es02_validacion,historial,pdf,sri,sintaxis,tiempo_carga}.test.js
+tests/{motor_calculo,evaluador_limites,secuencia,modelo_equipo,es02_validacion,historial,pdf,sri,sintaxis,tiempo_carga,version}.test.js
 tools/sri.mjs (calcula los hashes SHA-384 de los JS y CSS y los escribe en index.html y ayuda.html; agrega "?v=" con parte del hash a cada URL y a los import entre módulos) · tools/peso.mjs (suma el peso descargado, ES05)
 docs/ (nuestros documentos + manual_usuario.md, solucion_problemas.md, mantenimiento.md, verificacion.md)
 README.md · LICENSE (MIT) · CHANGELOG.md · CLAUDE.md · .gitignore

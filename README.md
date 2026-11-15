@@ -1,6 +1,6 @@
 # Analizador Transparente
 
-Simulador web para aprender la prueba de seguridad eléctrica (IEC 60601-1) del electrocardiógrafo **Mindray BeneHeart R12** (Clase I, partes aplicadas tipo CF a prueba de desfibrilación), como la haría un analizador tipo **Fluke ESA620**, pero "transparente": muestra por dentro el camino de la corriente y explica cada lectura.
+Simulador web para aprender las pruebas de seguridad eléctrica (IEC 60601-1) del electrocardiógrafo **Mindray BeneHeart R12** (Clase I, partes aplicadas tipo CF a prueba de desfibrilación), como la haría un analizador tipo **Fluke ESA620**, pero "transparente": muestra por dentro el camino de la corriente y explica cada lectura.
 
 Proyecto de Diseño Biomédico 1 — Universidad Autónoma de Occidente (UAO), Cali, 2026.
 Autores: Yustin Rico, David Cardona y Santiago González.

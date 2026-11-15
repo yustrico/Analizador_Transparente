@@ -5,6 +5,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Cambiado (14/11/2026, novena ronda: textos, sin cambios en cálculos)
+- Subtítulo del encabezado: «Pruebas de seguridad eléctrica al electrocardiógrafo Mindray BeneHeart R12» (sin «(IEC 60601-1)»). Plural también en la descripción de la página, la introducción de la prueba guiada, la ayuda, el manual y el README.
+- Ayuda y manual (iguales): títulos en forma de pregunta («1. ¿Qué es y para qué sirve?», «2. ¿Qué necesitas?», «3. ¿Cómo se abre?», «4. ¿Cómo se hace la práctica, paso a paso?», «5. ¿Qué pasa con tus datos?», «6. ¿Cómo se leen los números?», «7. ¿De dónde salen los datos?», «8. ¿Qué hago si algo no funciona?»); «simula las pruebas»; texto nuevo sobre el uso en celular; «No se pueden saltar pasos».
+- `tests/version.test.js`: la versión de la ayuda, el manual y el README debe ser la de package.json. 123 pruebas en verde.
+
 ### Cambiado (14/11/2026, octava ronda: textos y PDF, sin cambios en cálculos)
 - Ficha del equipo: «Clase: Clase I (protección contra choque eléctrico)» en un renglón; Normas con IEC 60601-1, IEC 60601-2-25 e IEC 62353, una por renglón (IEC 62353 se agrega al JSON como `equipo.norma_pruebas_periodicas` y M3 la valida). El bloque plegable se llama «¿Qué significa cada dato?»: Clase I, Tipo CF, A prueba de desfibrilación, IEC 60601-1, IEC 60601-2-25 e IEC 62353.
 - Reporte (pantalla y PDF): título «Reporte de práctica: pruebas de seguridad eléctrica»; Normas con las tres normas, una por renglón; sin la fila «Más cerca del límite» (sigue en «Copiar resumen»); «¿Cómo se lee la incertidumbre?».

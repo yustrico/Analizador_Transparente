@@ -48,7 +48,7 @@ Las versiones siguen [SemVer](https://semver.org/lang/es/): **MAYOR.MENOR.PARCHE
 Pasos:
 1. `npm run sri && npm test && npm run peso`.
 2. En `CHANGELOG.md`, cambia *Sin publicar* por `[x.y.z] - AAAA-MM-DD`.
-3. Cambia `"version"` en `package.json`.
+3. Cambia `"version"` en `package.json` y el texto «Versión x.y.z» de `ayuda.html`, `docs/manual_usuario.md` y `README.md` (`npm test` falla si no coinciden: `tests/version.test.js`).
 4. Commit firmado: `git commit -m "Versión x.y.z"`.
 5. Etiqueta firmada: `git tag -s vx.y.z -m "Versión x.y.z"` y `git push --follow-tags`.
 6. Espera a que la pestaña *Actions* esté en verde. Después abre la página publicada y repite la revisión del punto 1 (navegadores).
