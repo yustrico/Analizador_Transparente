@@ -92,7 +92,7 @@ Después de generar el reporte puedes volver a medir y generarlo otra vez.
 - **Qué tan cerca del límite:** una corriente pequeña puede estar más cerca de su límite que una grande: compara la corriente de paciente CF (límite 10 µA) con la de contacto (límite 100 µA).
 
 ## 7. ¿De dónde salen los datos?
-Los valores del simulador están calibrados con mediciones reales del Fluke ESA620 sobre el electrocardiógrafo Mindray BeneHeart R12 serie FN-84011415 (3 repeticiones por condición). El detalle de las mediciones y de la calibración está en `docs/06_Datos_ECG_R12_calibracion.md`.
+Los valores del simulador están calibrados con mediciones reales del Fluke ESA620 sobre el electrocardiógrafo Mindray BeneHeart R12 serie FN-84011415 (3 repeticiones por condición). Los parámetros del modelo (C_L, C_N, C_AP, ΔI y k_N) se calcularon con mediciones del R12 en polaridad normal y se comprobaron con las mediciones en polaridad invertida (E_n ≤ 0,19 en las 16 configuraciones). El detalle de las mediciones y de la calibración está en `docs/06_Datos_ECG_R12_calibracion.md`.
 
 ## 8. ¿Qué hago si algo no funciona?
 Consulta [solucion_problemas.md](solucion_problemas.md).

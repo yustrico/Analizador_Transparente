@@ -243,6 +243,8 @@ h4 { margin: 14px 0 6px; font-size: 1rem; }
 .formula p { margin: 4px 0; font-family: ui-monospace, Consolas, monospace; font-size: 0.95rem; }
 .simbolos { margin: 4px 0 10px; padding-left: 20px; }
 .simbolos li { margin: 2px 0; }
+/* De dónde sale un parámetro calibrado: en su propio renglón, más discreto */
+.simbolos__origen { display: block; margin: 2px 0 6px; color: var(--texto-secundario); font-size: 0.9rem; }
 .partes-circuito { border-top: 1px solid var(--borde); margin-top: 12px; padding-top: 4px; }
 .ficha--partes { grid-template-columns: 230px 1fr; font-size: 0.92rem; }
 

@@ -19,7 +19,7 @@ import {
   pasoDisponible, pasoCompletado, verPaso,
 } from "../nucleo/secuencia.js?v=bffe121e07";
 import {
-  calcularMedicion, corrientePorFaradio_A_F, capacitanciaDeFuga_F, capacitanciaFugaATierra_F, listarConfiguraciones,
+  calcularMedicion, capacitanciaDeFuga_F, capacitanciaFugaATierra_F, listarConfiguraciones,
   medicionPosible, MENSAJE_FUGA_SIN_TIERRA,
 } from "../nucleo/motor_calculo.js?v=efa73aed55";
 import {
@@ -65,10 +65,8 @@ const MICROAMPERIOS_POR_AMPERIO = 1e6;
 const OHMIOS_POR_MEGAOHMIO = 1e6;
 const OHMIOS_POR_KILOOHMIO = 1e3;
 
-/** Decimales para capacitancias (pF), reactancia (MΩ) y la constante V·2πf (A/F). */
+/** Decimales para capacitancias (pF). */
 const DECIMALES_CAPACITANCIA = 1;
-const DECIMALES_REACTANCIA = 1;
-const DECIMALES_CORRIENTE_POR_FARADIO = 2;
 
 /** Nombres para mostrar. */
 const NOMBRES_ESTADO = Object.freeze({ normal: "Condición normal", primer_defecto: "Primer defecto" });
@@ -854,109 +852,201 @@ function textosDeExplicacion(resultado) {
 }
 
 /**
- * Significado de cada sigla de las fórmulas, con su nombre completo y su valor.
- * Se muestra ANTES de la fórmula, para que la primera vez que el estudiante
- * vea una sigla ya sepa qué es.
- * @param {object} parametros - Parámetros validados (M3).
- * @param {number} [capacitanciaActiva_F] - Capacitancia usada en contacto (para X_C), en F.
- * @returns {Record<string, string>} Texto de cada sigla.
+ * De dónde sale cada parámetro calibrado con las mediciones del R12
+ * (docs/06_Datos_ECG_R12_calibracion.md §3 y §8). Son textos para el
+ * estudiante: los valores que usa el cálculo vienen del JSON.
  */
-function significadoDeSiglas(parametros, capacitanciaActiva_F) {
-  const capacitancia_pF = (nombre) =>
-    (parametros.capacitancias_F[nombre] * PICOFARADIOS_POR_FARADIO).toFixed(DECIMALES_CAPACITANCIA);
+const ORIGEN_PARAMETROS = Object.freeze({
+  C_L: "De dónde sale: de la fuga a tierra medida en el R12 en condición normal con polaridad normal (14.73 µA). Despejando la ley de Ohm: X_C = 120 V ÷ 14.73 µA ≈ 8.14 MΩ y C_L = 1 ÷ (2π · 60 Hz · X_C) ≈ 325.7 pF.",
+  C_N: "De dónde sale: se tomó igual a C_L, porque en este equipo los capacitores de fase y de neutro son simétricos. Se comprobó con la fuga a tierra en polaridad invertida: 14.90 µA medidos frente a 14.73 µA del modelo.",
+  C_AP: "De dónde sale: de la corriente de paciente CF medida en condición normal con polaridad normal (1.27 µA). Igual que C_L: X_C = 120 V ÷ 1.27 µA ≈ 94.7 MΩ y C_AP = 1 ÷ (2π · 60 Hz · X_C) ≈ 28.0 pF.",
+  DELTA: "De dónde sale: es la diferencia entre la corriente de paciente CF medida con la tierra abierta y la medida en condición normal, ambas con polaridad normal: 2.10 µA − 1.27 µA = 0.83 µA.",
+  K_N: "De dónde sale: se calculó con mediciones del R12: (27.13 µA con neutro abierto ÷ 14.73 µA en condición normal) − 1 = 0.84. Indica que, al abrir el neutro, ese lado queda a ~84 % de la tensión de fase.",
+});
+
+/** Cifras significativas para mostrar la reactancia X_C en MΩ (así I = V / X_C da la misma lectura). */
+const CIFRAS_REACTANCIA = 5;
+
+/** Primera línea de la fórmula: la ley física que se usa en todas las mediciones. */
+const LINEA_LEY_DE_OHM = "Fórmula: ley de Ohm en un capacitor, I = V / X_C, con X_C = 1/(2πfC) (reactancia capacitiva).";
+
+/**
+ * Significado de cada sigla de las fórmulas, con su nombre completo, su valor
+ * y, si es un parámetro calibrado, de dónde sale. Se muestra ANTES de la
+ * fórmula, para que la primera vez que el estudiante vea una sigla ya sepa qué es.
+ * @param {object} parametros - Parámetros validados (M3).
+ * @returns {Record<string, {texto: string, origen?: string}>} Texto (y origen) de cada sigla.
+ */
+function significadoDeSiglas(parametros) {
+  const capacitancia_pF = (nombre) => textoCapacitancia_pF(parametros.capacitancias_F[nombre]);
   const { V_rms, f_Hz } = parametros.red;
-  const corrientePorFaradio = corrientePorFaradio_A_F(parametros).toFixed(DECIMALES_CORRIENTE_POR_FARADIO);
-  const significados = {
-    I: "I (corriente que pasa por la MD, el cuerpo humano simulado: es lo que lee el analizador)",
-    I_TIERRA: "I (corriente que circula por el conductor de protección hacia la tierra: es lo que lee el analizador)",
-    K_N: `k_N (factor empírico de la fuga a tierra con neutro abierto, calibrado en el laboratorio: 27.13 µA / 14.73 µA − 1) = ${parametros.factor_neutro_abierto_fuga_tierra}`,
-    VF: `V·2πf (tensión de la red V = ${V_rms} V, por 2π, por la frecuencia f = ${f_Hz} Hz) = ${corrientePorFaradio} A/F`,
-    C_L: `C_L (capacitancia de fuga entre fase y chasis) = ${capacitancia_pF("C_L")} pF`,
-    C_N: `C_N (capacitancia de fuga entre neutro y chasis) = ${capacitancia_pF("C_N")} pF`,
-    C_AP: `C_AP (capacitancia del aislamiento entre la red y los electrodos) = ${capacitancia_pF("C_AP")} pF`,
-    R_PE: `R_PE (resistencia del conductor de protección, PE) = ${parametros.R_PE_ohm} Ω`,
-    R_MD: `R_MD (resistencia de la MD, el cuerpo humano simulado) = ${parametros.R_MD_ohm} Ω`,
-    DELTA: `ΔI (aumento de corriente medido en el laboratorio con la tierra abierta; término empírico) = ${formatearCorriente_uA(parametros.delta_paciente_tierra_abierta_A * MICROAMPERIOS_POR_AMPERIO)} µA`,
-    U: `U (incertidumbre expandida del analizador real, k = ${parametros.exactitud_analizador.k})`,
+  return {
+    I: { texto: "I (corriente que pasa por la MD, el cuerpo humano simulado: es lo que lee el analizador)" },
+    I_TIERRA: { texto: "I (corriente que circula por el conductor de protección hacia la tierra: es lo que lee el analizador)" },
+    I_FUGA: { texto: "I_fuga (fuga capacitiva total del equipo, antes de repartirse entre el conductor de protección y la persona)" },
+    I_BARRERA: { texto: "I_barrera (corriente que cruza el aislamiento entre la red y los electrodos)" },
+    V: { texto: `V (tensión de la red) = ${V_rms} V` },
+    F: { texto: `f (frecuencia de la red) = ${f_Hz} Hz` },
+    X_C: { texto: "X_C (reactancia capacitiva: cuánto se opone el capacitor a la corriente alterna; entre más pequeño el capacitor, más grande X_C)" },
+    C_L: { texto: `C_L (capacitancia de fuga entre fase y chasis) = ${capacitancia_pF("C_L")} pF`, origen: ORIGEN_PARAMETROS.C_L },
+    C_N: { texto: `C_N (capacitancia de fuga entre neutro y chasis) = ${capacitancia_pF("C_N")} pF`, origen: ORIGEN_PARAMETROS.C_N },
+    C_TOTAL: { texto: "C_total (las dos capacitancias de fuga juntas: con el neutro abierto ambos lados de la red quedan a tensión de fase)" },
+    C_EQ: { texto: "C_eq (capacitancia equivalente de la fuga a tierra con el neutro abierto)" },
+    C_AP: { texto: `C_AP (capacitancia del aislamiento entre la red y los electrodos) = ${capacitancia_pF("C_AP")} pF`, origen: ORIGEN_PARAMETROS.C_AP },
+    K_N: { texto: `k_N (factor empírico de la fuga a tierra con neutro abierto) = ${parametros.factor_neutro_abierto_fuga_tierra}`, origen: ORIGEN_PARAMETROS.K_N },
+    R_PE: { texto: `R_PE (resistencia del conductor de protección, PE) = ${parametros.R_PE_ohm} Ω` },
+    R_MD: { texto: `R_MD (resistencia de la MD, el cuerpo humano simulado) = ${parametros.R_MD_ohm} Ω` },
+    DELTA: { texto: `ΔI (aumento de la corriente de paciente con la tierra abierta; término empírico) = ${formatearCorriente_uA(parametros.delta_paciente_tierra_abierta_A * MICROAMPERIOS_POR_AMPERIO)} µA`, origen: ORIGEN_PARAMETROS.DELTA },
+    U: { texto: `U (incertidumbre expandida del analizador real, k = ${parametros.exactitud_analizador.k})` },
   };
-  // X_C solo tiene sentido cuando hay una capacitancia de contacto
-  if (capacitanciaActiva_F !== undefined) {
-    const reactancia_Mohm = 1 / (2 * Math.PI * f_Hz * capacitanciaActiva_F) / OHMIOS_POR_MEGAOHMIO;
-    significados.X_C = `X_C (reactancia capacitiva: cuánto se opone el capacitor a la corriente alterna) = 1/(2πf·C) ≈ ${reactancia_Mohm.toFixed(DECIMALES_REACTANCIA)} MΩ`;
+}
+
+/**
+ * Capacitancia en pF, como texto, con un decimal.
+ * @param {number} capacitancia_F - Capacitancia, en F.
+ * @returns {string} Por ejemplo "325.7".
+ */
+function textoCapacitancia_pF(capacitancia_F) {
+  return (capacitancia_F * PICOFARADIOS_POR_FARADIO).toFixed(DECIMALES_CAPACITANCIA);
+}
+
+/**
+ * Reactancia capacitiva X_C = 1 / (2π·f·C), como texto en MΩ.
+ * @param {number} capacitancia_F - Capacitancia, en F.
+ * @param {number} frecuencia_Hz - Frecuencia de la red, en Hz.
+ * @returns {string} Por ejemplo "8.1442".
+ */
+function textoReactancia_Mohm(capacitancia_F, frecuencia_Hz) {
+  const reactancia_ohm = 1 / (2 * Math.PI * frecuencia_Hz * capacitancia_F);
+  return (reactancia_ohm / OHMIOS_POR_MEGAOHMIO).toPrecision(CIFRAS_REACTANCIA);
+}
+
+/**
+ * Los dos pasos de la ley de Ohm en un capacitor: primero X_C y luego I = V / X_C.
+ * @param {object} datos - Datos de los dos pasos.
+ * @param {string} datos.nombreC - Sigla de la capacitancia ("C_L", "C_eq"...).
+ * @param {number} datos.capacitancia_F - Capacitancia, en F.
+ * @param {string} datos.nombreI - Sigla de la corriente ("I", "I_fuga"...).
+ * @param {number} datos.corriente_uA - Corriente que resulta (la del motor de cálculo), en µA.
+ * @param {object} red - Datos de la red ({V_rms, f_Hz}).
+ * @returns {string[]} Las dos líneas.
+ */
+function pasosLeyDeOhm({ nombreC, capacitancia_F, nombreI, corriente_uA }, red) {
+  const reactancia_Mohm = textoReactancia_Mohm(capacitancia_F, red.f_Hz);
+  return [
+    `X_C = 1 / (2π·f·${nombreC}) = 1 / (2π · ${red.f_Hz} Hz · ${textoCapacitancia_pF(capacitancia_F)} pF) = ${reactancia_Mohm} MΩ`,
+    `${nombreI} = V / X_C = ${red.V_rms} V / ${reactancia_Mohm} MΩ = ${formatearCorriente_uA(corriente_uA)} µA`,
+  ];
+}
+
+/**
+ * Fórmula de la fuga a tierra: toda la fuga capacitiva vuelve por el conductor de protección.
+ * @param {object} resultado - Resultado evaluado.
+ * @param {object} parametros - Parámetros validados (M3).
+ * @returns {{siglas: string[], lineas: string[]}} Siglas usadas y líneas de la fórmula.
+ */
+function formulaFugaATierra(resultado, parametros) {
+  const { condicion } = resultado;
+  const capacitancia_F = capacitanciaFugaATierra_F(condicion, parametros);
+  const [activa, otra] = condicion.polaridad === "normal" ? ["C_L", "C_N"] : ["C_N", "C_L"];
+  const pasos = { capacitancia_F, nombreI: "I", corriente_uA: resultado.corriente_uA };
+  // Neutro abierto: primero la capacitancia equivalente con el factor k_N
+  if (condicion.neutro === "abierto") {
+    const activa_pF = textoCapacitancia_pF(parametros.capacitancias_F[activa]);
+    const otra_pF = textoCapacitancia_pF(parametros.capacitancias_F[otra]);
+    return {
+      siglas: ["I_TIERRA", "V", "F", "X_C", "C_L", "C_N", "K_N", "C_EQ", "U"],
+      lineas: [
+        `C_eq = ${activa} + k_N · ${otra} = ${activa_pF} pF + ${parametros.factor_neutro_abierto_fuga_tierra} × ${otra_pF} pF = ${textoCapacitancia_pF(capacitancia_F)} pF`,
+        ...pasosLeyDeOhm({ ...pasos, nombreC: "C_eq" }, parametros.red),
+      ],
+    };
   }
-  return significados;
+  return { siglas: ["I_TIERRA", "V", "F", "X_C", activa, "U"], lineas: pasosLeyDeOhm({ ...pasos, nombreC: activa }, parametros.red) };
+}
+
+/**
+ * Fórmula de la corriente de contacto: divisor de corriente con tierra, o toda
+ * la fuga por la persona sin tierra.
+ * @param {object} resultado - Resultado evaluado (incluye ramas del motor).
+ * @param {object} parametros - Parámetros validados (M3).
+ * @returns {{siglas: string[], lineas: string[]}} Siglas usadas y líneas de la fórmula.
+ */
+function formulaContacto(resultado, parametros) {
+  const { condicion } = resultado;
+  const capacitancia_F = capacitanciaDeFuga_F(condicion, parametros);
+  const { R_PE_ohm, R_MD_ohm } = parametros;
+  let siglasC = [condicion.polaridad === "normal" ? "C_L" : "C_N"];
+  let nombreC = siglasC[0];
+  const lineas = [];
+  // Neutro abierto: las dos capacitancias de fuga se suman
+  if (condicion.neutro === "abierto") {
+    siglasC = ["C_L", "C_N", "C_TOTAL"];
+    nombreC = "C_total";
+    const { C_L, C_N } = parametros.capacitancias_F;
+    lineas.push(`C_total = C_L + C_N = ${textoCapacitancia_pF(C_L)} pF + ${textoCapacitancia_pF(C_N)} pF = ${textoCapacitancia_pF(capacitancia_F)} pF`);
+  }
+  // Tierra abierta: toda la fuga pasa por la persona (aproximación X_C ≫ R_MD)
+  if (condicion.tierra === "abierta") {
+    lineas.push(...pasosLeyDeOhm({ nombreC, capacitancia_F, nombreI: "I", corriente_uA: resultado.corriente_uA }, parametros.red));
+    lineas.push(`Se desprecia R_MD porque X_C ≫ R_MD (${R_MD_ohm / OHMIOS_POR_KILOOHMIO} kΩ): toda la fuga pasa por la persona.`);
+    return { siglas: ["I", "V", "F", "X_C", ...siglasC, "R_MD", "U"], lineas };
+  }
+  // Tierra cerrada: divisor de corriente entre el PE y la persona
+  const fugaTotal = formatearCorriente_uA(resultado.ramas.fugaTotal_uA);
+  lineas.push(...pasosLeyDeOhm({ nombreC, capacitancia_F, nombreI: "I_fuga", corriente_uA: resultado.ramas.fugaTotal_uA }, parametros.red));
+  lineas.push(`I = I_fuga · R_PE / (R_PE + R_MD) = ${fugaTotal} µA × ${R_PE_ohm} Ω / (${R_PE_ohm} Ω + ${R_MD_ohm} Ω) = ${formatearCorriente_uA(resultado.corriente_uA)} µA`);
+  return { siglas: ["I", "V", "F", "X_C", ...siglasC, "I_FUGA", "R_PE", "R_MD", "U"], lineas };
+}
+
+/**
+ * Fórmula de la corriente de paciente CF: la que cruza la barrera de
+ * aislamiento, más el término empírico si la tierra está abierta.
+ * @param {object} resultado - Resultado evaluado (incluye ramas del motor).
+ * @param {object} parametros - Parámetros validados (M3).
+ * @returns {{siglas: string[], lineas: string[]}} Siglas usadas y líneas de la fórmula.
+ */
+function formulaPaciente(resultado, parametros) {
+  const capacitancia_F = parametros.capacitancias_F.C_AP;
+  // Tierra abierta: se suma el término empírico medido en el laboratorio
+  if (resultado.condicion.tierra === "abierta") {
+    const barrera = formatearCorriente_uA(resultado.ramas.barreraAislamiento_uA);
+    const delta = formatearCorriente_uA(resultado.ramas.terminoEmpirico_uA);
+    return {
+      siglas: ["I", "V", "F", "X_C", "C_AP", "I_BARRERA", "DELTA", "U"],
+      lineas: [
+        ...pasosLeyDeOhm({ nombreC: "C_AP", capacitancia_F, nombreI: "I_barrera", corriente_uA: resultado.ramas.barreraAislamiento_uA }, parametros.red),
+        `I = I_barrera + ΔI = ${barrera} µA + ${delta} µA = ${formatearCorriente_uA(resultado.corriente_uA)} µA`,
+      ],
+    };
+  }
+  return {
+    siglas: ["I", "V", "F", "X_C", "C_AP", "U"],
+    lineas: pasosLeyDeOhm({ nombreC: "C_AP", capacitancia_F, nombreI: "I", corriente_uA: resultado.corriente_uA }, parametros.red),
+  };
 }
 
 /**
  * Arma la fórmula usada: primero el significado de las siglas y después las
- * líneas de la fórmula con los números reemplazados.
+ * líneas de la fórmula con los números reemplazados (ley de Ohm en dos pasos).
  * @param {object} resultado - Resultado evaluado (incluye ramas del motor).
  * @param {object} parametros - Parámetros validados (M3).
- * @returns {{simbolos: string[], lineas: string[]}} Siglas explicadas y líneas de la fórmula.
+ * @returns {{simbolos: {texto: string, origen?: string}[], lineas: string[]}} Siglas explicadas y líneas de la fórmula.
  */
 function formulaUsada(resultado, parametros) {
-  const { condicion } = resultado;
-  const corrientePorFaradio = corrientePorFaradio_A_F(parametros).toFixed(DECIMALES_CORRIENTE_POR_FARADIO);
-  const corriente = formatearCorriente_uA(resultado.corriente_uA);
-  const lineas = [];
-  let siglasUsadas;
-  let significados;
-
-  if (resultado.tipoMedicion === MEDICION_FUGA_TIERRA) {
-    // Fuga a tierra: toda la fuga capacitiva vuelve por el conductor de protección
-    significados = significadoDeSiglas(parametros);
-    const capacitancia_pF = (capacitanciaFugaATierra_F(condicion, parametros) * PICOFARADIOS_POR_FARADIO).toFixed(DECIMALES_CAPACITANCIA);
-    const [activa, otra] = condicion.polaridad === "normal" ? ["C_L", "C_N"] : ["C_N", "C_L"];
-    if (condicion.neutro === "abierto") {
-      siglasUsadas = ["I_TIERRA", "VF", "C_L", "C_N", "K_N", "U"];
-      lineas.push(`I = V·2πf · (${activa} + k_N · ${otra})`);
-    } else {
-      siglasUsadas = ["I_TIERRA", "VF", activa, "U"];
-      lineas.push(`I = V·2πf · ${activa}`);
-    }
-    lineas.push(`I = ${corrientePorFaradio} A/F × ${capacitancia_pF} pF = ${corriente} µA`);
-  } else if (resultado.tipoMedicion === "contacto") {
-    const capacitancia_F = capacitanciaDeFuga_F(condicion, parametros);
-    const capacitancia_pF = (capacitancia_F * PICOFARADIOS_POR_FARADIO).toFixed(DECIMALES_CAPACITANCIA);
-    significados = significadoDeSiglas(parametros, capacitancia_F);
-    let siglasC = [condicion.polaridad === "normal" ? "C_L" : "C_N"];
-    if (condicion.neutro === "abierto") {
-      siglasC = ["C_L", "C_N"];
-    }
-    const nombreC = siglasC.length > 1 ? `(${siglasC.join(" + ")})` : siglasC[0];
-    if (condicion.tierra === "cerrada") {
-      // Divisor de corriente entre el PE y la persona
-      siglasUsadas = ["I", "VF", ...siglasC, "R_PE", "R_MD", "U"];
-      lineas.push(`I = V·2πf · ${nombreC} · R_PE / (R_PE + R_MD)`);
-      lineas.push(`I = ${corrientePorFaradio} A/F × ${capacitancia_pF} pF × ${parametros.R_PE_ohm} Ω / (${parametros.R_PE_ohm} Ω + ${parametros.R_MD_ohm} Ω) = ${corriente} µA`);
-    } else {
-      // Toda la fuga por la persona (aproximación X_C ≫ R_MD)
-      siglasUsadas = ["I", "VF", ...siglasC, "X_C", "R_MD", "U"];
-      lineas.push(`I ≈ V·2πf · ${nombreC}`);
-      lineas.push(`I = ${corrientePorFaradio} A/F × ${capacitancia_pF} pF = ${corriente} µA`);
-      lineas.push(`Se desprecia R_MD porque X_C ≫ R_MD (${parametros.R_MD_ohm / OHMIOS_POR_KILOOHMIO} kΩ).`);
-    }
-  } else {
-    significados = significadoDeSiglas(parametros);
-    const capacitanciaAP_pF = (parametros.capacitancias_F.C_AP * PICOFARADIOS_POR_FARADIO).toFixed(DECIMALES_CAPACITANCIA);
-    const barrera = formatearCorriente_uA(resultado.ramas.barreraAislamiento_uA);
-    if (condicion.tierra === "abierta") {
-      // Se suma el término empírico medido en el laboratorio
-      const delta = formatearCorriente_uA(resultado.ramas.terminoEmpirico_uA);
-      siglasUsadas = ["I", "VF", "C_AP", "DELTA", "U"];
-      lineas.push("I = V·2πf · C_AP + ΔI");
-      lineas.push(`I = ${corrientePorFaradio} A/F × ${capacitanciaAP_pF} pF + ${delta} µA = ${barrera} µA + ${delta} µA = ${corriente} µA`);
-    } else {
-      siglasUsadas = ["I", "VF", "C_AP", "U"];
-      lineas.push("I = V·2πf · C_AP");
-      lineas.push(`I = ${corrientePorFaradio} A/F × ${capacitanciaAP_pF} pF = ${corriente} µA`);
-    }
-  }
-
-  // Incertidumbre del analizador real
+  const armadores = { [MEDICION_FUGA_TIERRA]: formulaFugaATierra, contacto: formulaContacto, paciente: formulaPaciente };
+  const { siglas, lineas } = armadores[resultado.tipoMedicion](resultado, parametros);
   const exactitud = parametros.exactitud_analizador;
-  lineas.push(`U = ${exactitud.k} · (${exactitud.porcentaje_lectura} % · I + ${exactitud.piso_uA} µA) / √3 = ${formatearCorriente_uA(resultado.incertidumbre_uA)} µA`);
-  return { simbolos: siglasUsadas.map((sigla) => significados[sigla]), lineas };
+  const significados = significadoDeSiglas(parametros);
+  return {
+    simbolos: siglas.map((sigla) => significados[sigla]),
+    lineas: [
+      LINEA_LEY_DE_OHM,
+      ...lineas,
+      // Incertidumbre del analizador real
+      `U = ${exactitud.k} · (${exactitud.porcentaje_lectura} % · I + ${exactitud.piso_uA} µA) / √3 = ${formatearCorriente_uA(resultado.incertidumbre_uA)} µA`,
+    ],
+  };
 }
 
 /**
@@ -974,9 +1064,12 @@ function mostrarExplicacion(resultado, parametros) {
   const { simbolos, lineas } = formulaUsada(resultado, parametros);
   const listaSimbolos = elemento("explicacion-simbolos");
   listaSimbolos.replaceChildren();
-  // Primero, qué significa cada sigla
+  // Primero, qué significa cada sigla y, si es un parámetro calibrado, de dónde sale
   for (const simbolo of simbolos) {
-    crearConTexto("li", simbolo, listaSimbolos);
+    const item = crearConTexto("li", simbolo.texto, listaSimbolos);
+    if (simbolo.origen) {
+      crearConTexto("span", simbolo.origen, item, "simbolos__origen");
+    }
   }
   const contenedorFormula = elemento("explicacion-formula");
   contenedorFormula.replaceChildren();

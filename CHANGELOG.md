@@ -5,6 +5,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Cambiado (14/11/2026, décima ronda: «¿Por qué da este valor?», sin cambios en resultados)
+- La fórmula se muestra en dos pasos con la ley de Ohm en un capacitor: X_C = 1/(2π·f·C) y luego I = V / X_C, con una primera línea «Fórmula: ley de Ohm en un capacitor…». Ya no aparece «A/F» en pantalla (la constante V·2πf sigue en el motor de cálculo). Con neutro abierto la fuga a tierra usa la capacitancia equivalente C_eq = C_L + k_N·C_N = 599.9 pF; la corriente de contacto con neutro abierto usa C_total = C_L + C_N.
+- Cada parámetro calibrado (C_L, C_N, C_AP, ΔI y k_N) explica de qué medición del R12 sale y cómo se calculó.
+- Ayuda y manual, «¿De dónde salen los datos?»: frase sobre la calibración con polaridad normal y la comprobación con polaridad invertida (E_n ≤ 0,19).
+
 ### Cambiado (14/11/2026, novena ronda: textos, sin cambios en cálculos)
 - Subtítulo del encabezado: «Pruebas de seguridad eléctrica al electrocardiógrafo Mindray BeneHeart R12» (sin «(IEC 60601-1)»). Plural también en la descripción de la página, la introducción de la prueba guiada, la ayuda, el manual y el README.
 - Ayuda y manual (iguales): títulos en forma de pregunta («1. ¿Qué es y para qué sirve?», «2. ¿Qué necesitas?», «3. ¿Cómo se abre?», «4. ¿Cómo se hace la práctica, paso a paso?», «5. ¿Qué pasa con tus datos?», «6. ¿Cómo se leen los números?», «7. ¿De dónde salen los datos?», «8. ¿Qué hago si algo no funciona?»); «simula las pruebas»; texto nuevo sobre el uso en celular; «No se pueden saltar pasos».
