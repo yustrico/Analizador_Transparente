@@ -63,9 +63,9 @@ const PUNTOS = Object.freeze({
   fuenteAbajo: [60, 186],
   esquinaL: [60, 90],
   esquinaN: [60, 230],
-  neutroInicio: [95, 230],
-  neutroFin: [135, 230],
-  neutroAbiertoPunta: [130, 212],
+  neutroInicio: [104, 230],
+  neutroFin: [140, 230],
+  neutroAbiertoPunta: [135, 212],
   entradaPolaridadL: [150, 90],
   entradaPolaridadN: [150, 230],
   salidaPolaridadL: [230, 90],
@@ -99,13 +99,13 @@ const PUNTOS = Object.freeze({
   nodoMD: [660, 215],
   mdArriba: [660, 235],
   mdAbajo: [660, 275],
-  mdTierra: [660, 340],
+  mdTierra: [660, 356],
   peChasis: [440, 300],
-  peInterruptorArriba: [440, 312],
-  peInterruptorAbajo: [440, 332],
-  peAbiertoPunta: [425, 328],
-  peTierra: [440, 340],
-  tierraFuente: [60, 340],
+  peInterruptorArriba: [440, 324],
+  peInterruptorAbajo: [440, 344],
+  peAbiertoPunta: [425, 340],
+  peTierra: [440, 356],
+  tierraFuente: [60, 356],
 });
 
 /** Cables fijos del dibujo (siempre grises), como listas de puntos. */
@@ -265,7 +265,7 @@ function dibujarCapacitor(puntoA, puntoB, esVertical, padre) {
  * la izquierda (polaridad y neutro), franja de abajo (interruptor de tierra)
  * y columna de la derecha (MD), sin tocar el chasis ni la parte aplicada.
  */
-const PUNTOS_RECUADRO_ANALIZADOR = "88,50 250,50 250,305 588,305 588,200 852,200 852,354 88,354";
+const PUNTOS_RECUADRO_ANALIZADOR = "96,50 250,50 250,318 590,318 590,200 852,200 852,370 96,370";
 
 /** Rectángulos y círculos fijos del dibujo (elemento SVG + atributos). */
 const FIGURAS_FIJAS = Object.freeze([
@@ -280,9 +280,9 @@ const FIGURAS_FIJAS = Object.freeze([
   { etiqueta: "rect", atributos: { x: 600, y: 135, width: 120, height: 50, rx: 6, class: "caja-componente" } },
   { etiqueta: "rect", atributos: { x: 620, y: 235, width: 80, height: 40, class: "caja-componente" } },
   // Símbolo de tierra en la acometida (tres rayas)
-  { etiqueta: "line", atributos: { x1: 48, y1: 346, x2: 72, y2: 346, class: "cable" } },
-  { etiqueta: "line", atributos: { x1: 53, y1: 352, x2: 67, y2: 352, class: "cable" } },
-  { etiqueta: "line", atributos: { x1: 57, y1: 358, x2: 63, y2: 358, class: "cable" } },
+  { etiqueta: "line", atributos: { x1: 48, y1: 362, x2: 72, y2: 362, class: "cable" } },
+  { etiqueta: "line", atributos: { x1: 53, y1: 368, x2: 67, y2: 368, class: "cable" } },
+  { etiqueta: "line", atributos: { x1: 57, y1: 374, x2: 63, y2: 374, class: "cable" } },
 ]);
 
 /** Clases CSS de los textos del dibujo. */
@@ -300,7 +300,7 @@ const TEXTOS_FIJOS = Object.freeze([
   ["120 V · 60 Hz", 60, 40, CLASE_PEQUENO, "middle"],
   ["L", 44, 94, CLASE_TITULO, "middle"],
   ["N", 44, 226, CLASE_TITULO, "middle"],
-  ["Neutro", 115, 254, CLASE_PEQUENO, "middle"],
+  ["Neutro", 122, 254, CLASE_PEQUENO, "middle"],
   ["Polaridad", 190, 68, CLASE_PEQUENO, "middle"],
   ["Chasis metálico del R12 (Clase I)", 450, 46, CLASE_TITULO, "middle"],
   ["Circuito", 378, 156, CLASE_PEQUENO, "end"],
@@ -315,9 +315,9 @@ const TEXTOS_FIJOS = Object.freeze([
   ["MD", 660, 260, CLASE_TITULO, "middle"],
   ["MD: cuerpo humano", 708, 251, CLASE_PEQUENO, "start"],
   ["simulado (1 kΩ)", 708, 265, CLASE_PEQUENO, "start"],
-  ["Conductor de protección (PE)", 416, 322, CLASE_PEQUENO, "end"],
-  ["Tierra de la instalación", 250, 372, CLASE_PEQUENO, "middle"],
-  ["Dentro del Fluke ESA620", 844, 346, CLASE_TITULO_ANALIZADOR, "end"],
+  ["Conductor de protección (PE)", 416, 338, CLASE_PEQUENO, "end"],
+  ["Tierra de la instalación", 250, 388, CLASE_PEQUENO, "middle"],
+  ["Dentro del Fluke ESA620", 844, 362, CLASE_TITULO_ANALIZADOR, "end"],
 ]);
 
 /**
@@ -332,9 +332,9 @@ const ZONAS_DE_AYUDA = Object.freeze([
   { parte: "red", x: 32, y: 132, width: 56, height: 56 },
   { parte: "fase", x: 36, y: 80, width: 114, height: 20 },
   { parte: "fase", x: 50, y: 96, width: 20, height: 36 },
-  { parte: "neutro", x: 36, y: 220, width: 59, height: 20 },
+  { parte: "neutro", x: 36, y: 220, width: 68, height: 20 },
   { parte: "neutro", x: 50, y: 188, width: 20, height: 32 },
-  { parte: "interruptorNeutro", x: 90, y: 204, width: 52, height: 72 },
+  { parte: "interruptorNeutro", x: 99, y: 204, width: 48, height: 72 },
   { parte: "polaridad", x: 146, y: 58, width: 88, height: 212 },
   { parte: "circuitoInterno", x: 338, y: 130, width: 82, height: 60 },
   { parte: "capacitanciaL", x: 372, y: 62, width: 150, height: 22 },
@@ -344,8 +344,8 @@ const ZONAS_DE_AYUDA = Object.freeze([
   { parte: "puntaContacto", x: 574, y: 82, width: 176, height: 24 },
   { parte: "puntaContacto", x: 730, y: 100, width: 20, height: 118 },
   { parte: "md", x: 616, y: 231, width: 200, height: 48 },
-  { parte: "conductorProteccion", x: 272, y: 302, width: 176, height: 36 },
-  { parte: "tierraInstalacion", x: 36, y: 338, width: 640, height: 40 },
+  { parte: "conductorProteccion", x: 272, y: 318, width: 176, height: 36 },
+  { parte: "tierraInstalacion", x: 36, y: 354, width: 640, height: 40 },
 ]);
 
 /** Conversión de faradios a picofaradios, para mostrar las capacitancias. */
@@ -416,10 +416,10 @@ function dibujarZonasDeAyuda(padre, parametros) {
 }
 
 /** Posición de los textos que cambian: estado de los conmutadores y corriente por rama. */
-const POSICION_ESTADO_NEUTRO = Object.freeze([115, 270]);
+const POSICION_ESTADO_NEUTRO = Object.freeze([122, 270]);
 const POSICION_ESTADO_POLARIDAD = Object.freeze([190, 262]);
-const POSICION_VALOR_PERSONA = Object.freeze([668, 318]);
-const POSICION_VALOR_TIERRA = Object.freeze([452, 322]);
+const POSICION_VALOR_PERSONA = Object.freeze([668, 334]);
+const POSICION_VALOR_TIERRA = Object.freeze([452, 338]);
 
 /**
  * Dibuja las partes que no cambian: fuente, chasis, cajas, cables, capacitores y textos.

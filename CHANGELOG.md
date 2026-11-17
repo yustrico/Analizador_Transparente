@@ -5,6 +5,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Cambiado (17/11/2026, ronda 15: recuadro del ESA620; sin cambios en cálculos ni pruebas)
+- Recuadro «Dentro del Fluke ESA620»: borde punteado y título en naranja oscuro (#A8561A, contraste ≥ 4.5:1 sobre fondo blanco) y relleno suave del mismo tono (opacidad 0.07) detrás del dibujo; el camino rojo de la corriente queda encima.
+- El borde izquierdo queda a la derecha del círculo de la red (la red es el tomacorriente de la pared, fuera del analizador) y a 18 px del chasis del R12, sin tocar textos. Para lograrlo se corrió el interruptor de neutro a la derecha, se bajó la tierra de la instalación 16 px y el dibujo pasa a 860 × 396.
+
 ### Cambiado (17/11/2026, ronda 14: dibujo y textos del Analizador; sin cambios en cálculos, resultados ni pruebas del núcleo)
 - Circuito SVG: recuadro punteado «Dentro del Fluke ESA620» que encierra el conmutador de polaridad, el interruptor del neutro, el interruptor de la tierra y la MD; el R12 (chasis, C_L, C_N, C_AP y parte aplicada) queda por fuera. Se movieron un poco los textos de la red y el interruptor de tierra para que nada se encime.
 - MD en «¿Qué es cada parte?» y en el dibujo: carga interna del ESA620 (1 kΩ en paralelo con 10 kΩ y 0,015 µF), que el analizador usa por dentro; aquí se simplifica como 1 kΩ.

@@ -25,7 +25,7 @@ import {
 import {
   evaluarMedicion, evaluarAislamiento, evaluarResistenciaTierra, VEREDICTO_CUMPLE,
 } from "../nucleo/evaluador_limites.js?v=9c30cc64cc";
-import { crearVisualizador, describirPartesDelCircuito, formatearCorriente_uA, partirSubindices } from "./visualizador.js?v=d9ed25ee53";
+import { crearVisualizador, describirPartesDelCircuito, formatearCorriente_uA, partirSubindices } from "./visualizador.js?v=7c640b2c72";
 import {
   crearHistorial, guardarAvancePrueba, leerAvancePrueba, filaDeRegistro, nombreCortoCondicion, textoLectura, textoPorcentaje, NOMBRES_MEDICION, UNIDAD_CORRIENTE,
   textoLimite, textoConfiguracion, resumirAvance, claveConfiguracion,

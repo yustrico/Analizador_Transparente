@@ -21,20 +21,20 @@
   <meta name="description" content="Simulador educativo de las pruebas de seguridad eléctrica al electrocardiógrafo Mindray BeneHeart R12.">
   <link rel="icon" href="data:,">
   <!-- Integridad (SRI): las huellas SHA-384 las escribe tools/sri.mjs; correrlo después de cambiar JS o CSS -->
-  <link rel="stylesheet" href="css/estilos.css?v=4b8298b63b" integrity="sha384-S4KYtjs8PkISGBNu2nMdC/lgjw8lGONtNp0zXqneCAo85+T3pH8yudlG0p7eaebg">
+  <link rel="stylesheet" href="css/estilos.css?v=370d3f952b" integrity="sha384-Nw0/lSs7EL2t21JNJVZnKf19hwRczaLsKc7RtbmYcb+/bIsfzCJcMq+j8haSiqFu">
   <!-- SRI: inicio (generado por tools/sri.mjs, no editar a mano) -->
   <link rel="modulepreload" href="js/adaptadores/historial.js?v=37beb88db5" integrity="sha384-N764jbU0sVhRC7ghKObyjTjXmaVMHHAPvVcAtTAhaCYpBXdSrwJZ+STKTxzDL19N">
-  <link rel="modulepreload" href="js/adaptadores/interfaz.js?v=ae7fd6995b" integrity="sha384-rn/WmVub/H5aj85lTYnY5rRVZiQosAsA+iWCriYFCERKDDxfj33M0nhhiaijKkWs">
+  <link rel="modulepreload" href="js/adaptadores/interfaz.js?v=4f54a30f85" integrity="sha384-T1SjD4WbsP/KHHhbRGAPPJJcqGAz5xAxZU5leTxj+XNNuJns7i/6oT1NoxYnW98W">
   <link rel="modulepreload" href="js/adaptadores/pdf.js?v=628f37170c" integrity="sha384-Yo83Fwy41RDZlS65Om/wuMl1yX/SZVT5roDLxWU5SsNCCIKYVhnCcHPF0o/ldBtx">
   <link rel="modulepreload" href="js/adaptadores/reporte.js?v=6b823710e1" integrity="sha384-a4I3EOHThCVLn9BHL0TAwxMx3w5fKfg4783A6zNWdi7mkIGY7riP0Lv6eiYkRaJM">
   <link rel="modulepreload" href="js/adaptadores/tiempo_carga.js?v=1c9699f3b9" integrity="sha384-HJaZ87n6slac+sCKpiv4PovGknwW6qIsYSbPkXqTEJSFVD0wGqJegnc9QHmWVjjg">
-  <link rel="modulepreload" href="js/adaptadores/visualizador.js?v=d9ed25ee53" integrity="sha384-2e0l7lOWNhxFF663Wm4bmViw1hCYFspt9n35kxYK58q0QGO7S3ExJNOJ9lPwApP3">
+  <link rel="modulepreload" href="js/adaptadores/visualizador.js?v=7c640b2c72" integrity="sha384-fGQLLHL/RH7kpmZM6cmQb2HMjgRnv6bNDrjNkDhv/7heX0F3FwSeFGFx/LhyK/q+">
   <link rel="modulepreload" href="js/nucleo/evaluador_limites.js?v=9c30cc64cc" integrity="sha384-nDDMZMy/C2qiFp7Uh8hHwvQch7REXj0Vo0KCd9xComz3vIlNz0DoVXElk5uPqfLM">
   <link rel="modulepreload" href="js/nucleo/modelo_equipo.js?v=5ca0bfb4e4" integrity="sha384-XKC/tOSU1bnqnTxnVs08DWpna0bP1cGP24BbDWufMn06OygGyUBk3CswydIGWaBh">
   <link rel="modulepreload" href="js/nucleo/motor_calculo.js?v=efa73aed55" integrity="sha384-76c67VUxXI/+Dx+nZ2FVjBDKPq9e8YkcvFPa3CAQQR4D8ItL4ouxZ+3uEIrZXUoc">
   <link rel="modulepreload" href="js/nucleo/secuencia.js?v=bffe121e07" integrity="sha384-v/4SHgduYquka0rL7HHdb+Z7SFxlx6UnWtzSicOu2HWYIDc2nw7ylTx8duc2u5qj">
   <!-- SRI: fin -->
-  <script type="module" src="js/main.js?v=20d137e535" integrity="sha384-INE35TVPDbqqnWzjUsYArLNhIgdraBXvbsDoa/QR4DIAiGoZ3HGFCTdomdQc93Om"></script>
+  <script type="module" src="js/main.js?v=d30656d584" integrity="sha384-0wZW1YS1VjHGGfBFkp2DrEzbIbiwH1ixKLBXY4UV2gcl4r9jxtWREImdVjeKMAeA"></script>
 </head>
 <body>
   <header class="encabezado">
@@ -201,7 +201,7 @@
 
         <div class="tarjeta circuito">
           <h3>Circuito: así circula la corriente</h3>
-          <svg id="svg-circuito" class="circuito__svg" viewBox="0 0 860 380" role="img" aria-labelledby="circuito-descripcion"></svg>
+          <svg id="svg-circuito" class="circuito__svg" viewBox="0 0 860 396" role="img" aria-labelledby="circuito-descripcion"></svg>
           <p class="nota" id="circuito-descripcion">Red de 120 V, conmutadores de polaridad, neutro y tierra, chasis del R12, parte aplicada y MD (cuerpo humano simulado). El recuadro punteado es lo que está dentro del Fluke ESA620. En rojo, el camino de la corriente de fuga. Pasa el mouse sobre cada parte para ver qué es.</p>
           <details class="plegable">
             <summary>¿Cómo se conecta en el laboratorio?</summary>

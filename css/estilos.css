@@ -26,6 +26,8 @@
   --gris-inactivo: #B5BEC9;
   --verde-cumple: #1E6B3A;
   --ambar-no-cumple: #8A5300;
+  --naranja-analizador: #A8561A;
+  --naranja-analizador-zona: rgba(168, 86, 26, 0.07);
   --radio: 8px;
   --ancho-minimo: 1280px;
   --ancho-contenido: 1240px;
@@ -267,8 +269,8 @@ h4 { margin: 14px 0 6px; font-size: 1rem; }
 .texto-circuito--pequeno { font-size: 11px; fill: var(--texto-secundario); }
 .texto-circuito__subindice { font-size: 0.75em; }
 .texto-circuito--valor { font-size: 12px; font-weight: 700; fill: var(--texto); }
-.recuadro-analizador { fill: none; stroke: var(--azul-principal); stroke-width: 1.5; stroke-dasharray: 6 5; }
-.texto-circuito--analizador { font-weight: 600; font-style: italic; fill: var(--azul-principal); }
+.recuadro-analizador { fill: var(--naranja-analizador-zona); stroke: var(--naranja-analizador); stroke-width: 2; stroke-dasharray: 7 5; }
+.texto-circuito--analizador { font-weight: 700; fill: var(--naranja-analizador); }
 .zona-ayuda { fill: transparent; cursor: help; }
 .parte-circuito:hover .zona-ayuda { fill: rgba(20, 54, 95, 0.06); }
 .camino-corriente { fill: none; stroke: var(--rojo-fuga); stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 10 8; }
