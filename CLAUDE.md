@@ -27,7 +27,7 @@ NO (trabajo futuro: no lo construyas):
 - Módulo físico; HL7/FHIR; backend; inicio de sesión; analítica o rastreo de cualquier tipo.
 - Red en parte aplicada y corriente auxiliar de paciente: NO se calculan. Se miden con el ESA620 sin abrir el equipo, pero no hay mediciones de la práctica para calibrarlas y validarlas (trabajo futuro).
 
-## 3. Arquitectura (obligatoria; ver docs/Diagramas y docs/08)
+## 3. Arquitectura (obligatoria; ver docs/08 y docs/Diagramas, versiones _v2: C4 N1, N2 y N3, DFD nivel 0 y nivel 1, flujo de control y ciclo de vida)
 Modular tipo **hexagonal**:
 - **NÚCLEO**: funciones puras, sin acceso al DOM, 100 % probables con `node --test`.
 - **ADAPTADORES**: conectan el núcleo con la pantalla, la memoria y el reporte.

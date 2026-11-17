@@ -53,7 +53,7 @@ npm run peso     # suma lo que descarga la página y lo compara con la meta ES05
 ```
 index.html, ayuda.html (manual de usuario en la web), css/, js/main.js
 js/nucleo/        Núcleo (funciones puras): secuencia, modelo del equipo, motor de cálculo, evaluador de límites
-js/adaptadores/   Adaptadores: interfaz, visualizador, historial, reporte, generador de PDF
+js/adaptadores/   Adaptadores: interfaz, visualizador, historial, reporte, generador de PDF, tiempo de carga
 datos/            Parámetros calibrados del R12
 tests/            Pruebas unitarias, validación contra el ESA620 (ES01, ES02), PDF y SRI/CSP
 tools/            sri.mjs (huellas SRI) y peso.mjs (presupuesto de peso ES05)
@@ -61,6 +61,7 @@ docs/             Documentos del proyecto, manual y verificación
 ```
 
 ## Documentación
+- [Arquitectura y diseño detallado](docs/08_Arquitectura_y_diseno_detallado.md), con los diagramas de [docs/Diagramas](docs/Diagramas) (versiones _v2): C4 nivel 1, 2 y 3, DFD nivel 0 y nivel 1, flujo de control y ciclo de vida
 - [Manual de usuario](docs/manual_usuario.md)
 - [Solución de problemas](docs/solucion_problemas.md)
 - [Mantenimiento](docs/mantenimiento.md)

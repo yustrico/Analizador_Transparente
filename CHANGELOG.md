@@ -5,6 +5,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Cambiado (17/11/2026, documentos; sin cambios en la página, el código ni los datos)
+- docs/Diagramas: quedan solo las versiones _v2 (C4 N1, N2 y N3, DFD nivel 0 y nivel 1, flujo de control y ciclo de vida); se borran las versiones viejas. Referencias actualizadas en docs/08, README y CLAUDE.md.
+- docs/08 al estado real del código: M10a Generador PDF y M11 Tiempo de carga en la jerarquía y las fichas; historial y avance de la prueba en sessionStorage; tabla de correspondencia con la guía del Corte 3 (punto 9.3); interacciones M10 → M10a, M10a → archivo PDF, M8 ↔ sessionStorage y M11 → M10; registro de fallas (guía punto 11); teórico vs. real (E_n de las 16 configuraciones, factor k_N, limitación de n = 3) y trabajo futuro; seguridad con las 7 medidas, el riesgo que cubre cada una y el riesgo residual. Se corrige SRI SHA-256 → SHA-384.
+
 ### Cambiado (17/11/2026, ronda 12: textos, sin cambios en cálculos)
 - Explicación de la incertidumbre (Comparar, reporte en pantalla y PDF): texto nuevo con un ejemplo de 14.73 µA en lista numerada (1 % + 1 µA → ÷ √3 → × 2), cada operación en su propio renglón. Los números quedan unidos a su unidad con un espacio sin corte, para que «1» y «%» no queden en renglones distintos.
 - PDF: nuevos `listaNumerada` y `seccionSinPartir` en el generador; la sección «¿Cómo se lee la incertidumbre?» nunca se parte entre páginas (prueba nueva en tests/pdf.test.js, 124 pruebas en verde).
