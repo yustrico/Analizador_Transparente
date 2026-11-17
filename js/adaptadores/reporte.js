@@ -11,20 +11,47 @@
  *   es del estudiante.
  * Módulo: M10 – Reporte (adaptador)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-14
+ * Creado: 2026-11-13 · Modificado: 2026-11-17
  * ============================================================================
  */
 
 import { VEREDICTO_CUMPLE } from "../nucleo/evaluador_limites.js?v=9c30cc64cc";
 import { filaDeRegistro, textoLectura, textoPorcentaje, textoLimite, NOMBRES_MEDICION, nombreCortoCondicion } from "./historial.js?v=37beb88db5";
-import { crearDocumentoPdf } from "./pdf.js?v=7d6a176698";
+import { crearDocumentoPdf } from "./pdf.js?v=628f37170c";
 import { textoTiempoCarga, detalleCarga } from "./tiempo_carga.js?v=1c9699f3b9";
 
-/** Explicación de la incertidumbre (se usa en Comparar y en el reporte). */
 /** Nota debajo de la tabla de lecturas (columna "Qué tan cerca del límite"). */
 export const TEXTO_CERCA_DEL_LIMITE = "Una corriente pequeña puede estar más cerca de su límite que una grande: compara la corriente de paciente CF (límite 10 µA) con la de contacto (límite 100 µA).";
 
-export const TEXTO_INCERTIDUMBRE = "La incertidumbre (U) indica cuánto podría diferir la lectura del analizador real. Se calcula con la exactitud que declara el fabricante del ESA620, ±(1 % de la lectura + 1 µA), según la guía GUM (JCGM 100:2008): u = exactitud/√3 y U = 2·u. Ejemplo: 14.73 ± 1.32 µA significa que el analizador real podría mostrar entre 13.41 y 16.05 µA.";
+/** Espacio que no deja cortar el renglón (U+00A0): une un número con su unidad, como «1.15 µA». */
+const ESPACIO_SIN_CORTE = "\u00A0";
+
+/**
+ * Une cada número con su unidad (% o µA), y el ± con el paréntesis que le
+ * sigue, para que un renglón nunca termine en «1» y el siguiente empiece con «%».
+ * @param {string} texto - Texto con espacios normales.
+ * @returns {string} Texto con espacios sin corte donde hacen falta.
+ */
+function unirNumerosYUnidades(texto) {
+  return texto.replace(/(\d) (?=%|µA)/g, `$1${ESPACIO_SIN_CORTE}`).replaceAll("± (", `±${ESPACIO_SIN_CORTE}(`);
+}
+
+/**
+ * Explicación de la incertidumbre (se usa en Comparar, en el reporte en
+ * pantalla y en el PDF). Cada paso es [qué se hace, la operación], para que
+ * la operación quede en su propio renglón. El ejemplo es la lectura de la
+ * corriente de contacto con tierra abierta (14.73 µA).
+ */
+export const EXPLICACION_INCERTIDUMBRE = Object.freeze({
+  introduccion: unirNumerosYUnidades("Ningún analizador es perfecto. El fabricante del Fluke ESA620 indica que su lectura puede equivocarse hasta ± (1 % de la lectura + 1 µA). Por eso cada resultado se muestra como lectura ± incertidumbre."),
+  ejemplo: unirNumerosYUnidades("Ejemplo con una lectura de 14.73 µA:"),
+  pasos: Object.freeze([
+    ["Error máximo del analizador:", "1 % × 14.73 µA + 1 µA = 1.15 µA"],
+    ["Se divide entre √3, porque el error puede caer en cualquier punto de ese rango:", "1.15 µA ÷ √3 = 0.66 µA"],
+    ["Se multiplica por 2, como recomienda la guía de metrología GUM:", "2 × 0.66 µA = 1.32 µA"],
+  ].map((paso) => Object.freeze(paso.map(unirNumerosYUnidades)))),
+  resultado: unirNumerosYUnidades("Resultado: 14.73 ± 1.32 µA. El analizador real podría mostrar entre 13.41 µA y 16.05 µA."),
+});
 
 /** Aviso obligatorio del reporte. */
 const TEXTO_AVISO = "Herramienta educativa, no certifica equipos. Complementa la práctica con el analizador real.";
@@ -170,6 +197,23 @@ export function contenidoDelReporte(datos) {
 }
 
 /**
+ * Arma en pantalla la explicación de la incertidumbre: párrafo, ejemplo,
+ * lista numerada (cada operación en su propio renglón) y resultado.
+ * @param {HTMLElement} padre - Elemento donde se agrega.
+ */
+export function mostrarExplicacionIncertidumbre(padre) {
+  agregar("p", EXPLICACION_INCERTIDUMBRE.introduccion, padre);
+  agregar("p", EXPLICACION_INCERTIDUMBRE.ejemplo, padre);
+  const lista = agregar("ol", "", padre, "pasos-incertidumbre");
+  // Un paso por renglón de la lista: primero qué se hace y debajo la operación
+  for (const [queSeHace, operacion] of EXPLICACION_INCERTIDUMBRE.pasos) {
+    const paso = agregar("li", queSeHace, lista);
+    agregar("span", operacion, paso, "pasos-incertidumbre__operacion");
+  }
+  agregar("p", EXPLICACION_INCERTIDUMBRE.resultado, padre);
+}
+
+/**
  * Crea un elemento HTML con texto (siempre textContent) y lo agrega a un padre.
  * @param {string} etiqueta - Nombre del elemento.
  * @param {string} texto - Texto.
@@ -242,7 +286,7 @@ export function generarReporte(contenedor, datos) {
 
   // Incertidumbre y aviso
   agregar("h3", TITULO_INCERTIDUMBRE, contenedor);
-  agregar("p", TEXTO_INCERTIDUMBRE, contenedor);
+  mostrarExplicacionIncertidumbre(contenedor);
   agregar("p", TEXTO_AVISO, contenedor, "reporte__aviso");
 }
 
@@ -266,8 +310,13 @@ export function crearPdfReporte(datos) {
   documento.tabla(columnas, contenido.filas);
   // La nota va completa en una sola página (si no cabe, pasa entera a la siguiente)
   documento.parrafoSinPartir(TEXTO_CERCA_DEL_LIMITE);
-  documento.seccion(TITULO_INCERTIDUMBRE);
-  documento.parrafo(TEXTO_INCERTIDUMBRE);
+  // La explicación de la incertidumbre va completa en una sola página
+  documento.seccionSinPartir(TITULO_INCERTIDUMBRE, [
+    { parrafo: EXPLICACION_INCERTIDUMBRE.introduccion },
+    { parrafo: EXPLICACION_INCERTIDUMBRE.ejemplo },
+    { listaNumerada: EXPLICACION_INCERTIDUMBRE.pasos },
+    { parrafo: EXPLICACION_INCERTIDUMBRE.resultado },
+  ]);
   documento.aviso(TEXTO_AVISO);
   return documento.generar();
 }

@@ -21,7 +21,7 @@
   <meta name="description" content="Manual de usuario del Analizador transparente: cómo hacer la práctica de seguridad eléctrica del electrocardiógrafo Mindray BeneHeart R12.">
   <link rel="icon" href="data:,">
   <!-- Integridad (SRI): la huella SHA-384 la escribe tools/sri.mjs -->
-  <link rel="stylesheet" href="css/estilos.css?v=c9753c947b" integrity="sha384-yXU8lHvV0Pn3nz21DXK07wHRKB1TURR0uMgOWpL+3hKKuA3PdbM+pyUhbHYg63+8">
+  <link rel="stylesheet" href="css/estilos.css?v=abc437fd0a" integrity="sha384-q8Q3/QrAJndnA53ylp+dkbbXuot3XRmm0Ox9zG5n8PaAGPjZkKd+u4Xqf8bx3St2">
 </head>
 <body>
   <header class="encabezado">
@@ -46,22 +46,16 @@
 
       <h2>2. ¿Qué necesitas?</h2>
       <ul>
-        <li>Un <strong>computador</strong> con <strong>Google Chrome</strong> o <strong>Microsoft Edge</strong> (Windows). Está diseñada para computador. En un celular la página abre, pero no se adapta a la pantalla y algunas partes se ven mal; úsala en un computador.</li>
-        <li>Internet solo para abrir la página. Después de cargar, todos los cálculos se hacen en tu computador.</li>
+        <li>Un <strong>computador</strong> con <strong>Google Chrome</strong> o <strong>Microsoft Edge</strong> (Windows).</li>
+        <li>Conexión a internet solo para abrir la página; después todo se calcula en tu computador.</li>
         <li>No hay que instalar nada, crear cuenta ni iniciar sesión.</li>
+        <li>Dirección: <strong>https://yustrico.github.io/Analizador_Transparente/</strong></li>
+        <li>En un celular la página abre, pero no se adapta a la pantalla; úsala en un computador.</li>
       </ul>
-
-      <h2>3. ¿Cómo se abre?</h2>
-      <ol>
-        <li>Abre Chrome o Edge.</li>
-        <li>Escribe la dirección: <strong>https://yustrico.github.io/Analizador_Transparente/</strong></li>
-        <li>Verás el encabezado azul y cinco pestañas: <em>1. Equipo bajo prueba</em>, <em>2. Prueba guiada</em>, <em>3. Analizador</em>, <em>4. Comparar</em> y <em>5. Historial y reporte</em>.</li>
-        <li>Arriba a la derecha está el enlace <strong>«Ayuda»</strong>: abre este manual en el mismo sitio. Para regresar, usa <strong>«Volver al simulador»</strong>.</li>
-      </ol>
     </article>
 
     <article class="tarjeta">
-      <h2>4. ¿Cómo se hace la práctica, paso a paso?</h2>
+      <h2>3. ¿Cómo se hace la práctica, paso a paso?</h2>
 
       <h3>Paso 1 — Conoce el equipo (pestaña «1. Equipo bajo prueba»)</h3>
       <p>Lee la ficha del R12: es <strong>Clase I</strong> (tiene conductor de protección a tierra) y sus partes aplicadas (electrodos y cable de paciente) son tipo <strong>CF a prueba de desfibrilación</strong>. La tabla compara los límites de las partes B, BF y CF: la CF es la más estricta porque los electrodos pueden quedar cerca del corazón (microchoque). La fuga a tierra tiene el mismo límite para B, BF y CF porque es un límite del equipo completo.</p>
@@ -117,14 +111,14 @@
     </article>
 
     <article class="tarjeta">
-      <h2>5. ¿Qué pasa con tus datos?</h2>
+      <h2>4. ¿Qué pasa con tus datos?</h2>
       <ul>
         <li>Tus lecturas se guardan <strong>solo en esta pestaña del navegador</strong>. Nada se envía a ningún servidor.</li>
         <li><strong>Se borran al cerrar la pestaña.</strong> Descarga tu reporte antes de cerrar. (Recargar la página no las borra; abrir esta Ayuda y volver tampoco).</li>
         <li>El nombre solo aparece en tu reporte.</li>
       </ul>
 
-      <h2>6. ¿Cómo se leen los números?</h2>
+      <h2>5. ¿Cómo se leen los números?</h2>
       <ul>
         <li><strong>0.00 µA en condición normal:</strong> casi toda la fuga se va por la tierra. El analizador real muestra ≈ 0.1 µA por su resolución.</li>
         <li><strong>± U (incertidumbre):</strong> cuánto podría diferir la lectura del analizador real, según su exactitud ±(1 % de la lectura + 1 µA) y la guía GUM.</li>
@@ -132,10 +126,10 @@
         <li><strong>Qué tan cerca del límite:</strong> una corriente pequeña puede estar más cerca de su límite que una grande: compara la corriente de paciente CF (límite 10 µA) con la de contacto (límite 100 µA).</li>
       </ul>
 
-      <h2>7. ¿De dónde salen los datos?</h2>
+      <h2>6. ¿De dónde salen los datos?</h2>
       <p>Los valores del simulador están calibrados con mediciones reales del Fluke ESA620 sobre el electrocardiógrafo Mindray BeneHeart R12 serie FN-84011415 (3 repeticiones por condición). Los parámetros del modelo (C<sub>L</sub>, C<sub>N</sub>, C<sub>AP</sub>, ΔI y k<sub>N</sub>) se calcularon con mediciones del R12 en polaridad normal y se comprobaron con las mediciones en polaridad invertida (E<sub>n</sub> ≤ 0,19 en las 16 configuraciones). El detalle de las mediciones y de la calibración está en el documento <em>docs/06_Datos_ECG_R12_calibracion.md</em> del repositorio del proyecto.</p>
 
-      <h2>8. ¿Qué hago si algo no funciona?</h2>
+      <h2>7. ¿Qué hago si algo no funciona?</h2>
       <table class="tabla">
         <thead><tr><th>Problema</th><th>Qué hacer</th></tr></thead>
         <tbody>

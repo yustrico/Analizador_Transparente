@@ -21,7 +21,7 @@
  *   que M10 (reporte.js) usa para armar el reporte.
  * Módulo: M10 – Reporte (adaptador)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-14
+ * Creado: 2026-11-13 · Modificado: 2026-11-17
  * ============================================================================
  */
 
@@ -62,6 +62,9 @@ const ESPACIO_DESPUES_BLOQUE = 10;
 const ESPACIO_ANTES_SECCION = 8;
 const ESPACIO_DESPUES_SECCION = 4;
 const ESPACIO_LINEA_AVISO = 8;
+
+/** Sangría de los elementos de una lista numerada (el número va a la izquierda), en pt. */
+const SANGRIA_LISTA_PT = 16;
 
 /** Lista de datos: ancho de la columna de los términos (pt). */
 const ANCHO_TERMINO_PT = 120;
@@ -533,6 +536,15 @@ export function crearDocumentoPdf(opciones) {
    * @param {string} texto - Texto.
    * @param {object} estilo - Tamaño, negrita y color.
    */
+  /**
+   * Renglones de un elemento de lista numerada: cada parte empieza en un
+   * renglón nuevo y se parte al ancho que deja la sangría.
+   * @param {string[]} partes - Partes del elemento.
+   * @returns {string[]} Renglones.
+   */
+  const renglonesConSangria = (partes) =>
+    partes.flatMap((parte) => partirEnRenglones(parte, ANCHO_UTIL_PT - SANGRIA_LISTA_PT, TAMANO_TEXTO, false));
+
   const bloqueDeTexto = (texto, estilo) => {
     const renglones = partirEnRenglones(texto, ANCHO_UTIL_PT, estilo.tamano, estilo.negrita);
     const interlineado_pt = estilo.tamano * FACTOR_INTERLINEADO;
@@ -633,6 +645,52 @@ export function crearDocumentoPdf(opciones) {
       const renglones = partirEnRenglones(texto, ANCHO_UTIL_PT, TAMANO_TEXTO, false);
       asegurarEspacio(renglones.length * TAMANO_TEXTO * FACTOR_INTERLINEADO);
       this.parrafo(texto);
+    },
+    /**
+     * Lista numerada (1., 2., 3.…). Cada elemento es una lista de partes y
+     * cada parte empieza en un renglón nuevo, con sangría.
+     * @param {string[][]} elementos - Partes de cada elemento.
+     */
+    listaNumerada(elementos) {
+      const estilo = { tamano: TAMANO_TEXTO, negrita: false, color: COLOR_TEXTO };
+      const interlineado_pt = TAMANO_TEXTO * FACTOR_INTERLINEADO;
+      // Elemento por elemento: el número a la izquierda y las partes con sangría
+      for (const [indice, partes] of elementos.entries()) {
+        const renglones = renglonesConSangria(partes);
+        asegurarEspacio(renglones.length * interlineado_pt);
+        escribirRenglones([`${indice + 1}.`], MARGEN_PT, cursor_pt, estilo);
+        escribirRenglones(renglones, MARGEN_PT + SANGRIA_LISTA_PT, cursor_pt, estilo);
+        cursor_pt += renglones.length * interlineado_pt;
+      }
+      cursor_pt += ESPACIO_DESPUES_BLOQUE;
+    },
+    /**
+     * Sección (título y contenido) que nunca queda partida entre dos
+     * páginas: si no cabe completa en lo que queda de la página, pasa
+     * entera a la siguiente.
+     * @param {string} titulo - Título de la sección.
+     * @param {({parrafo: string}|{listaNumerada: string[][]})[]} bloques - Párrafos y listas, en orden.
+     */
+    seccionSinPartir(titulo, bloques) {
+      const interlineado_pt = TAMANO_TEXTO * FACTOR_INTERLINEADO;
+      const altoTitulo_pt = ESPACIO_ANTES_SECCION + TAMANO_SECCION * FACTOR_INTERLINEADO + ESPACIO_DESPUES_SECCION;
+      // Alto de cada bloque: sus renglones más el espacio después del bloque
+      const altoBloques_pt = bloques.reduce((suma, bloque) => {
+        const renglones = bloque.parrafo !== undefined
+          ? partirEnRenglones(bloque.parrafo, ANCHO_UTIL_PT, TAMANO_TEXTO, false)
+          : bloque.listaNumerada.flatMap(renglonesConSangria);
+        return suma + renglones.length * interlineado_pt + ESPACIO_DESPUES_BLOQUE;
+      }, 0);
+      asegurarEspacio(altoTitulo_pt + altoBloques_pt);
+      this.seccion(titulo);
+      // Dibuja los bloques en orden
+      for (const bloque of bloques) {
+        if (bloque.parrafo !== undefined) {
+          this.parrafo(bloque.parrafo);
+        } else {
+          this.listaNumerada(bloque.listaNumerada);
+        }
+      }
     },
     /**
      * Lista de datos: término en negrita a la izquierda y valor a la derecha.

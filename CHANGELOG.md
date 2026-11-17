@@ -5,6 +5,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Cambiado (17/11/2026, ronda 12: textos, sin cambios en cálculos)
+- Explicación de la incertidumbre (Comparar, reporte en pantalla y PDF): texto nuevo con un ejemplo de 14.73 µA en lista numerada (1 % + 1 µA → ÷ √3 → × 2), cada operación en su propio renglón. Los números quedan unidos a su unidad con un espacio sin corte, para que «1» y «%» no queden en renglones distintos.
+- PDF: nuevos `listaNumerada` y `seccionSinPartir` en el generador; la sección «¿Cómo se lee la incertidumbre?» nunca se parte entre páginas (prueba nueva en tests/pdf.test.js, 124 pruebas en verde).
+- Ayuda y manual: «¿Qué necesitas?» y «¿Cómo se abre?» quedan en una sola sección «¿Qué necesitas?» (con la dirección de la página); las secciones siguientes se renumeran (7 en total).
+
 ### Cambiado (17/11/2026, ronda 11: presentación, sin cambios en resultados ni cálculos)
 - Nota de la fuga a tierra (Analizador, tabla de la sección Equipo, ayuda y manual): «El límite de fuga a tierra es del equipo completo: no depende del tipo de parte aplicada (B, BF o CF).» y, en letra pequeña, la nota sobre los límites del manual del R12 (0.5 mA y 1 mA, edición anterior de la norma).
 - «¿Por qué da este valor?»: en todas las mediciones y condiciones, párrafo explicativo, fórmula sola y centrada con subíndices (I = V · 2π · f · …) y frase del límite («Es un primer defecto, por eso el límite es …»), armada con el límite del resultado.

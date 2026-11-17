@@ -188,3 +188,34 @@ test("parrafoSinPartir nunca deja un párrafo partido entre dos páginas", () =>
   // Control: con el párrafo normal sí se parte en alguna altura (la prueba sí mide algo)
   assert.ok(partidoConParrafoNormal);
 });
+
+test("seccionSinPartir deja el título, los párrafos y la lista numerada en la misma página", () => {
+  /**
+   * Arma un PDF con párrafos de relleno y al final la sección completa.
+   * @param {number} relleno - Párrafos de relleno antes.
+   * @returns {string[]} Flujos de contenido (uno por página).
+   */
+  const flujos = (relleno) => {
+    const documento = crearDocumentoPdf({ titulo: "Prueba", pie: "Pie", fecha: FECHA_PRUEBA });
+    // Relleno para que la sección caiga en distintas alturas de la página
+    for (let indice = 0; indice < relleno; indice += 1) {
+      documento.parrafo("Relleno");
+    }
+    documento.seccionSinPartir("TITULO", [
+      { parrafo: `Primero ${"palabra ".repeat(30)}` },
+      { listaNumerada: [["Paso uno:", "1 + 1 = 2"], ["Paso dos:", "2 × 2 = 4"]] },
+      { parrafo: "FINAL" },
+    ]);
+    return comoTexto(documento.generar()).split("endstream").filter((flujo) => flujo.includes(" Tj") || flujo.includes("TJ"));
+  };
+  // Prueba la sección en muchas alturas de la página
+  for (let relleno = 20; relleno < 60; relleno += 1) {
+    const paginas = flujos(relleno);
+    assert.ok(paginas.some((pagina) => pagina.includes("TITULO") && pagina.includes("FINAL")), `Con ${relleno} párrafos de relleno la sección quedó partida`);
+  }
+  // La lista lleva sus números y cada operación en su propio renglón
+  const texto = textoVisible(flujos(0).join("\n"));
+  for (const parte of ["1.", "2.", "Paso uno:", "1 + 1 = 2", "Paso dos:"]) {
+    assert.ok(texto.includes(parte), `Falta «${parte}»`);
+  }
+});

@@ -10,19 +10,15 @@ El Analizador transparente simula las pruebas de seguridad eléctrica (IEC 60601
 Úsalo para practicar solo, antes o después de la práctica con el equipo real. Puedes pausar cuando quieras: no hay límite de tiempo.
 
 ## 2. ¿Qué necesitas?
-- Un **computador** con **Google Chrome** o **Microsoft Edge** (Windows). Está diseñada para computador. En un celular la página abre, pero no se adapta a la pantalla y algunas partes se ven mal; úsala en un computador.
-- Internet solo para abrir la página. Después de cargar, todos los cálculos se hacen en tu computador.
+- Un **computador** con **Google Chrome** o **Microsoft Edge** (Windows).
+- Conexión a internet solo para abrir la página; después todo se calcula en tu computador.
 - No hay que instalar nada, crear cuenta ni iniciar sesión.
-
-## 3. ¿Cómo se abre?
-1. Abre Chrome o Edge.
-2. Escribe la dirección: **https://yustrico.github.io/Analizador_Transparente/**
-3. Verás el encabezado azul y cinco pestañas: *1. Equipo bajo prueba*, *2. Prueba guiada*, *3. Analizador*, *4. Comparar* y *5. Historial y reporte*.
-4. Arriba a la derecha está el enlace **«Ayuda»**: abre este manual en el mismo sitio. Para regresar, usa **«Volver al simulador»**.
+- Dirección: **https://yustrico.github.io/Analizador_Transparente/**
+- En un celular la página abre, pero no se adapta a la pantalla; úsala en un computador.
 
 📷 *Captura sugerida 1: la página recién abierta, con las cinco pestañas y el aviso educativo abajo.*
 
-## 4. ¿Cómo se hace la práctica, paso a paso?
+## 3. ¿Cómo se hace la práctica, paso a paso?
 
 ### Paso 1 — Conoce el equipo (pestaña «1. Equipo bajo prueba»)
 Lee la ficha del R12: es **Clase I** (tiene conductor de protección a tierra) y sus partes aplicadas (electrodos y cable de paciente) son tipo **CF a prueba de desfibrilación**. La tabla compara los límites de las partes B, BF y CF: la CF es la más estricta porque los electrodos pueden quedar cerca del corazón (microchoque). La fuga a tierra tiene el mismo límite para B, BF y CF porque es un límite del equipo completo.
@@ -80,19 +76,19 @@ Después de generar el reporte puedes volver a medir y generarlo otra vez.
 📷 *Captura sugerida 6: la vista del reporte con los botones «Descargar reporte (PDF)» y «Copiar resumen».*
 📷 *Captura sugerida 7: el PDF abierto en el navegador.*
 
-## 5. ¿Qué pasa con tus datos?
+## 4. ¿Qué pasa con tus datos?
 - Tus lecturas se guardan **solo en esta pestaña del navegador**. Nada se envía a ningún servidor.
 - **Se borran al cerrar la pestaña.** Descarga tu reporte antes de cerrar. (Recargar la página no las borra).
 - El nombre solo aparece en tu reporte.
 
-## 6. ¿Cómo se leen los números?
+## 5. ¿Cómo se leen los números?
 - **0.00 µA en condición normal:** casi toda la fuga se va por la tierra. El analizador real muestra ≈ 0.1 µA por su resolución.
 - **± U (incertidumbre):** cuánto podría diferir la lectura del analizador real, según su exactitud ±(1 % de la lectura + 1 µA) y la guía GUM.
 - **Límites (IEC 60601-1):** corriente de contacto 100 µA (normal) y 500 µA (primer defecto); corriente de paciente CF 10 µA (normal) y 50 µA (primer defecto); corriente de fuga a tierra 5 mA (normal) y 10 mA (primer defecto), según la 3.ª edición de la norma. El límite de fuga a tierra es del equipo completo: no depende del tipo de parte aplicada (B, BF o CF).<br><small>Nota: el manual del R12 usa límites más estrictos, 0.5 mA en condición normal y 1 mA en primer defecto, porque se basa en la edición anterior de la norma. El R12 cumple con ambos.</small>
 - **Qué tan cerca del límite:** una corriente pequeña puede estar más cerca de su límite que una grande: compara la corriente de paciente CF (límite 10 µA) con la de contacto (límite 100 µA).
 
-## 7. ¿De dónde salen los datos?
+## 6. ¿De dónde salen los datos?
 Los valores del simulador están calibrados con mediciones reales del Fluke ESA620 sobre el electrocardiógrafo Mindray BeneHeart R12 serie FN-84011415 (3 repeticiones por condición). Los parámetros del modelo (C<sub>L</sub>, C<sub>N</sub>, C<sub>AP</sub>, ΔI y k<sub>N</sub>) se calcularon con mediciones del R12 en polaridad normal y se comprobaron con las mediciones en polaridad invertida (E<sub>n</sub> ≤ 0,19 en las 16 configuraciones). El detalle de las mediciones y de la calibración está en `docs/06_Datos_ECG_R12_calibracion.md`.
 
-## 8. ¿Qué hago si algo no funciona?
+## 7. ¿Qué hago si algo no funciona?
 Consulta [solucion_problemas.md](solucion_problemas.md).

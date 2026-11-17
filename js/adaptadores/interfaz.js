@@ -31,10 +31,10 @@ import {
   textoLimite, textoConfiguracion, resumirAvance, claveConfiguracion,
 } from "./historial.js?v=37beb88db5";
 import {
-  generarReporte, crearPdfReporte, nombreArchivoReporte, armarResumen, limpiarNombre, TEXTO_INCERTIDUMBRE, TEXTO_CERCA_DEL_LIMITE,
+  generarReporte, crearPdfReporte, nombreArchivoReporte, armarResumen, limpiarNombre, mostrarExplicacionIncertidumbre, TEXTO_CERCA_DEL_LIMITE,
   normasDelEquipo, conSaltosDeLinea,
-} from "./reporte.js?v=0d6cd0542e";
-import { descargarPdf } from "./pdf.js?v=7d6a176698";
+} from "./reporte.js?v=6b823710e1";
+import { descargarPdf } from "./pdf.js?v=628f37170c";
 import { medirCargaPagina, textoTiempoCarga, detalleCarga } from "./tiempo_carga.js?v=1c9699f3b9";
 
 /* ------------------------------------------------------------------------ */
@@ -1620,7 +1620,7 @@ export function iniciarInterfaz(parametros) {
   configurarNavegacion(estado);
   configurarPruebaGuiada(estado);
   configurarAnalizador(estado);
-  elemento("comparar-incertidumbre").textContent = TEXTO_INCERTIDUMBRE;
+  mostrarExplicacionIncertidumbre(elemento("comparar-incertidumbre"));
   configurarHistorial(estado);
   // Si la página se recargó, muestra las lecturas que ya había en esta pestaña
   mostrarComparacion(estado);
