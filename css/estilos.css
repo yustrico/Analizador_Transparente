@@ -267,6 +267,8 @@ h4 { margin: 14px 0 6px; font-size: 1rem; }
 .texto-circuito--pequeno { font-size: 11px; fill: var(--texto-secundario); }
 .texto-circuito__subindice { font-size: 0.75em; }
 .texto-circuito--valor { font-size: 12px; font-weight: 700; fill: var(--texto); }
+.recuadro-analizador { fill: none; stroke: var(--azul-principal); stroke-width: 1.5; stroke-dasharray: 6 5; }
+.texto-circuito--analizador { font-weight: 600; font-style: italic; fill: var(--azul-principal); }
 .zona-ayuda { fill: transparent; cursor: help; }
 .parte-circuito:hover .zona-ayuda { fill: rgba(20, 54, 95, 0.06); }
 .camino-corriente { fill: none; stroke: var(--rojo-fuga); stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 10 8; }

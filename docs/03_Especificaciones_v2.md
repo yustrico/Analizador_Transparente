@@ -88,6 +88,7 @@ CORRECCIÓN: antes se mostraba neutro abierto = 145 µA. Ese valor supone que la
 ## 5. Lo que deliberadamente NO es especificación (y por qué)
 - Funcionar sin internet después de la primera carga: es sí/no, así que es requerimiento (RNF04) y se verifica por demostración.
 - Tiempo de la práctica: el profesor pidió tiempo indefinido, así que es requerimiento (RNF08).
+- ES11 mide el uso del simulador sin ayuda; no evalúa la habilidad de conectar el ESA620 al R12, que se enseña en la práctica de laboratorio.
 - Mejora del aprendizaje (antes y después): NO se promete un valor, porque con n = 5 y un semestre no se puede garantizar. Se mide en el instrumento D como dato exploratorio, sin meta. Esto es lo honesto.
 
 ## 6. Riesgos para cumplir (revisar YA)

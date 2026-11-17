@@ -163,6 +163,7 @@ Resultado: 16 de 16 configuraciones con E_n ≤ 1; máximo 0.187 (detalle en doc
 - Solo 3 repeticiones por condición (docs/03 planeaba 10). Con n = 3 la desviación estándar se estima mal, y U_med queda dominada por la exactitud del analizador (piso de 1 µA). Por eso, en corrientes de 1 a 2 µA (paciente CF) un E_n pequeño también refleja una incertidumbre grande frente al valor medido.
 - Los parámetros (C_L, C_N, C_AP, ΔI y k_N) se calcularon con las mediciones de polaridad normal: en esas configuraciones el E_n muestra que el modelo reproduce lo medido, no es una predicción independiente. La validación independiente es la polaridad invertida.
 - Un solo equipo (R12 serie FN-84011415) y una sola sesión de laboratorio.
+- ES11 mide el uso del simulador sin ayuda; no evalúa la habilidad de conectar el ESA620 al R12, que se enseña en la práctica de laboratorio.
 
 ### 10.4 Propuesta de mejora y trabajo futuro
 - Repetir las mediciones con 10 repeticiones por condición y, si es posible, en otro R12, para estimar mejor la dispersión.

@@ -101,9 +101,9 @@ const PUNTOS = Object.freeze({
   mdAbajo: [660, 275],
   mdTierra: [660, 340],
   peChasis: [440, 300],
-  peInterruptorArriba: [440, 308],
-  peInterruptorAbajo: [440, 328],
-  peAbiertoPunta: [425, 324],
+  peInterruptorArriba: [440, 312],
+  peInterruptorAbajo: [440, 332],
+  peAbiertoPunta: [425, 328],
   peTierra: [440, 340],
   tierraFuente: [60, 340],
 });
@@ -260,8 +260,19 @@ function dibujarCapacitor(puntoA, puntoB, esVertical, padre) {
   }
 }
 
+/**
+ * Contorno del recuadro "Dentro del Fluke ESA620" (x,y en orden): columna de
+ * la izquierda (polaridad y neutro), franja de abajo (interruptor de tierra)
+ * y columna de la derecha (MD), sin tocar el chasis ni la parte aplicada.
+ */
+const PUNTOS_RECUADRO_ANALIZADOR = "88,50 250,50 250,305 588,305 588,200 852,200 852,354 88,354";
+
 /** Rectángulos y círculos fijos del dibujo (elemento SVG + atributos). */
 const FIGURAS_FIJAS = Object.freeze([
+  // Recuadro punteado del Fluke ESA620: encierra los conmutadores (polaridad,
+  // neutro, tierra) y la MD; el R12 (chasis y parte aplicada) queda por fuera.
+  // Va primero para quedar detrás de todo lo demás.
+  { etiqueta: "polygon", atributos: { points: PUNTOS_RECUADRO_ANALIZADOR, class: "recuadro-analizador" } },
   { etiqueta: "rect", atributos: { x: 330, y: 55, width: 240, height: 245, rx: 6, class: "chasis" } },
   { etiqueta: "rect", atributos: { x: 150, y: 75, width: 80, height: 170, rx: 6, class: "cable cable--inactivo" } },
   { etiqueta: "circle", atributos: { cx: 60, cy: 160, r: 26, class: "caja-componente" } },
@@ -280,12 +291,13 @@ const CLASE_TITULO = "texto-circuito texto-circuito--titulo";
 const CLASE_PEQUENO = "texto-circuito texto-circuito--pequeno";
 const CLASE_SUBINDICE = "texto-circuito__subindice";
 const CLASE_VALOR = "texto-circuito texto-circuito--valor";
+const CLASE_TITULO_ANALIZADOR = "texto-circuito texto-circuito--analizador";
 
 /** Textos fijos del dibujo: [contenido, x, y, clase, alineación]. */
 const TEXTOS_FIJOS = Object.freeze([
   ["~", 60, 167, CLASE_TITULO, "middle"],
-  ["Red", 60, 38, CLASE_TITULO, "middle"],
-  ["120 V · 60 Hz", 60, 56, CLASE_PEQUENO, "middle"],
+  ["Red", 60, 24, CLASE_TITULO, "middle"],
+  ["120 V · 60 Hz", 60, 40, CLASE_PEQUENO, "middle"],
   ["L", 44, 94, CLASE_TITULO, "middle"],
   ["N", 44, 226, CLASE_TITULO, "middle"],
   ["Neutro", 115, 254, CLASE_PEQUENO, "middle"],
@@ -304,7 +316,8 @@ const TEXTOS_FIJOS = Object.freeze([
   ["MD: cuerpo humano", 708, 251, CLASE_PEQUENO, "start"],
   ["simulado (1 kΩ)", 708, 265, CLASE_PEQUENO, "start"],
   ["Conductor de protección (PE)", 416, 322, CLASE_PEQUENO, "end"],
-  ["Tierra de la instalación", 250, 360, CLASE_PEQUENO, "middle"],
+  ["Tierra de la instalación", 250, 372, CLASE_PEQUENO, "middle"],
+  ["Dentro del Fluke ESA620", 844, 346, CLASE_TITULO_ANALIZADOR, "end"],
 ]);
 
 /**
@@ -315,7 +328,7 @@ const TEXTOS_FIJOS = Object.freeze([
  */
 const ZONAS_DE_AYUDA = Object.freeze([
   { parte: "chasis", x: 326, y: 36, width: 248, height: 268 },
-  { parte: "red", x: 28, y: 28, width: 64, height: 40 },
+  { parte: "red", x: 24, y: 10, width: 72, height: 36 },
   { parte: "red", x: 32, y: 132, width: 56, height: 56 },
   { parte: "fase", x: 36, y: 80, width: 114, height: 20 },
   { parte: "fase", x: 50, y: 96, width: 20, height: 36 },
@@ -332,7 +345,7 @@ const ZONAS_DE_AYUDA = Object.freeze([
   { parte: "puntaContacto", x: 730, y: 100, width: 20, height: 118 },
   { parte: "md", x: 616, y: 231, width: 200, height: 48 },
   { parte: "conductorProteccion", x: 272, y: 302, width: 176, height: 36 },
-  { parte: "tierraInstalacion", x: 36, y: 338, width: 640, height: 30 },
+  { parte: "tierraInstalacion", x: 36, y: 338, width: 640, height: 40 },
 ]);
 
 /** Conversión de faradios a picofaradios, para mostrar las capacitancias. */
@@ -370,8 +383,8 @@ export function describirPartesDelCircuito(parametros) {
       explicacion: "Capacitancia del aislamiento entre la red y los electrodos. Es la barrera que separa la parte aplicada de la red; una corriente muy pequeña la cruza hacia el paciente." },
     { id: "parteAplicada", nombre: "Parte aplicada CF", enCuadro: true,
       explicacion: "Los electrodos de ECG y el cable de paciente: lo que toca al paciente. Es tipo CF porque puede quedar cerca del corazón, por eso tiene los límites más estrictos." },
-    { id: "md", nombre: "MD (cuerpo humano simulado)", enCuadro: true,
-      explicacion: "Es el circuito que usa el analizador para imitar el cuerpo humano (IEC 60601-1). Aquí se simplifica como una resistencia de 1 kΩ; el real también tiene una red de 10 kΩ y 0,015 µF que imita cómo responde el cuerpo a la frecuencia." },
+    { id: "md", nombre: "MD", enCuadro: true,
+      explicacion: "Carga interna del Fluke ESA620 que imita el cuerpo humano (IEC 60601-1): 1 kΩ en paralelo con una red de 10 kΩ y 0,015 µF. No se conecta a mano: el analizador la usa por dentro en cada medición de fuga. Aquí se simplifica como 1 kΩ." },
     { id: "red", nombre: "Red eléctrica", enCuadro: false,
       explicacion: `La red de ${V_rms} V y ${f_Hz} Hz, como un tomacorriente en Colombia.` },
     { id: "chasis", nombre: "Chasis del R12", enCuadro: false,

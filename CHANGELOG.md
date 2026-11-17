@@ -5,6 +5,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Cambiado (17/11/2026, ronda 14: dibujo y textos del Analizador; sin cambios en cálculos, resultados ni pruebas del núcleo)
+- Circuito SVG: recuadro punteado «Dentro del Fluke ESA620» que encierra el conmutador de polaridad, el interruptor del neutro, el interruptor de la tierra y la MD; el R12 (chasis, C_L, C_N, C_AP y parte aplicada) queda por fuera. Se movieron un poco los textos de la red y el interruptor de tierra para que nada se encime.
+- MD en «¿Qué es cada parte?» y en el dibujo: carga interna del ESA620 (1 kΩ en paralelo con 10 kΩ y 0,015 µF), que el analizador usa por dentro; aquí se simplifica como 1 kΩ.
+- Bloque cerrado «¿Cómo se conecta en el laboratorio?» debajo del circuito, con los 4 pasos de conexión del R12 al ESA620; el mismo texto en ayuda.html y en docs/manual_usuario.md.
+- docs/03 (ES11) y docs/08 (limitaciones): ES11 mide el uso del simulador sin ayuda, no la habilidad de conectar el ESA620 al R12.
+
 ### Cambiado (17/11/2026, documentos; sin cambios en la página, el código ni los datos)
 - docs/Diagramas: quedan solo las versiones _v2 (C4 N1, N2 y N3, DFD nivel 0 y nivel 1, flujo de control y ciclo de vida); se borran las versiones viejas. Referencias actualizadas en docs/08, README y CLAUDE.md.
 - docs/08 al estado real del código: M10a Generador PDF y M11 Tiempo de carga en la jerarquía y las fichas; historial y avance de la prueba en sessionStorage; tabla de correspondencia con la guía del Corte 3 (punto 9.3); interacciones M10 → M10a, M10a → archivo PDF, M8 ↔ sessionStorage y M11 → M10; registro de fallas (guía punto 11); teórico vs. real (E_n de las 16 configuraciones, factor k_N, limitación de n = 3) y trabajo futuro; seguridad con las 7 medidas, el riesgo que cubre cada una y el riesgo residual. Se corrige SRI SHA-256 → SHA-384.

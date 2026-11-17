@@ -48,7 +48,7 @@ No se pueden saltar pasos hacia adelante: un paso nuevo se habilita al completar
    - **Lectura ± incertidumbre** en µA (lo que mostraría el analizador real y cuánto podría variar).
    - **Límite** que aplica (condición normal o primer defecto) y **qué tan cerca del límite** está la lectura (en %).
    - **Cumple / No cumple**.
-5. Mira el **circuito**: el camino de la corriente se dibuja en **rojo** y muestra cuánta corriente va por cada rama (en la fuga a tierra, el camino rojo va por el conductor de protección). Pasa el mouse sobre cada parte para saber qué es; el cuadro «¿Qué es cada parte?» lo explica también.
+5. Mira el **circuito**: el camino de la corriente se dibuja en **rojo** y muestra cuánta corriente va por cada rama (en la fuga a tierra, el camino rojo va por el conductor de protección). Pasa el mouse sobre cada parte para saber qué es; el cuadro «¿Qué es cada parte?» lo explica también. El recuadro punteado del circuito es lo que está dentro del Fluke ESA620.
 6. Lee **«¿Por qué da este valor?»**: la explicación física y la fórmula con los números usados.
 
 📷 *Captura sugerida 4: el Analizador con «tierra abierta» y corriente de contacto: lectura ≈ 14.73 ± 1.32 µA y el camino rojo por la persona (MD).*
@@ -56,6 +56,13 @@ No se pueden saltar pasos hacia adelante: un paso nuevo se habilita al completar
 **Prueba sugerida:** mide la corriente de contacto en condición normal (≈ 0 µA) y luego con tierra abierta (≈ 14.7 µA). Observa en el circuito por qué cambia: sin tierra, la corriente de fuga ya no tiene un camino de baja resistencia y pasa por la persona.
 
 > La animación se detiene sola si no mueves el mouse durante 30 s (para ahorrar batería) y vuelve al moverlo. Si en Windows tienes desactivados los «Efectos de animación», el camino rojo se muestra quieto.
+
+**¿Cómo se conecta en el laboratorio?**
+
+1. El cable de poder del R12 se conecta al tomacorriente de prueba del ESA620 (no a la pared). Así el analizador puede invertir la polaridad y abrir el neutro o la tierra.
+2. Los cables de paciente del R12 se conectan a los bornes de ECG del ESA620. Esa es la parte aplicada.
+3. Para la corriente de contacto, la punta de prueba del ESA620 toca una parte conductora accesible del R12 (por ejemplo, una parte metálica del chasis o su borne equipotencial).
+4. Cada medición se elige en el menú del ESA620; lo que muestra la pantalla es la corriente que pasa por su carga interna (MD).
 
 ### Paso 4 — Compara (pestaña «4. Comparar»)
 Arriba verás tu **avance**: «Has medido X de las 16 configuraciones que simula esta herramienta», con la lista de las que te faltan y de las que repetiste (y cuántas veces). El bloque «¿Por qué 16?» explica de dónde sale ese número: 12 de contacto y de paciente CF y 4 de fuga a tierra.

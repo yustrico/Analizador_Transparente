@@ -21,7 +21,7 @@
   <meta name="description" content="Manual de usuario del Analizador transparente: cómo hacer la práctica de seguridad eléctrica del electrocardiógrafo Mindray BeneHeart R12.">
   <link rel="icon" href="data:,">
   <!-- Integridad (SRI): la huella SHA-384 la escribe tools/sri.mjs -->
-  <link rel="stylesheet" href="css/estilos.css?v=abc437fd0a" integrity="sha384-q8Q3/QrAJndnA53ylp+dkbbXuot3XRmm0Ox9zG5n8PaAGPjZkKd+u4Xqf8bx3St2">
+  <link rel="stylesheet" href="css/estilos.css?v=4b8298b63b" integrity="sha384-S4KYtjs8PkISGBNu2nMdC/lgjw8lGONtNp0zXqneCAo85+T3pH8yudlG0p7eaebg">
 </head>
 <body>
   <header class="encabezado">
@@ -89,11 +89,19 @@
             <li><strong>Cumple / No cumple</strong>.</li>
           </ul>
         </li>
-        <li>Mira el <strong>circuito</strong>: el camino de la corriente se dibuja en <strong>rojo</strong> y muestra cuánta corriente va por cada rama (en la fuga a tierra, el camino rojo va por el conductor de protección). Pasa el mouse sobre cada parte para saber qué es; el cuadro «¿Qué es cada parte?» lo explica también.</li>
+        <li>Mira el <strong>circuito</strong>: el camino de la corriente se dibuja en <strong>rojo</strong> y muestra cuánta corriente va por cada rama (en la fuga a tierra, el camino rojo va por el conductor de protección). Pasa el mouse sobre cada parte para saber qué es; el cuadro «¿Qué es cada parte?» lo explica también. El recuadro punteado del circuito es lo que está dentro del Fluke ESA620.</li>
         <li>Lee <strong>«¿Por qué da este valor?»</strong>: la explicación física y la fórmula con los números usados.</li>
       </ol>
       <p><strong>Prueba sugerida:</strong> mide la corriente de contacto en condición normal (≈ 0 µA) y luego con tierra abierta (≈ 14.7 µA). Observa en el circuito por qué cambia: sin tierra, la corriente de fuga ya no tiene un camino de baja resistencia y pasa por la persona.</p>
       <p class="nota">La animación se detiene sola si no mueves el mouse durante 30 s (para ahorrar batería) y vuelve al moverlo. Si en Windows tienes desactivados los «Efectos de animación», el camino rojo se muestra quieto.</p>
+
+      <h4>¿Cómo se conecta en el laboratorio?</h4>
+      <ol>
+        <li>El cable de poder del R12 se conecta al tomacorriente de prueba del ESA620 (no a la pared). Así el analizador puede invertir la polaridad y abrir el neutro o la tierra.</li>
+        <li>Los cables de paciente del R12 se conectan a los bornes de ECG del ESA620. Esa es la parte aplicada.</li>
+        <li>Para la corriente de contacto, la punta de prueba del ESA620 toca una parte conductora accesible del R12 (por ejemplo, una parte metálica del chasis o su borne equipotencial).</li>
+        <li>Cada medición se elige en el menú del ESA620; lo que muestra la pantalla es la corriente que pasa por su carga interna (MD).</li>
+      </ol>
 
       <h3>Paso 4 — Compara (pestaña «4. Comparar»)</h3>
       <p>Arriba verás tu <strong>avance</strong>: «Has medido X de las 16 configuraciones que simula esta herramienta», con la lista de las que te faltan y de las que repetiste (y cuántas veces). El bloque «¿Por qué 16?» explica de dónde sale ese número: 12 de contacto y de paciente CF y 4 de fuga a tierra.</p>
