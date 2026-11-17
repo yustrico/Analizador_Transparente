@@ -7,7 +7,7 @@
  *   computador de 1280 px o más.
  * Módulo: M1 – Interfaz de usuario (adaptador) y M6 – Visualizador
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-14
+ * Creado: 2026-11-13 · Modificado: 2026-11-17
  * ============================================================================
  */
 
@@ -106,6 +106,7 @@ h4 { margin: 14px 0 6px; font-size: 1rem; }
 .seccion > .rejilla-dos { margin-bottom: 16px; }
 
 .nota { color: var(--texto-secundario); font-size: 0.9rem; margin: 6px 0; }
+.nota--pequena { font-size: 0.8rem; }
 .mensaje-error {
   background: #FFF4E5;
   border: 1px solid var(--ambar-no-cumple);
@@ -243,6 +244,8 @@ h4 { margin: 14px 0 6px; font-size: 1rem; }
 .formula p { margin: 4px 0; font-family: ui-monospace, Consolas, monospace; font-size: 0.95rem; }
 .simbolos { margin: 4px 0 10px; padding-left: 20px; }
 .simbolos li { margin: 2px 0; }
+/* Fórmula de la explicación: sola en su renglón y centrada */
+.explicacion__formula { text-align: center; font-size: 1.1rem; margin: 12px 0; }
 /* De dónde sale un parámetro calibrado: en su propio renglón, más discreto */
 .simbolos__origen { display: block; margin: 2px 0 6px; color: var(--texto-secundario); font-size: 0.9rem; }
 .partes-circuito { border-top: 1px solid var(--borde); margin-top: 12px; padding-top: 4px; }
@@ -258,6 +261,7 @@ h4 { margin: 14px 0 6px; font-size: 1rem; }
 .texto-circuito { font-size: 13px; fill: var(--texto); }
 .texto-circuito--titulo { font-weight: 600; fill: var(--azul-principal); }
 .texto-circuito--pequeno { font-size: 11px; fill: var(--texto-secundario); }
+.texto-circuito__subindice { font-size: 0.75em; }
 .texto-circuito--valor { font-size: 12px; font-weight: 700; fill: var(--texto); }
 .zona-ayuda { fill: transparent; cursor: help; }
 .parte-circuito:hover .zona-ayuda { fill: rgba(20, 54, 95, 0.06); }

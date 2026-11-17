@@ -10,7 +10,7 @@
  *   textContent (nunca innerHTML), por seguridad.
  * Módulo: M1 – Interfaz de usuario (adaptador)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-14
+ * Creado: 2026-11-13 · Modificado: 2026-11-17
  * ============================================================================
  */
 
@@ -25,7 +25,7 @@ import {
 import {
   evaluarMedicion, evaluarAislamiento, evaluarResistenciaTierra, VEREDICTO_CUMPLE,
 } from "../nucleo/evaluador_limites.js?v=9c30cc64cc";
-import { crearVisualizador, describirPartesDelCircuito, formatearCorriente_uA } from "./visualizador.js?v=a5acde3349";
+import { crearVisualizador, describirPartesDelCircuito, formatearCorriente_uA, partirSubindices } from "./visualizador.js?v=b3d866e175";
 import {
   crearHistorial, guardarAvancePrueba, leerAvancePrueba, filaDeRegistro, nombreCortoCondicion, textoLectura, textoPorcentaje, NOMBRES_MEDICION, UNIDAD_CORRIENTE,
   textoLimite, textoConfiguracion, resumirAvance, claveConfiguracion,
@@ -125,22 +125,75 @@ const GRUPOS_LIMITES_POR_MEDICION = Object.freeze({
 
 /** Textos de explicación (CLAUDE.md, sección 7). */
 const TEXTOS_EXPLICACION = Object.freeze({
-  contactoNormal: "La fuga capacitiva del equipo (≈ 14.7 µA) se va casi toda por el conductor de protección (≈ 0.003 Ω), que está en paralelo con la persona (1 kΩ). Por divisor de corriente casi nada pasa por la persona: ≈ 0 µA. El analizador real muestra ≈ 0.1 µA por su resolución.",
   contactoPolaridadInvertida: "En este equipo los capacitores de fuga de fase y de neutro son casi iguales, por eso invertir la polaridad casi no cambia la lectura.",
-  contactoTierraAbierta: "Sin conductor de protección, la fuga de la capacitancia entre fase y chasis no tiene un camino de baja resistencia: circula por la persona. I = V·2πf·C (V: tensión de la red; f: frecuencia; C: capacitancia de fuga entre fase y chasis) ≈ 14.7 µA. Es primer defecto: límite 500 µA.",
-  contactoNeutroAbierto: "Con el neutro abierto ambos lados de la red quedan a tensión de fase y la fuga total aumenta, pero la tierra sigue conectada y se la lleva: ≈ 0 µA por la persona.",
-  pacienteNormal: "Es la corriente que cruza la barrera de aislamiento de la parte aplicada (≈ 28 pF): ≈ 1.3 µA. Como los electrodos pueden quedar cerca del corazón (CF), el límite es 10 µA.",
   pacientePolaridadInvertida: "Invertir la polaridad casi no cambia la lectura.",
-  pacienteTierraAbierta: "Con el chasis sin tierra aumenta el acople hacia la parte aplicada: ≈ 2.1 µA (aumento medido en el laboratorio). Límite de primer defecto: 50 µA.",
-  pacienteNeutroAbierto: "≈ 1.3 µA, casi igual a la condición normal en este equipo. Límite de primer defecto: 50 µA.",
-  fugaNormal: "Es la corriente que la capacitancia de fuga entre fase y chasis (≈ 326 pF) manda al chasis y que vuelve por el conductor de protección hacia la tierra de la instalación: I = V·2πf·C ≈ 14.7 µA. El límite es del equipo completo: 5 mA en condición normal.",
-  fugaNeutroAbierto: "Con el neutro abierto, el lado del neutro también queda con tensión y suma parte de su fuga: I = V·2πf·(C_L + k_N·C_N) ≈ 27.1 µA. k_N ≈ 0.84 es un factor empírico medido en el laboratorio: el lado del neutro no queda exactamente a la tensión de fase. Es primer defecto: límite 10 mA.",
-  fugaSegundaEdicion: "El manual del R12 indica 500/1000 µA porque usa la 2.ª edición de la norma.",
+  limiteEquipoCompleto: "El límite de fuga a tierra es del equipo completo: no depende del tipo de parte aplicada (B, BF o CF).",
+  notaManualR12: "Nota: el manual del R12 usa límites más estrictos, 0.5 mA en condición normal y 1 mA en primer defecto, porque se basa en la edición anterior de la norma. El R12 cumple con ambos.",
   limiteContactoIgual: "Para la corriente de contacto el límite es el mismo para B, BF y CF.",
-  limiteEquipoCompleto: "Para la fuga a tierra el límite es del equipo completo, no depende de B, BF o CF.",
   bandaIncertidumbre: "Es la exactitud del analizador real (±(1 % + 1 µA), k = 2). Si dos lecturas difieren menos que esta banda, la diferencia puede ser del instrumento y no de la condición.",
   dobleFalla: "No se pueden abrir la tierra y el neutro al mismo tiempo: serían dos fallas a la vez (doble falla). La norma evalúa una sola falla a la vez (primer defecto), por eso esa opción está deshabilitada.",
   tierraCerradaSola: "Se cerró la tierra porque la fuga a tierra se mide con el conductor de protección conectado.",
+});
+
+/**
+ * Explicación física de cada medición y condición (CLAUDE.md, sección 7,
+ * reorganizada): un párrafo explicativo y la fórmula, que se muestra sola,
+ * centrada y con subíndices. La frase del límite se arma con el resultado.
+ * {C} es la capacitancia del lado de la fase (C_L con polaridad normal y C_N
+ * con polaridad invertida) y {C_otra}, la del otro lado. {ladoNeutro} dice
+ * a qué lado del equipo llega el neutro de la red (cambia con la polaridad).
+ */
+const EXPLICACIONES = Object.freeze({
+  contacto: {
+    normal: {
+      parrafo: "La fuga capacitiva del equipo (I_fuga ≈ 14.7 µA) se va casi toda por el conductor de protección (R_PE ≈ 0.003 Ω), que está en paralelo con la persona (R_MD = 1 kΩ). Por divisor de corriente casi nada pasa por la persona. El analizador real muestra ≈ 0.1 µA por su resolución.",
+      formula: "I = I_fuga · R_PE / (R_PE + R_MD) ≈ 0 µA",
+    },
+    tierraAbierta: {
+      parrafo: "Sin conductor de protección, la fuga de la capacitancia entre la fase y el chasis ({C}) no tiene un camino de baja resistencia: circula por la persona.",
+      formula: "I = V · 2π · f · {C} ≈ 14.7 µA",
+    },
+    neutroAbierto: {
+      parrafo: "Con el neutro abierto ambos lados de la red quedan a tensión de fase y la fuga total aumenta, pero la tierra sigue conectada y se la lleva: casi nada pasa por la persona.",
+      formula: "I = V · 2π · f · (C_L + C_N) · R_PE / (R_PE + R_MD) ≈ 0 µA",
+    },
+  },
+  paciente: {
+    normal: {
+      parrafo: "Es la corriente que cruza la barrera de aislamiento de la parte aplicada (C_AP ≈ 28 pF). Como los electrodos pueden quedar cerca del corazón (CF), su límite es el más estricto.",
+      formula: "I = V · 2π · f · C_AP ≈ 1.3 µA",
+    },
+    tierraAbierta: {
+      parrafo: "Con el chasis sin tierra aumenta el acople hacia la parte aplicada. Ese aumento (ΔI ≈ 0.83 µA) se midió en el laboratorio.",
+      formula: "I = V · 2π · f · C_AP + ΔI ≈ 2.1 µA",
+    },
+    neutroAbierto: {
+      parrafo: "En este equipo, abrir el neutro casi no cambia la corriente de paciente: queda casi igual a la condición normal.",
+      formula: "I = V · 2π · f · C_AP ≈ 1.3 µA",
+    },
+  },
+  fuga_tierra: {
+    normal: {
+      parrafo: "Es la corriente que la capacitancia de fuga entre la fase y el chasis ({C} ≈ 326 pF) manda al chasis y que vuelve por el conductor de protección hacia la tierra de la instalación.",
+      formula: "I = V · 2π · f · {C} ≈ 14.7 µA",
+    },
+    neutroAbierto: {
+      parrafo: "Con el neutro abierto, {ladoNeutro} también queda con tensión, así que su capacitancia de fuga ({C_otra}) también manda corriente al chasis. Pero no aporta completa: solo un 84 % (k_N = 0.84), porque ese lado no queda exactamente a la tensión de la fase.",
+      formula: "I = V · 2π · f · ({C} + k_N · {C_otra}) ≈ 27.1 µA",
+    },
+  },
+});
+
+/** A qué lado del equipo llega el neutro de la red, según la polaridad. */
+const LADO_NEUTRO = Object.freeze({
+  normal: "el lado del neutro del equipo",
+  invertida: "el lado del equipo que recibe el neutro de la red",
+});
+
+/** Frase del límite al final de la explicación, según el estado de la condición. */
+const FRASES_LIMITE = Object.freeze({
+  normal: "Es la condición normal, por eso el límite es",
+  primer_defecto: "Es un primer defecto, por eso el límite es",
 });
 
 /**
@@ -193,11 +246,33 @@ function elemento(id) {
 }
 
 /**
- * Crea un elemento HTML con su texto (siempre con textContent) y lo agrega a un padre.
- * @param {string} etiqueta - Nombre del elemento ("p", "td"...).
- * @param {string} texto - Texto que va adentro.
+ * Crea un elemento con texto plano y escribe las siglas como "C_L" con
+ * subíndice (C<sub>L</sub>), sin el guion bajo.
+ * @param {string} etiqueta - Nombre del elemento ("p", "li"...).
+ * @param {string} texto - Texto con siglas como "C_L".
  * @param {HTMLElement} padre - Elemento donde se agrega.
- * @param {string} [clase] - Clase CSS opcional.
+ * @param {string} [clase] - Clase CSS.
+ * @returns {HTMLElement} El elemento creado.
+ */
+function crearConSubindices(etiqueta, texto, padre, clase) {
+  const nuevo = crearConTexto(etiqueta, "", padre, clase);
+  // Cada trozo como texto normal o dentro de <sub> (siempre como texto, nunca como HTML)
+  for (const trozo of partirSubindices(texto)) {
+    if (trozo.subindice) {
+      crearConTexto("sub", trozo.texto, nuevo);
+    } else {
+      nuevo.appendChild(document.createTextNode(trozo.texto));
+    }
+  }
+  return nuevo;
+}
+
+/**
+ * Crea un elemento con texto plano (nunca HTML) y lo agrega a un padre.
+ * @param {string} etiqueta - Nombre del elemento ("p", "li"...).
+ * @param {string} texto - Texto.
+ * @param {HTMLElement} padre - Elemento donde se agrega.
+ * @param {string} [clase] - Clase CSS.
  * @returns {HTMLElement} El elemento creado.
  */
 function crearConTexto(etiqueta, texto, padre, clase) {
@@ -267,7 +342,8 @@ function mostrarEquipo(parametros) {
       cuerpo.appendChild(fila);
     }
   }
-  elemento("nota-limites-equipo").textContent = `Fuga a tierra: límites de IEC 60601-1, 3.ª edición. ${TEXTOS_EXPLICACION.fugaSegundaEdicion}`;
+  elemento("nota-limites-equipo").textContent = TEXTOS_EXPLICACION.limiteEquipoCompleto;
+  elemento("nota-manual-equipo").textContent = TEXTOS_EXPLICACION.notaManualR12;
 }
 
 /**
@@ -747,6 +823,7 @@ function limpiarLectura() {
   veredicto.className = "";
   elemento("tabla-limites-lectura").querySelector("tbody").replaceChildren();
   elemento("lectura-limite-unico").hidden = true;
+  elemento("lectura-nota-manual").hidden = true;
   elemento("lectura-comparacion").hidden = true;
   elemento("lectura-pendiente").hidden = false;
   elemento("explicacion-texto").replaceChildren();
@@ -765,8 +842,8 @@ function mostrarPartesDelCircuito(parametros) {
   lista.replaceChildren();
   // Una línea por cada parte que va en el cuadro
   for (const parte of describirPartesDelCircuito(parametros).filter((descripcion) => descripcion.enCuadro)) {
-    crearConTexto("dt", parte.nombre, lista);
-    crearConTexto("dd", parte.explicacion, lista);
+    crearConSubindices("dt", parte.nombre, lista);
+    crearConSubindices("dd", parte.explicacion, lista);
   }
 }
 
@@ -806,8 +883,12 @@ function mostrarLectura(resultado) {
   // Paciente: tabla con los límites equivalentes para partes B, BF y CF (RF07)
   const frasesLimiteUnico = {
     contacto: TEXTOS_EXPLICACION.limiteContactoIgual,
-    fuga_tierra: `${TEXTOS_EXPLICACION.limiteEquipoCompleto} ${TEXTOS_EXPLICACION.fugaSegundaEdicion}`,
+    fuga_tierra: TEXTOS_EXPLICACION.limiteEquipoCompleto,
   };
+  // La nota del manual del R12 (límites de la edición anterior) solo va con la fuga a tierra
+  const notaManual = elemento("lectura-nota-manual");
+  notaManual.textContent = TEXTOS_EXPLICACION.notaManualR12;
+  notaManual.hidden = resultado.tipoMedicion !== MEDICION_FUGA_TIERRA;
   const fraseLimiteUnico = frasesLimiteUnico[resultado.tipoMedicion];
   const notaLimiteUnico = elemento("lectura-limite-unico");
   notaLimiteUnico.textContent = fraseLimiteUnico ?? "";
@@ -822,33 +903,34 @@ function mostrarLectura(resultado) {
 }
 
 /**
- * Escoge los párrafos de explicación (sección 7 de CLAUDE.md) para un resultado.
- * @param {{tipoMedicion: string, condicion: object}} resultado - Resultado evaluado.
- * @returns {string[]} Párrafos.
+ * Escoge la explicación de un resultado: párrafos, fórmula y frase del límite.
+ * @param {{tipoMedicion: string, condicion: object, estadoCondicion: string, limite_uA: number}} resultado - Resultado evaluado.
+ * @returns {{parrafos: string[], formula: string, fraseLimite: string}} Explicación (con siglas como "C_L").
  */
 function textosDeExplicacion(resultado) {
   const { tierra, neutro, polaridad } = resultado.condicion;
-  // Fuga a tierra: normal o neutro abierto (con la tierra abierta no existe)
-  if (resultado.tipoMedicion === MEDICION_FUGA_TIERRA) {
-    const parrafos = [neutro === "abierto" ? TEXTOS_EXPLICACION.fugaNeutroAbierto : TEXTOS_EXPLICACION.fugaNormal];
-    if (polaridad === "invertida") {
-      parrafos.push(TEXTOS_EXPLICACION.contactoPolaridadInvertida);
-    }
-    return parrafos;
-  }
-  const esContacto = resultado.tipoMedicion === "contacto";
-  let principal = esContacto ? TEXTOS_EXPLICACION.contactoNormal : TEXTOS_EXPLICACION.pacienteNormal;
+  let caso = "normal";
   if (tierra === "abierta") {
-    principal = esContacto ? TEXTOS_EXPLICACION.contactoTierraAbierta : TEXTOS_EXPLICACION.pacienteTierraAbierta;
+    caso = "tierraAbierta";
   } else if (neutro === "abierto") {
-    principal = esContacto ? TEXTOS_EXPLICACION.contactoNeutroAbierto : TEXTOS_EXPLICACION.pacienteNeutroAbierto;
+    caso = "neutroAbierto";
   }
-  const parrafos = [principal];
+  const { parrafo, formula } = EXPLICACIONES[resultado.tipoMedicion][caso];
+  // Las capacitancias del lado de la fase y del otro lado dependen de la polaridad
+  const [activa, otra] = polaridad === "normal" ? ["C_L", "C_N"] : ["C_N", "C_L"];
+  const ponerCapacitancias = (texto) =>
+    texto.replaceAll("{C_otra}", otra).replaceAll("{C}", activa).replaceAll("{ladoNeutro}", LADO_NEUTRO[polaridad]);
+  const parrafos = [ponerCapacitancias(parrafo)];
   // Con polaridad invertida se agrega la nota de que casi no cambia
   if (polaridad === "invertida") {
-    parrafos.push(esContacto ? TEXTOS_EXPLICACION.contactoPolaridadInvertida : TEXTOS_EXPLICACION.pacientePolaridadInvertida);
+    const esPaciente = resultado.tipoMedicion === "paciente";
+    parrafos.push(esPaciente ? TEXTOS_EXPLICACION.pacientePolaridadInvertida : TEXTOS_EXPLICACION.contactoPolaridadInvertida);
   }
-  return parrafos;
+  return {
+    parrafos,
+    formula: ponerCapacitancias(formula),
+    fraseLimite: `${FRASES_LIMITE[resultado.estadoCondicion]} ${textoLimite(resultado.limite_uA)}.`,
+  };
 }
 
 /**
@@ -1057,25 +1139,29 @@ function formulaUsada(resultado, parametros) {
 function mostrarExplicacion(resultado, parametros) {
   const contenedorTexto = elemento("explicacion-texto");
   contenedorTexto.replaceChildren();
-  // Un párrafo por cada texto de explicación
-  for (const parrafo of textosDeExplicacion(resultado)) {
-    crearConTexto("p", parrafo, contenedorTexto);
+  const { parrafos, formula, fraseLimite } = textosDeExplicacion(resultado);
+  // Primero, un párrafo por cada texto de explicación
+  for (const parrafo of parrafos) {
+    crearConSubindices("p", parrafo, contenedorTexto);
   }
+  // Después, la fórmula sola, centrada, y al final la frase del límite
+  crearConSubindices("p", formula, contenedorTexto, "explicacion__formula");
+  crearConSubindices("p", fraseLimite, contenedorTexto);
   const { simbolos, lineas } = formulaUsada(resultado, parametros);
   const listaSimbolos = elemento("explicacion-simbolos");
   listaSimbolos.replaceChildren();
   // Primero, qué significa cada sigla y, si es un parámetro calibrado, de dónde sale
   for (const simbolo of simbolos) {
-    const item = crearConTexto("li", simbolo.texto, listaSimbolos);
+    const item = crearConSubindices("li", simbolo.texto, listaSimbolos);
     if (simbolo.origen) {
-      crearConTexto("span", simbolo.origen, item, "simbolos__origen");
+      crearConSubindices("span", simbolo.origen, item, "simbolos__origen");
     }
   }
   const contenedorFormula = elemento("explicacion-formula");
   contenedorFormula.replaceChildren();
   // Después, una línea por cada paso de la fórmula
   for (const linea of lineas) {
-    crearConTexto("p", linea, contenedorFormula);
+    crearConSubindices("p", linea, contenedorFormula);
   }
 }
 

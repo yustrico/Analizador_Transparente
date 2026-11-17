@@ -14,7 +14,7 @@
  *   camino rojo sigue dibujado; solo dejan de moverse los guiones.
  * Módulo: M6 – Visualizador (adaptador)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-14
+ * Creado: 2026-11-13 · Modificado: 2026-11-17
  * ============================================================================
  */
 
@@ -142,6 +142,33 @@ const TRAMO_POR_MD = Object.freeze(["nodoMD", "mdArriba", "mdAbajo", "mdTierra"]
 const TRAMO_POR_PE = Object.freeze(["peChasis", "peInterruptorArriba", "peInterruptorAbajo", "peTierra"]);
 
 /**
+ * Siglas con subíndice: una letra (C, k, X, I, R o E), un guion bajo y el
+ * subíndice. Por ejemplo C_L, k_N, X_C, C_eq, I_fuga, R_PE o E_n.
+ */
+const PATRON_SUBINDICE = /\b([CkXIRE])_([A-Za-z]+)\b/g;
+
+/**
+ * Parte un texto en trozos normales y trozos que van como subíndice, para
+ * escribir "C_L" como C con una L pequeña abajo (sin el guion bajo).
+ * Función pura: la usan el dibujo (tspan) y la interfaz (<sub>).
+ * @param {string} texto - Texto con siglas como "C_L".
+ * @returns {{texto: string, subindice: boolean}[]} Trozos en orden.
+ */
+export function partirSubindices(texto) {
+  const trozos = [];
+  let desde = 0;
+  // Cada sigla encontrada deja su letra como texto normal y lo demás como subíndice
+  for (const encontrada of texto.matchAll(PATRON_SUBINDICE)) {
+    const [, letra, subindice] = encontrada;
+    trozos.push({ texto: texto.slice(desde, encontrada.index) + letra, subindice: false });
+    trozos.push({ texto: subindice, subindice: true });
+    desde = encontrada.index + encontrada[0].length;
+  }
+  trozos.push({ texto: texto.slice(desde), subindice: false });
+  return trozos.filter((trozo) => trozo.texto !== "");
+}
+
+/**
  * Formatea una corriente en µA para mostrarla: 2 decimales, o 3 cifras
  * significativas si es muy pequeña (por ejemplo 0.0000383).
  * @param {number} corriente_uA - Corriente en µA.
@@ -203,7 +230,14 @@ function dibujarCable(nombres, clase, padre) {
  */
 function escribirTexto(contenido, x, y, padre, clase = CLASE_TEXTO, ancla = "middle") {
   const texto = crearElementoSvg("text", { x, y, class: clase, "text-anchor": ancla }, padre);
-  texto.textContent = contenido;
+  // Cada trozo como texto normal o como subíndice (tspan más pequeño y más abajo)
+  for (const trozo of partirSubindices(contenido)) {
+    if (trozo.subindice) {
+      crearElementoSvg("tspan", { class: CLASE_SUBINDICE, "baseline-shift": "sub" }, texto).textContent = trozo.texto;
+    } else {
+      texto.appendChild(document.createTextNode(trozo.texto));
+    }
+  }
   return texto;
 }
 
@@ -244,6 +278,7 @@ const FIGURAS_FIJAS = Object.freeze([
 const CLASE_TEXTO = "texto-circuito";
 const CLASE_TITULO = "texto-circuito texto-circuito--titulo";
 const CLASE_PEQUENO = "texto-circuito texto-circuito--pequeno";
+const CLASE_SUBINDICE = "texto-circuito__subindice";
 const CLASE_VALOR = "texto-circuito texto-circuito--valor";
 
 /** Textos fijos del dibujo: [contenido, x, y, clase, alineación]. */
@@ -260,8 +295,8 @@ const TEXTOS_FIJOS = Object.freeze([
   ["interno", 378, 170, CLASE_PEQUENO, "end"],
   ["C_L: fuga fase–chasis", 484, 80, CLASE_PEQUENO, "end"],
   ["C_N: fuga neutro–chasis", 484, 271, CLASE_PEQUENO, "end"],
-  ["C_AP: aislamiento", 490, 132, CLASE_PEQUENO, "middle"],
-  ["de electrodos", 490, 145, CLASE_PEQUENO, "middle"],
+  ["C_AP: aislamiento", 490, 130, CLASE_PEQUENO, "middle"],
+  ["de electrodos", 490, 147, CLASE_PEQUENO, "middle"],
   ["Parte aplicada", 660, 156, CLASE_TITULO, "middle"],
   ["CF (electrodos)", 660, 172, CLASE_PEQUENO, "middle"],
   ["Punta de contacto", 655, 92, CLASE_PEQUENO, "middle"],

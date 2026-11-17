@@ -8,7 +8,7 @@
     en línea (lo exige la política de seguridad de contenido, CSP).
   Módulo: M1 – Interfaz de usuario (adaptador)
   Autores: Yustin Rico, David Cardona, Santiago González
-  Creado: 2026-11-13 · Modificado: 2026-11-14
+  Creado: 2026-11-13 · Modificado: 2026-11-17
   ============================================================================
 -->
 <html lang="es">
@@ -21,20 +21,20 @@
   <meta name="description" content="Simulador educativo de las pruebas de seguridad eléctrica al electrocardiógrafo Mindray BeneHeart R12.">
   <link rel="icon" href="data:,">
   <!-- Integridad (SRI): las huellas SHA-384 las escribe tools/sri.mjs; correrlo después de cambiar JS o CSS -->
-  <link rel="stylesheet" href="css/estilos.css?v=b72c8b6820" integrity="sha384-tyyLaCDkW8O1nKTTc3Li5tfrjR9oc3vu73F21t/y6pQMe1qrbTri1Ap6HGpDvBuV">
+  <link rel="stylesheet" href="css/estilos.css?v=c9753c947b" integrity="sha384-yXU8lHvV0Pn3nz21DXK07wHRKB1TURR0uMgOWpL+3hKKuA3PdbM+pyUhbHYg63+8">
   <!-- SRI: inicio (generado por tools/sri.mjs, no editar a mano) -->
   <link rel="modulepreload" href="js/adaptadores/historial.js?v=37beb88db5" integrity="sha384-N764jbU0sVhRC7ghKObyjTjXmaVMHHAPvVcAtTAhaCYpBXdSrwJZ+STKTxzDL19N">
-  <link rel="modulepreload" href="js/adaptadores/interfaz.js?v=763a7f1e20" integrity="sha384-djp/HiC8u7XTHan6uKLexlOMW8QGTUdMIa1Ylx6rA4HJZV15F9Xho9hd89WvrXaj">
+  <link rel="modulepreload" href="js/adaptadores/interfaz.js?v=d1c8f71eee" integrity="sha384-0cj3Hu6jwPVhq3C0aitN9j6hKnCn+mTEabHSTMItvRPIxa9kEsVwjqiOYYiaJxc2">
   <link rel="modulepreload" href="js/adaptadores/pdf.js?v=7d6a176698" integrity="sha384-fWoXZphhUcAxn9iKmsH+SuiY4iiO64h/DVeB1MgUdOlUFxGmjZdexpyI/cXHhcGw">
   <link rel="modulepreload" href="js/adaptadores/reporte.js?v=0d6cd0542e" integrity="sha384-DWzQVC635IbiK02lc4bAnH0SGULItk4BbcqeZvbRL2YauUsLwIrodeGNCDds4HeN">
   <link rel="modulepreload" href="js/adaptadores/tiempo_carga.js?v=1c9699f3b9" integrity="sha384-HJaZ87n6slac+sCKpiv4PovGknwW6qIsYSbPkXqTEJSFVD0wGqJegnc9QHmWVjjg">
-  <link rel="modulepreload" href="js/adaptadores/visualizador.js?v=a5acde3349" integrity="sha384-pazeM0knXrd79Z7TxwvuJWO7Q7gEqWRZVPdflahrC+XLbfYASsOB/w37A4GD+iir">
+  <link rel="modulepreload" href="js/adaptadores/visualizador.js?v=b3d866e175" integrity="sha384-s9hm4XVBnnTzAJO1UYqiqdo610Rr9NlaTJcyllCzu4dZuaOIPtTWP8egFKhoUNVB">
   <link rel="modulepreload" href="js/nucleo/evaluador_limites.js?v=9c30cc64cc" integrity="sha384-nDDMZMy/C2qiFp7Uh8hHwvQch7REXj0Vo0KCd9xComz3vIlNz0DoVXElk5uPqfLM">
   <link rel="modulepreload" href="js/nucleo/modelo_equipo.js?v=5ca0bfb4e4" integrity="sha384-XKC/tOSU1bnqnTxnVs08DWpna0bP1cGP24BbDWufMn06OygGyUBk3CswydIGWaBh">
   <link rel="modulepreload" href="js/nucleo/motor_calculo.js?v=efa73aed55" integrity="sha384-76c67VUxXI/+Dx+nZ2FVjBDKPq9e8YkcvFPa3CAQQR4D8ItL4ouxZ+3uEIrZXUoc">
   <link rel="modulepreload" href="js/nucleo/secuencia.js?v=bffe121e07" integrity="sha384-v/4SHgduYquka0rL7HHdb+Z7SFxlx6UnWtzSicOu2HWYIDc2nw7ylTx8duc2u5qj">
   <!-- SRI: fin -->
-  <script type="module" src="js/main.js?v=d2cac1666e" integrity="sha384-0srBZm7bc8XefKSt1kdfAUY3PGDYl1unnNIjzSJC37nKoXIjxIboT4g5zUeyI8Ls"></script>
+  <script type="module" src="js/main.js?v=4b7e12d1f9" integrity="sha384-S34S0flMZQOFul4D8fXpMz82/QGM6PpxSffD7TzQYy0DHGHNBRXupKcrfgjOwkh/"></script>
 </head>
 <body>
   <header class="encabezado">
@@ -103,6 +103,7 @@
           <tbody></tbody>
         </table>
         <p class="nota" id="nota-limites-equipo"></p>
+        <p class="nota nota--pequena" id="nota-manual-equipo"></p>
         <details class="plegable">
           <summary>¿Qué significan estos términos?</summary>
           <ul class="lista-simple plegable__lista" data-glosario="todos"></ul>
@@ -187,6 +188,7 @@
             <dt>Veredicto</dt><dd id="lectura-veredicto">—</dd>
           </dl>
           <p class="nota" id="lectura-limite-unico" hidden></p>
+          <p class="nota nota--pequena" id="lectura-nota-manual" hidden></p>
           <div class="lectura__comparacion" id="lectura-comparacion">
             <p class="nota">Mismo caso con otros tipos de parte aplicada:</p>
             <table class="tabla tabla--compacta" id="tabla-limites-lectura">

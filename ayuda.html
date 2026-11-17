@@ -8,7 +8,7 @@
     manual, hay que actualizar también esta página (docs/mantenimiento.md).
   Módulo: M1 – Interfaz de usuario (adaptador)
   Autores: Yustin Rico, David Cardona, Santiago González
-  Creado: 2026-11-14 · Modificado: 2026-11-14
+  Creado: 2026-11-14 · Modificado: 2026-11-17
   ============================================================================
 -->
 <html lang="es">
@@ -21,7 +21,7 @@
   <meta name="description" content="Manual de usuario del Analizador transparente: cómo hacer la práctica de seguridad eléctrica del electrocardiógrafo Mindray BeneHeart R12.">
   <link rel="icon" href="data:,">
   <!-- Integridad (SRI): la huella SHA-384 la escribe tools/sri.mjs -->
-  <link rel="stylesheet" href="css/estilos.css?v=b72c8b6820" integrity="sha384-tyyLaCDkW8O1nKTTc3Li5tfrjR9oc3vu73F21t/y6pQMe1qrbTri1Ap6HGpDvBuV">
+  <link rel="stylesheet" href="css/estilos.css?v=c9753c947b" integrity="sha384-yXU8lHvV0Pn3nz21DXK07wHRKB1TURR0uMgOWpL+3hKKuA3PdbM+pyUhbHYg63+8">
 </head>
 <body>
   <header class="encabezado">
@@ -128,12 +128,12 @@
       <ul>
         <li><strong>0.00 µA en condición normal:</strong> casi toda la fuga se va por la tierra. El analizador real muestra ≈ 0.1 µA por su resolución.</li>
         <li><strong>± U (incertidumbre):</strong> cuánto podría diferir la lectura del analizador real, según su exactitud ±(1 % de la lectura + 1 µA) y la guía GUM.</li>
-        <li><strong>Límites (IEC 60601-1):</strong> corriente de contacto 100 µA (normal) y 500 µA (primer defecto); corriente de paciente CF 10 µA (normal) y 50 µA (primer defecto); corriente de fuga a tierra 5 mA (normal) y 10 mA (primer defecto), según la 3.ª edición de la norma. El manual del R12 indica 500/1000 µA porque usa la 2.ª edición de la norma.</li>
+        <li><strong>Límites (IEC 60601-1):</strong> corriente de contacto 100 µA (normal) y 500 µA (primer defecto); corriente de paciente CF 10 µA (normal) y 50 µA (primer defecto); corriente de fuga a tierra 5 mA (normal) y 10 mA (primer defecto), según la 3.ª edición de la norma. El límite de fuga a tierra es del equipo completo: no depende del tipo de parte aplicada (B, BF o CF).<br><small>Nota: el manual del R12 usa límites más estrictos, 0.5 mA en condición normal y 1 mA en primer defecto, porque se basa en la edición anterior de la norma. El R12 cumple con ambos.</small></li>
         <li><strong>Qué tan cerca del límite:</strong> una corriente pequeña puede estar más cerca de su límite que una grande: compara la corriente de paciente CF (límite 10 µA) con la de contacto (límite 100 µA).</li>
       </ul>
 
       <h2>7. ¿De dónde salen los datos?</h2>
-      <p>Los valores del simulador están calibrados con mediciones reales del Fluke ESA620 sobre el electrocardiógrafo Mindray BeneHeart R12 serie FN-84011415 (3 repeticiones por condición). Los parámetros del modelo (C_L, C_N, C_AP, ΔI y k_N) se calcularon con mediciones del R12 en polaridad normal y se comprobaron con las mediciones en polaridad invertida (E_n ≤ 0,19 en las 16 configuraciones). El detalle de las mediciones y de la calibración está en el documento <em>docs/06_Datos_ECG_R12_calibracion.md</em> del repositorio del proyecto.</p>
+      <p>Los valores del simulador están calibrados con mediciones reales del Fluke ESA620 sobre el electrocardiógrafo Mindray BeneHeart R12 serie FN-84011415 (3 repeticiones por condición). Los parámetros del modelo (C<sub>L</sub>, C<sub>N</sub>, C<sub>AP</sub>, ΔI y k<sub>N</sub>) se calcularon con mediciones del R12 en polaridad normal y se comprobaron con las mediciones en polaridad invertida (E<sub>n</sub> ≤ 0,19 en las 16 configuraciones). El detalle de las mediciones y de la calibración está en el documento <em>docs/06_Datos_ECG_R12_calibracion.md</em> del repositorio del proyecto.</p>
 
       <h2>8. ¿Qué hago si algo no funciona?</h2>
       <table class="tabla">

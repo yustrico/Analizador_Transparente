@@ -5,6 +5,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Cambiado (17/11/2026, ronda 11: presentación, sin cambios en resultados ni cálculos)
+- Nota de la fuga a tierra (Analizador, tabla de la sección Equipo, ayuda y manual): «El límite de fuga a tierra es del equipo completo: no depende del tipo de parte aplicada (B, BF o CF).» y, en letra pequeña, la nota sobre los límites del manual del R12 (0.5 mA y 1 mA, edición anterior de la norma).
+- «¿Por qué da este valor?»: en todas las mediciones y condiciones, párrafo explicativo, fórmula sola y centrada con subíndices (I = V · 2π · f · …) y frase del límite («Es un primer defecto, por eso el límite es …»), armada con el límite del resultado.
+- Subíndices (C<sub>L</sub>, C<sub>N</sub>, C<sub>AP</sub>, k<sub>N</sub>, X<sub>C</sub>, C<sub>eq</sub>…) en la lista «Fórmula usada», en «¿Qué es cada parte?», en el circuito SVG (tspan) y en la ayuda; sin guiones bajos visibles. Se escriben con nodos de texto y `<sub>`, nunca con innerHTML.
+
 ### Cambiado (14/11/2026, décima ronda: «¿Por qué da este valor?», sin cambios en resultados)
 - La fórmula se muestra en dos pasos con la ley de Ohm en un capacitor: X_C = 1/(2π·f·C) y luego I = V / X_C, con una primera línea «Fórmula: ley de Ohm en un capacitor…». Ya no aparece «A/F» en pantalla (la constante V·2πf sigue en el motor de cálculo). Con neutro abierto la fuga a tierra usa la capacitancia equivalente C_eq = C_L + k_N·C_N = 599.9 pF; la corriente de contacto con neutro abierto usa C_total = C_L + C_N.
 - Cada parámetro calibrado (C_L, C_N, C_AP, ΔI y k_N) explica de qué medición del R12 sale y cómo se calculó.
