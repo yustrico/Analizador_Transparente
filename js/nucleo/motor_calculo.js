@@ -11,7 +11,7 @@
  *   Modelo: la fuga del equipo es capacitiva, I = V · 2πf · C.
  * Módulo: M4 – Motor de cálculo (núcleo)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-14
+ * Creado: 2026-11-13 · Modificado: 2026-11-25
  * ============================================================================
  */
 
@@ -20,7 +20,7 @@ export const POLARIDADES = Object.freeze(["normal", "invertida"]);
 export const ESTADOS_TIERRA = Object.freeze(["cerrada", "abierta"]);
 export const ESTADOS_NEUTRO = Object.freeze(["cerrado", "abierto"]);
 
-/** Tipos de medición que calcula esta versión. */
+/** Tipos de medición que calcula la herramienta. */
 export const TIPOS_MEDICION = Object.freeze(["contacto", "paciente", "fuga_tierra"]);
 
 /** Medición que no se puede hacer con la tierra abierta. */

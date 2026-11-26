@@ -4,9 +4,9 @@ Analizador transparente **v1.0.0** · Medido el 13 de noviembre de 2026 · Versi
 
 Equipo de medición: PC con Windows 11 (16 núcleos lógicos), Chrome 157.0.8103.51, Edge 157.0.4341.57, Node.js 26.13.1. Las especificaciones y metas vienen de `docs/03_Especificaciones_v2.md` (ES07 fue eliminada el 12/11/2026).
 
-## Alcance de esta versión (actualizado 14/11/2026)
+## Alcance de la herramienta (actualizado 14/11/2026)
 - Simula 16 configuraciones validadas con mediciones reales del Fluke ESA620 sobre el R12: corriente de contacto y corriente de paciente CF (6 condiciones cada una) y corriente de fuga a tierra (4: normal y neutro abierto, con las 2 polaridades).
-- Trabajo futuro: corriente con red en la parte aplicada y corriente auxiliar de paciente. Se miden con el ESA620 sin abrir el equipo, pero no hay mediciones del laboratorio para calibrarlas y validarlas.
+- Fuera del alcance: corriente con red en la parte aplicada y corriente auxiliar de paciente. Se miden con el ESA620 sin abrir el equipo, pero no hay mediciones del laboratorio para calibrarlas y validarlas.
 
 ## Resumen
 

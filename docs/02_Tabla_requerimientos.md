@@ -29,8 +29,8 @@ Método de verificación de cada requerimiento: I = inspección (se mira que exi
 | RF06 | Mostrar junto a cada lectura su explicación física (fórmula y fenómeno) con la terminología de IEC 60601-1 | N11, N14, N26 | I | No (antes E06) |
 | RF07 | Comparar cada lectura con el límite aplicable (contacto o paciente, condición normal o primer defecto, Clase I, parte CF), mostrar Cumple o No cumple y mostrar al lado el límite equivalente para partes B y BF | N09, N10, N11 | I | No (antes E03) |
 | RF08 | Mostrar lado a lado las lecturas de las cuatro condiciones | N06, N08 | D | No |
-| ~~RF09~~ (TRABAJO FUTURO, 11/11/2026) | Pedir al estudiante que prediga la lectura antes de medir y mostrarle la diferencia con el valor obtenido y su causa | N07, N21 | D | No |
-| ~~RF10~~ (TRABAJO FUTURO, 11/11/2026) | Ofrecer ayuda en cada pantalla (glosario y explicación del paso) sin salir de la herramienta | N17 | I | No |
+| ~~RF09~~ (Fuera del alcance, 11/11/2026) | Pedir al estudiante que prediga la lectura antes de medir y mostrarle la diferencia con el valor obtenido y su causa | N07, N21 | D | No |
+| ~~RF10~~ (Fuera del alcance, 11/11/2026) | Ofrecer ayuda en cada pantalla (glosario y explicación del paso) sin salir de la herramienta | N17 | I | No |
 | RF11 | Al terminar la práctica, generar un REPORTE FINAL (estudiante, fecha, equipo, lecturas por condición, límite, Cumple/No cumple y resumen) que se pueda descargar en PDF y copiar resumen al portapapeles para pegarlo en el correo del propio estudiante junto con el PDF (sin servidor). CAMBIO del 13/11/2026: reemplaza al botón mailto, que en Windows abre una lista de programas y no sirve con correo web. Mantiene la tabla de historial en pantalla. CAMBIO del 12/11/2026: reemplaza al CSV | N22, N20 parcial (la herramienta es INDIVIDUAL: el estudiante guarda o envía su propio reporte; solo si el docente lo pide para la práctica, se lo reenvía. No hay recolección central de datos) | D | Sí: ES09 |
 
 ## 4. Requerimientos no funcionales (RNF): cómo debe comportarse
@@ -79,8 +79,8 @@ Método de verificación de cada requerimiento: I = inspección (se mira que exi
 
 ## 7. Trazabilidad: las 28 necesidades quedan cubiertas o justificadas
 - Cubiertas por al menos un requerimiento: N01–N03, N05–N18, N20 (parcial), N21, N22, N24–N28.
-- N19 (varios equipos reales): parcial; RR01 limita a un equipo por la retroalimentación del Corte 1. Bomba de infusión y electrobisturí quedan como trabajo futuro.
-- Trabajo futuro, con justificación:
+- N19 (varios equipos reales): parcial; RR01 limita a un equipo por la retroalimentación del Corte 1. Bomba de infusión y electrobisturí quedan fuera del alcance.
+- Fuera del alcance, con justificación:
   - N04 (diferenciar IEC 60601-1 de IEC 62353): cambia los límites y los métodos; se deja para no agrandar el alcance.
   - N23 (repetibilidad e incertidumbre): requiere datos reales repetidos.
   - "Red en parte aplicada" y "corriente auxiliar de paciente" (de N05): se miden con el analizador sin abrir el equipo y están en la inspección del manual del R12, pero no se midieron en la práctica; sin datos no se pueden simular ni validar (ES02). "Aislamiento degradado" (de N27): requiere un modelo adicional.
@@ -98,8 +98,8 @@ Método de verificación de cada requerimiento: I = inspección (se mira que exi
 - [ ] Punto 3: rehacer las especificaciones con valores (archivo 03).
 
 ## 10. Recorte de alcance (11/11/2026, decisión del equipo; entrega el 20/11)
-- RF09 (predecir antes de medir) y RF10 (ayuda en pantalla) pasan a TRABAJO FUTURO. Ninguna especificación los mide, así que todas las especificaciones se mantienen.
+- RF09 (predecir antes de medir) y RF10 (ayuda en pantalla) quedan fuera del alcance. Ninguna especificación los mide, así que todas las especificaciones se mantienen.
 - Trazabilidad:
-  - N21 y N17 quedan como trabajo futuro, con esta justificación: tiempo de desarrollo (9 días) y que no son necesarias para el núcleo de la solución.
+  - N21 y N17 quedan fuera del alcance, con esta justificación: tiempo de desarrollo (9 días) y que no son necesarias para el núcleo de la solución.
   - N07 sigue cubierta por RF06 (explicación física), RF08 (comparar condiciones) y la banda de incertidumbre de cada lectura (archivo 06).
 - La esencia se conserva: el estudiante recorre la prueba completa (RF01), impone las condiciones (RF03), ve el camino de la corriente (RF05) y entiende por qué cambia la lectura (RF06, RF08).

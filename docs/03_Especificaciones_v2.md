@@ -4,7 +4,7 @@ Fecha: 30 de octubre de 2026 · Equipo: Yustin Rico, David Cardona, Santiago Gon
 Estado: especificaciones del SOFTWARE redactadas. FALTA revisarlas en equipo, confirmar el modelo del analizador del laboratorio y pasarlas al Word, al libro de cálculo y al Canva.
 Relacionado: 01 (problemática con literatura) y 02 (requerimientos). Cada especificación sale de un requerimiento de la 02.
 
-## 0. RESUELTO (06/11/2026): el profesor dijo que, al ser software, SOLO se califica la parte de software. Las etapas 2 y 3 de la guía (mecánico y electrónico) no aplican y el módulo físico M9 NO se construye. Lo de abajo queda como historial.
+## 0. RESUELTO (06/11/2026): el profesor dijo que, al ser software, SOLO se califica la parte de software. Las etapas 2 y 3 de la guía (mecánico y electrónico) no aplican. Lo de abajo queda como historial.
 
 ### (historial) ALERTA: la guía del Corte 3 pide más que software
 El archivo "🧩 GUÍA FINAL DE ENTREGABLES 3.docx" tiene 5 etapas:
@@ -17,9 +17,8 @@ El archivo "🧩 GUÍA FINAL DE ENTREGABLES 3.docx" tiene 5 etapas:
 Con una solución solo de software, las etapas 2 y 3 quedan vacías y la 5 queda incompleta.
 - El profesor permitió el software, pero la guía es la misma para todos los grupos.
 - Decisión pendiente del equipo (preguntar al profesor POR ESCRITO):
-  - (a) cómo se califican las etapas 2 y 3 en un proyecto de software; o
-  - (b) construir el módulo físico M9, que ya está en la arquitectura como trabajo futuro: una maqueta de baja tensión con interruptores de tierra, neutro y polaridad, capacitores de fuga, la red MD y un microcontrolador que mida y envíe los datos al simulador.
-- Las especificaciones de software de este archivo sirven en ambos casos. Si se elige (b), se agrega un bloque de especificaciones de hardware.
+  - (a) cómo se califican las etapas 2 y 3 en un proyecto de software.
+- Las especificaciones de software de este archivo se mantienen.
 
 ## 1. Por qué se rehicieron
 Retroalimentación del Corte 2:
@@ -111,7 +110,7 @@ Nota honesta sobre ES02: C_L, C_N y C_AP se ajustan con la propia medición. Por
 - Brooke 1996 y Bangor et al. 2009 (SUS), ya en el Word.
 
 ## 8. Pendiente
-- [ ] DECIDIR con el profesor: cómo se califican las etapas 2 y 3 de la guía, o si se agrega el módulo físico M9 (sección 0).
+- [ ] DECIDIR con el profesor: cómo se califican las etapas 2 y 3 de la guía (sección 0).
 - [ ] Confirmar el modelo del analizador del laboratorio y su exactitud (para ES02).
 - [ ] Confirmar el ancho de pantalla de los celulares del equipo (ES07).
 - [ ] Modelar la corriente de paciente CF (C_AP) en el libro de cálculo.
@@ -135,7 +134,7 @@ Nota honesta sobre ES02: C_L, C_N y C_AP se ajustan con la propia medición. Por
 - Ancho de pantalla (ES07): cada integrante abre en su celular, en Chrome y en vertical, https://yesviz.com/mydevice.php y anota el "viewport width" en px (NO la resolución de la ficha técnica). El valor de ES07 = el menor de los 3.
 
 ## 11. Respuestas del profesor (06/11/2026) y cambios hechos
-- Solo se califica el software → se elimina la alerta de la sección 0 y no se construye el M9.
+- Solo se califica el software → se elimina la alerta de la sección 0.
 - Equipo del simulador: electrocardiógrafo Mindray BeneHeart R12 (IEC 60601-2-25). Ver el archivo 05 (datos reales y parámetros calibrados: C_L ≈ 285 pF).
 - Latencia: ES03 deja de ser "clic → pantalla" y pasa a ser LATENCIA POR CONCURRENCIA (30 usuarios virtuales, percentil 95 ≤ 1 s, 0 % errores). ES08 se mantiene (≥ 5 dispositivos reales a la vez).
 - Por qué es honesta: la herramienta no tiene servidor de cálculo; la concurrencia solo afecta la DESCARGA de los archivos desde el alojamiento gratuito (por ejemplo GitHub Pages). Una vez cargada, cada navegador calcula solo, así que más usuarios no la vuelven más lenta. Así se explica en la sustentación.

@@ -22,10 +22,10 @@ SÍ:
 - Página de ayuda (ayuda.html) con el manual de usuario en HTML, enlazada desde el encabezado.
 - Reporte final descargable en PDF + botón para copiar resumen al portapapeles.
 
-NO (trabajo futuro: no lo construyas):
+NO (fuera del alcance: no lo construyas):
 - Versión para celular; otros equipos; predecir antes de medir (RF09); ayuda contextual avanzada (RF10).
-- Módulo físico; HL7/FHIR; backend; inicio de sesión; analítica o rastreo de cualquier tipo.
-- Red en parte aplicada y corriente auxiliar de paciente: NO se calculan. Se miden con el ESA620 sin abrir el equipo, pero no hay mediciones de la práctica para calibrarlas y validarlas (trabajo futuro).
+- Backend; inicio de sesión; analítica o rastreo de cualquier tipo.
+- Red en parte aplicada y corriente auxiliar de paciente: NO se calculan. Se miden con el ESA620 sin abrir el equipo, pero no hay mediciones de la práctica para calibrarlas y validarlas.
 
 ## 3. Arquitectura (obligatoria; ver docs/08 y docs/Diagramas, versiones _v2: C4 N1, N2 y N3, DFD nivel 0 y nivel 1, flujo de control y ciclo de vida)
 Modular tipo **hexagonal**:

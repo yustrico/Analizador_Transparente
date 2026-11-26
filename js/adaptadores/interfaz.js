@@ -21,10 +21,10 @@ import {
 import {
   calcularMedicion, capacitanciaDeFuga_F, capacitanciaFugaATierra_F, listarConfiguraciones,
   medicionPosible, MENSAJE_FUGA_SIN_TIERRA,
-} from "../nucleo/motor_calculo.js?v=efa73aed55";
+} from "../nucleo/motor_calculo.js?v=c6349ec03b";
 import {
   evaluarMedicion, evaluarAislamiento, evaluarResistenciaTierra, VEREDICTO_CUMPLE,
-} from "../nucleo/evaluador_limites.js?v=9c30cc64cc";
+} from "../nucleo/evaluador_limites.js?v=12ab74e8c1";
 import {
   crearVisualizador, describirPartesDelCircuito, formatearCorriente_uA, partirSubindices, dibujarConexiones, obtenerConexiones,
 } from "./visualizador.js?v=1d37bf1085";
@@ -35,7 +35,7 @@ import {
 import {
   generarReporte, crearPdfReporte, nombreArchivoReporte, armarResumen, limpiarNombre, mostrarExplicacionIncertidumbre, TEXTO_CERCA_DEL_LIMITE,
   normasDelEquipo, conSaltosDeLinea,
-} from "./reporte.js?v=6b823710e1";
+} from "./reporte.js?v=577ca59cef";
 import { descargarPdf } from "./pdf.js?v=628f37170c";
 import { medirCargaPagina, textoTiempoCarga, detalleCarga } from "./tiempo_carga.js?v=1c9699f3b9";
 

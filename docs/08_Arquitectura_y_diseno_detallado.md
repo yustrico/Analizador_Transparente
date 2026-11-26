@@ -29,8 +29,7 @@ Justificación: cumple RNF04 (sin instalación, fuera del laboratorio), RNF05 (P
 - Modular y no integral: cada módulo cumple una función completa y las interfaces entre módulos son datos bien definidos (sección 6). Así los 3 integrantes pueden trabajar en paralelo y se pueden agregar equipos o módulos sin tocar el núcleo.
 - Hexagonal: el NÚCLEO (M2–M5) son funciones puras, sin pantalla. Se prueban solas (pruebas unitarias) y no cambian si cambia la interfaz.
 - Los ADAPTADORES (M1, M6, M8, M10, M10a y M11) conectan el núcleo con la pantalla, la memoria del navegador y el reporte.
-- Expansión futura (lo que pidió el profesor sobre "expandible"): versión celular, M7 Evaluación, M9 módulo físico, exportación HL7/FHIR. Todo como adaptadores nuevos, sin tocar el núcleo (sección 10).
-- Alcance de las mediciones (actualizado 14/11/2026): corriente de contacto, corriente de paciente CF y corriente de fuga a tierra (16 configuraciones validadas con el ESA620). Trabajo futuro: corriente con red en la parte aplicada y corriente auxiliar de paciente. Se miden con el ESA620 sin abrir el equipo y están en la inspección del manual del R12, pero no hay mediciones del laboratorio para calibrarlas y validarlas, así que esta versión no las simula. Agregarlas solo exige los datos en el JSON y una función nueva en M4.
+- Alcance de las mediciones (actualizado 14/11/2026): corriente de contacto, corriente de paciente CF y corriente de fuga a tierra (16 configuraciones validadas con el ESA620). Fuera del alcance: corriente con red en la parte aplicada y corriente auxiliar de paciente. Se miden con el ESA620 sin abrir el equipo y están en la inspección del manual del R12, pero no hay mediciones del laboratorio para calibrarlas y validarlas, así que la herramienta no las simula.
 
 ## 3. Jerarquía (Sistema → Subsistema → Componente → Elemento)
 - Sistema: Analizador transparente.
@@ -55,8 +54,6 @@ Justificación: cumple RNF04 (sin instalación, fuera del laboratorio), RNF05 (P
 | M10 Reporte | js/adaptadores/reporte.js | Adaptador | Arma el reporte final (pantalla y PDF) y el resumen para copiar al portapapeles | Lista de registros, nombre, tiempo de carga | Contenido del reporte; resumen en el portapapeles | RF11, RNF09 | ES09 |
 | M10a Generador PDF | js/adaptadores/pdf.js | Adaptador | Escribe el archivo PDF 1.4 a mano, sin librerías (fuentes estándar Helvetica y Symbol, codificación WinAnsi), con salto de página, tablas, listas numeradas y bloques que no se parten; lo descarga directo (Blob + enlace con download) | Contenido del reporte | Archivo reporte_seguridad_electrica_AAAA-MM-DD.pdf | RF11 | ES09, ES12 |
 | M11 Tiempo de carga | js/adaptadores/tiempo_carga.js | Adaptador | Mide cuánto tardó en cargar la página con la API Navigation Timing (navegación → fin de load) | Datos del navegador | Tiempo de carga (ms), navegador, tipo de carga | — | ES03 |
-| M7 Evaluación | — | Trabajo futuro | Predecir antes de medir | — | — | RF09 | — |
-| M9 Módulo físico | — | Trabajo futuro | Medición real a baja tensión | — | — | — | — |
 
 ## 5. Correspondencia con la guía del Corte 3 (punto 9.3)
 | Función de la guía | Módulos | Cómo la cumple |
@@ -165,13 +162,8 @@ Resultado: 16 de 16 configuraciones con E_n ≤ 1; máximo 0.187 (detalle en doc
 - Un solo equipo (R12 serie FN-84011415) y una sola sesión de laboratorio.
 - ES11 mide el uso del simulador sin ayuda; no evalúa la habilidad de conectar el ESA620 al R12, que se enseña en la práctica de laboratorio.
 
-### 10.4 Propuesta de mejora y trabajo futuro
-- Repetir las mediciones con 10 repeticiones por condición y, si es posible, en otro R12, para estimar mejor la dispersión.
-- Simular la corriente con red en la parte aplicada y la corriente auxiliar de paciente cuando haya mediciones del laboratorio para calibrarlas y validarlas.
-- Versión para celular (diseño adaptable a pantallas pequeñas).
-- RF09: predecir antes de medir (módulo M7 Evaluación); RF10: ayuda contextual avanzada.
-- Publicar cada versión en Zenodo para tener un DOI y poder citarla.
-- Exportar el reporte en HL7 FHIR como un adaptador nuevo.
+### 10.4 Propuesta de mejora
+- Repetir las mediciones con 10 repeticiones por condición (n = 10) y, si es posible, en otro R12, para estimar mejor la dispersión.
 - Auditoría de seguridad hecha por un tercero.
 
 ## 11. Cronograma

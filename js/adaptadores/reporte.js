@@ -15,7 +15,7 @@
  * ============================================================================
  */
 
-import { VEREDICTO_CUMPLE } from "../nucleo/evaluador_limites.js?v=9c30cc64cc";
+import { VEREDICTO_CUMPLE } from "../nucleo/evaluador_limites.js?v=12ab74e8c1";
 import { filaDeRegistro, textoLectura, textoPorcentaje, textoLimite, NOMBRES_MEDICION, nombreCortoCondicion } from "./historial.js?v=37beb88db5";
 import { crearDocumentoPdf } from "./pdf.js?v=628f37170c";
 import { textoTiempoCarga, detalleCarga } from "./tiempo_carga.js?v=1c9699f3b9";

@@ -59,10 +59,36 @@ No se pueden saltar pasos hacia adelante: un paso nuevo se habilita al completar
 
 **¿Cómo se conecta en el laboratorio?**
 
-1. El cable de poder del R12 se conecta al tomacorriente de prueba del ESA620 (no a la pared). Así el analizador puede invertir la polaridad y abrir el neutro o la tierra.
-2. Los cables de paciente del R12 se conectan a los bornes de ECG del ESA620. Esa es la parte aplicada.
-3. Para la corriente de contacto, la punta de prueba del ESA620 toca una parte conductora accesible del R12 (por ejemplo, una parte metálica del chasis o su borne equipotencial).
-4. Cada medición se elige en el menú del ESA620; lo que muestra la pantalla es la corriente que pasa por su carga interna (MD).
+Debajo del circuito, la tarjeta «Conexiones en el laboratorio» dibuja qué cable va a qué borne o jack del ESA620 y del R12 según la medición elegida, con sus pasos. En la Prueba guiada, los pasos 2 (resistencia de tierra) y 3 (aislamiento) muestran su propio dibujo. Esto es lo mismo, en texto:
+
+*En todas las pruebas:*
+
+1. El ESA620 enchufado a la pared y encendido.
+2. El cable de poder del R12 va al tomacorriente de prueba del ESA620, no a la pared.
+3. El tomacorriente de prueba arranca sin energía: se energiza con la tecla POLARITY.
+
+*Corriente de contacto:*
+
+1. R12 ENCENDIDO.
+2. Los 10 latiguillos en sus bornes: R→RA/R, L→LA/L, F→LL/F, N→RL/N y C1…C6→V1/C1…V6/C6. IEC 60601-1 pide las partes aplicadas conectadas en esta medición.
+3. Cable de prueba desde el jack 2 WIRE V/Ω/A rojo hasta una parte metálica accesible del R12 unida a tierra (el borne equipotencial).
+4. Tecla µA → «Enclosure».
+
+*Corriente de paciente CF:*
+
+1. R12 ENCENDIDO.
+2. Los 10 latiguillos en sus bornes: R→RA/R, L→LA/L, F→LL/F, N→RL/N y C1…C6→V1/C1…V6/C6.
+3. Tecla µA → F4 (More) → flechas ▲▼ hasta el grupo que abarca todos los bornes → F1 (Select).
+4. Revisar que el modo sea «Leakage AC+DC».
+
+*Corriente de fuga a tierra:*
+
+1. R12 ENCENDIDO.
+2. Los 10 latiguillos en sus bornes: R→RA/R, L→LA/L, F→LL/F, N→RL/N y C1…C6→V1/C1…V6/C6.
+3. No se agrega ningún cable.
+4. Tecla µA y POLARITY para energizar el tomacorriente; la fuga a tierra la mide el ESA620 por el conductor de tierra del cable de poder.
+
+> Polaridad, tierra y neutro se cambian con las teclas POLARITY, EARTH y NEUTRAL del ESA620, sin mover cables.
 
 ### Paso 4 — Compara (pestaña «4. Comparar»)
 Arriba verás tu **avance**: «Has medido X de las 16 configuraciones que simula esta herramienta», con la lista de las que te faltan y de las que repetiste (y cuántas veces). El bloque «¿Por qué 16?» explica de dónde sale ese número: 12 de contacto y de paciente CF y 4 de fuga a tierra.

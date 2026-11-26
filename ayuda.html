@@ -8,7 +8,7 @@
     manual, hay que actualizar también esta página (docs/mantenimiento.md).
   Módulo: M1 – Interfaz de usuario (adaptador)
   Autores: Yustin Rico, David Cardona, Santiago González
-  Creado: 2026-11-14 · Modificado: 2026-11-17
+  Creado: 2026-11-14 · Modificado: 2026-11-25
   ============================================================================
 -->
 <html lang="es">
@@ -96,12 +96,35 @@
       <p class="nota">La animación se detiene sola si no mueves el mouse durante 30 s (para ahorrar batería) y vuelve al moverlo. Si en Windows tienes desactivados los «Efectos de animación», el camino rojo se muestra quieto.</p>
 
       <h4>¿Cómo se conecta en el laboratorio?</h4>
+      <p>Debajo del circuito, la tarjeta «Conexiones en el laboratorio» dibuja qué cable va a qué borne o jack del ESA620 y del R12 según la medición elegida, con sus pasos. En la Prueba guiada, los pasos 2 (resistencia de tierra) y 3 (aislamiento) muestran su propio dibujo. Esto es lo mismo, en texto:</p>
+      <p><strong>En todas las pruebas:</strong></p>
       <ol>
-        <li>El cable de poder del R12 se conecta al tomacorriente de prueba del ESA620 (no a la pared). Así el analizador puede invertir la polaridad y abrir el neutro o la tierra.</li>
-        <li>Los cables de paciente del R12 se conectan a los bornes de ECG del ESA620. Esa es la parte aplicada.</li>
-        <li>Para la corriente de contacto, la punta de prueba del ESA620 toca una parte conductora accesible del R12 (por ejemplo, una parte metálica del chasis o su borne equipotencial).</li>
-        <li>Cada medición se elige en el menú del ESA620; lo que muestra la pantalla es la corriente que pasa por su carga interna (MD).</li>
+        <li>El ESA620 enchufado a la pared y encendido.</li>
+        <li>El cable de poder del R12 va al tomacorriente de prueba del ESA620, no a la pared.</li>
+        <li>El tomacorriente de prueba arranca sin energía: se energiza con la tecla POLARITY.</li>
       </ol>
+      <p><strong>Corriente de contacto:</strong></p>
+      <ol>
+        <li>R12 ENCENDIDO.</li>
+        <li>Los 10 latiguillos en sus bornes: R→RA/R, L→LA/L, F→LL/F, N→RL/N y C1…C6→V1/C1…V6/C6. IEC 60601-1 pide las partes aplicadas conectadas en esta medición.</li>
+        <li>Cable de prueba desde el jack 2 WIRE V/Ω/A rojo hasta una parte metálica accesible del R12 unida a tierra (el borne equipotencial).</li>
+        <li>Tecla µA → «Enclosure».</li>
+      </ol>
+      <p><strong>Corriente de paciente CF:</strong></p>
+      <ol>
+        <li>R12 ENCENDIDO.</li>
+        <li>Los 10 latiguillos en sus bornes: R→RA/R, L→LA/L, F→LL/F, N→RL/N y C1…C6→V1/C1…V6/C6.</li>
+        <li>Tecla µA → F4 (More) → flechas ▲▼ hasta el grupo que abarca todos los bornes → F1 (Select).</li>
+        <li>Revisar que el modo sea «Leakage AC+DC».</li>
+      </ol>
+      <p><strong>Corriente de fuga a tierra:</strong></p>
+      <ol>
+        <li>R12 ENCENDIDO.</li>
+        <li>Los 10 latiguillos en sus bornes: R→RA/R, L→LA/L, F→LL/F, N→RL/N y C1…C6→V1/C1…V6/C6.</li>
+        <li>No se agrega ningún cable.</li>
+        <li>Tecla µA y POLARITY para energizar el tomacorriente; la fuga a tierra la mide el ESA620 por el conductor de tierra del cable de poder.</li>
+      </ol>
+      <p class="nota">Polaridad, tierra y neutro se cambian con las teclas POLARITY, EARTH y NEUTRAL del ESA620, sin mover cables.</p>
 
       <h3>Paso 4 — Compara (pestaña «4. Comparar»)</h3>
       <p>Arriba verás tu <strong>avance</strong>: «Has medido X de las 16 configuraciones que simula esta herramienta», con la lista de las que te faltan y de las que repetiste (y cuántas veces). El bloque «¿Por qué 16?» explica de dónde sale ese número: 12 de contacto y de paciente CF y 4 de fuga a tierra.</p>
