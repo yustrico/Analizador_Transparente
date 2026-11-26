@@ -3,15 +3,17 @@
  * Título: Interfaz de usuario
  * Descripción: Conecta la página (index.html) con el núcleo. Escucha los
  *   clics del estudiante, le pide al núcleo los cálculos (M2 secuencia,
- *   M4 motor, M5 evaluador) y muestra los resultados en las 5 secciones:
+ *   M4 motor, M5 evaluador) y muestra los resultados en las secciones:
  *   Equipo, Prueba guiada, Analizador, Comparar e Historial. En el reporte,
  *   la tarjeta «Enviar al docente» usa M12 (envio.js) para mandar el PDF.
+ *   La sección 6 (Examen) la maneja pantalla_examen.js, que usa elemento()
+ *   y crearConTexto() de este archivo.
  *   Este archivo NO calcula corrientes ni decide veredictos: solo pregunta al
  *   núcleo y pinta lo que el núcleo responde. Todo texto se escribe con
  *   textContent (nunca innerHTML), por seguridad.
  * Módulo: M1 – Interfaz de usuario (adaptador)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-25
+ * Creado: 2026-11-13 · Modificado: 2026-11-26
  * ============================================================================
  */
 
@@ -36,8 +38,8 @@ import {
 import {
   generarReporte, crearPdfReporte, nombreArchivoReporte, armarResumen, limpiarNombre, mostrarExplicacionIncertidumbre, TEXTO_CERCA_DEL_LIMITE,
   normasDelEquipo, conSaltosDeLinea,
-} from "./reporte.js?v=d4749f7c51";
-import { descargarPdf } from "./pdf.js?v=628f37170c";
+} from "./reporte.js?v=8550e3a4c5";
+import { descargarPdf } from "./pdf.js?v=bfb0882a03";
 import { medirCargaPagina, textoTiempoCarga, detalleCarga } from "./tiempo_carga.js?v=1c9699f3b9";
 import { validarDatosEnvio, bytesABase64, enviarAlServicio, CORREO_DOCENTE_POR_DEFECTO } from "./envio.js?v=b9d3663c3b";
 
@@ -246,7 +248,7 @@ const SIGNIFICADO_CLASE = "protección contra choque eléctrico";
  * @param {string} id - id del elemento en index.html.
  * @returns {HTMLElement} El elemento.
  */
-function elemento(id) {
+export function elemento(id) {
   const encontrado = document.getElementById(id);
   if (encontrado === null) {
     throw new Error(`Falta el elemento "${id}" en index.html.`);
@@ -284,7 +286,7 @@ function crearConSubindices(etiqueta, texto, padre, clase) {
  * @param {string} [clase] - Clase CSS.
  * @returns {HTMLElement} El elemento creado.
  */
-function crearConTexto(etiqueta, texto, padre, clase) {
+export function crearConTexto(etiqueta, texto, padre, clase) {
   const nuevo = document.createElement(etiqueta);
   nuevo.textContent = texto;
   if (clase) {

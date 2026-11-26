@@ -6,7 +6,7 @@
  *   librerías externas. Usa las fuentes estándar de todo lector de PDF
  *   (Helvetica, Helvetica-Bold y Symbol), así que no hay que incrustar
  *   fuentes. El texto va en codificación WinAnsi, que incluye tildes, ñ, µ y
- *   ±; los pocos símbolos matemáticos que WinAnsi no tiene (√, ≤, ≥, ≈...)
+ *   ±; los pocos símbolos matemáticos que WinAnsi no tiene (√, ≤, ≥, ≈, π...)
  *   se dibujan con la fuente Symbol.
  *   Cómo se arma un PDF (lo mínimo):
  *     1. Encabezado "%PDF-1.4".
@@ -170,7 +170,7 @@ const WINANSI_ESPECIALES = new Map([
 /** Símbolos que no están en WinAnsi y se dibujan con la fuente Symbol: [código, ancho]. */
 const SIMBOLOS = new Map([
   ["√", [0xd6, 549]], ["≤", [0xa3, 549]], ["≥", [0xb3, 549]], ["≈", [0xbb, 549]],
-  ["≠", [0xb9, 549]], ["−", [0x2d, 549]], ["Ω", [0x57, 768]],
+  ["≠", [0xb9, 549]], ["−", [0x2d, 549]], ["Ω", [0x57, 768]], ["π", [0x70, 549]],
 ]);
 
 /**

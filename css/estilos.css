@@ -393,6 +393,27 @@ a.boton { display: inline-block; text-decoration: none; }
 .envio__estado { margin: 12px 0 0; padding: 10px 14px; border-radius: var(--radio); font-weight: 600; }
 .envio__estado--exito { color: var(--verde-cumple); background: #E8F3EC; border: 1px solid var(--verde-cumple); }
 .envio__estado--error { color: var(--ambar-no-cumple); background: #FFF4E5; border: 1px solid var(--ambar-no-cumple); }
+
+/* Sección 6: Examen (M7). ✓ en verde y ✗ en ámbar (el rojo es solo para la corriente de fuga) */
+.examen__intento { font-weight: 700; color: var(--azul-principal); font-size: 1.1rem; margin: 18px 0 10px; }
+.examen__lista { list-style: none; padding: 0; margin: 0; counter-reset: pregunta; }
+.examen__pregunta { counter-increment: pregunta; max-width: 900px; }
+.examen__grupo { border: 0; margin: 0; padding: 0; min-width: 0; }
+.examen__enunciado { font-weight: 600; margin-bottom: 10px; padding: 0; }
+.examen__enunciado::before { content: counter(pregunta) ". "; }
+.examen__opcion { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; cursor: pointer; }
+.examen__opcion input { margin-top: 4px; }
+.examen__marca { margin-left: 10px; padding: 2px 8px; border-radius: var(--radio); font-size: 0.9rem; white-space: nowrap; }
+.examen__marca--bien { color: var(--verde-cumple); background: #E8F3EC; border: 1px solid var(--verde-cumple); }
+.examen__marca--mal { color: var(--ambar-no-cumple); background: #FFF4E5; border: 1px solid var(--ambar-no-cumple); }
+.examen__resultado { max-width: 900px; }
+.examen__nota { font-size: 1.6rem; font-weight: 700; color: var(--azul-principal); margin: 6px 0; }
+.examen__veredicto { font-weight: 700; margin: 4px 0; }
+.examen__veredicto--aprobado { color: var(--verde-cumple); }
+.examen__veredicto--reprobado { color: var(--ambar-no-cumple); }
+.examen__envio { max-width: 900px; }
+.examen__confirmacion { margin-top: 12px; padding: 12px 14px; border: 1px solid var(--borde); border-radius: var(--radio); }
+.examen__confirmacion p { margin: 0 0 10px; font-weight: 600; }
 .reporte h2 { margin-bottom: 0; }
 .reporte .ficha { margin: 14px 0 8px; }
 .tabla--reporte { font-size: 0.92rem; }

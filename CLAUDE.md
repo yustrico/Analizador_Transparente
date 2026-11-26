@@ -18,9 +18,10 @@
 SÍ:
 - Solo **computador**: Chrome y Edge en Windows.
 - **Sin servidor propio y sin cuentas. Único servicio externo: el Apps Script del equipo, solo para enviar al docente el reporte y el examen.** Todo lo demás corre en el navegador. Se publica gratis en GitHub Pages.
-- 5 secciones (sección 6), un solo equipo (R12), tres tipos de medición (**corriente de contacto**, **corriente de paciente CF** y **corriente de fuga a tierra**) y cuatro condiciones: 16 configuraciones validadas con el ESA620 (la fuga a tierra no existe con la tierra abierta).
+- 6 secciones (sección 6: las 5 de la práctica + Examen), un solo equipo (R12), tres tipos de medición (**corriente de contacto**, **corriente de paciente CF** y **corriente de fuga a tierra**) y cuatro condiciones: 16 configuraciones validadas con el ESA620 (la fuga a tierra no existe con la tierra abierta).
 - Página de ayuda (ayuda.html) con el manual de usuario en HTML, enlazada desde el encabezado.
 - Reporte final descargable en PDF + botón para copiar resumen al portapapeles.
+- Modo examen (corrección del profesor del 23/11/2026): 10 preguntas al azar de datos/examen.json (15, sin respuestas), máximo 2 intentos por código; califica el servicio del equipo, que es el único que tiene la clave.
 
 NO (fuera del alcance: no lo construyas):
 - Versión para celular; otros equipos; predecir antes de medir (RF09); ayuda contextual avanzada (RF10).
@@ -34,12 +35,13 @@ Modular tipo **hexagonal**:
 
 | Módulo | Archivo | Tipo | Responsabilidad |
 |---|---|---|---|
-| M1 Interfaz de usuario | js/adaptadores/interfaz.js + index.html + css/estilos.css | Adaptador | 5 secciones, navegación y eventos; muestra resultados |
+| M1 Interfaz de usuario | js/adaptadores/interfaz.js + js/adaptadores/pantalla_examen.js + index.html + css/estilos.css | Adaptador | 6 secciones, navegación y eventos; muestra resultados (pantalla_examen.js maneja la sección 6) |
 | M2 Secuencia de la prueba | js/nucleo/secuencia.js | Núcleo | Orden fijo de los pasos, propósito de cada paso, no permite saltar pasos |
 | M3 Modelo del equipo | js/nucleo/modelo_equipo.js | Núcleo | Carga y VALIDA datos/parametros_r12.json (tipos y rangos) |
 | M4 Motor de cálculo | js/nucleo/motor_calculo.js | Núcleo | Corriente de contacto, de paciente y de fuga a tierra por condición + incertidumbre U; lista de las 16 configuraciones |
 | M5 Evaluador de límites | js/nucleo/evaluador_limites.js | Núcleo | Límite IEC 60601-1 aplicable y veredicto; veredicto de los pasos 2 y 3 (tierra y aislamiento) |
 | M6 Visualizador | js/adaptadores/visualizador.js | Adaptador | Circuito en SVG (red MD, conmutadores L/N/PE, chasis, parte aplicada) y animación del camino de la corriente |
+| M7 Examen | js/nucleo/examen.js | Núcleo | Valida el banco (sin respuestas), sortea 10 preguntas, baraja opciones con su índice original y arma las respuestas {id: índice original}. NO califica |
 | M8 Historial | js/adaptadores/historial.js | Adaptador | Registro de lecturas en memoria (y sessionStorage); nota visible de que las lecturas se borran al cerrar la pestaña (sin aviso beforeunload) |
 | M10 Reporte | js/adaptadores/reporte.js | Adaptador | Reporte final en PDF (generador propio js/adaptadores/pdf.js, descarga directa) y copiar resumen al portapapeles |
 | M12 Envío | js/adaptadores/envio.js | Adaptador | Envía el reporte (y el examen) al correo del docente por el servicio del equipo (Google Apps Script + Gmail + hoja de registros), con consentimiento; código del servicio en tools/apps_script/ (sin la clave del examen) |
@@ -111,7 +113,7 @@ Datos medidos con el ESA620 (media ± desviación estándar, n = 3), para la pru
 - Fuga a tierra: normal normal 14.73 ± 0.49 | normal invertida 14.90 ± 0.10 | neutro abierto normal 27.13 ± 0.71 | neutro abierto invertida 27.43 ± 0.45 (la polaridad normal es la calibración; la invertida, la validación).
 - Criterio: E_n = |I_modelo − media| / U_med ≤ 1, con U_med = 2·√((s/√3)² + ((0.01·media + 1)/√3)²). Debe cumplirse en TODAS las configuraciones.
 
-## 6. Interfaz (M1): 5 secciones en una sola página, en español, sobria
+## 6. Interfaz (M1): 6 secciones en una sola página, en español, sobria
 Estilo:
 - Fondo claro; azul oscuro #14365F como color principal; rojo SOLO para la corriente de fuga.
 - Tipografía del sistema (sin fuentes externas). Ancho mínimo de diseño: 1280 px.
@@ -134,6 +136,12 @@ Estilo:
    - Tarjeta «Enviar al docente» (M12): nombre, código estudiantil, correo del docente (cferro@uao.edu.co, editable, solo @uao.edu.co) y casilla de consentimiento (Ley 1581 de 2012); envía el mismo PDF y el resumen al servicio del equipo;
    - "Copiar resumen" copia el resumen al portapapeles (navigator.clipboard.writeText); el estudiante lo pega en su correo y adjunta el PDF. (Antes era un enlace mailto: se quitó porque en Windows abre una lista de programas y no sirve con correo web.)
    - Sin límite de tiempo: la práctica se puede pausar.
+6. **Examen** (M7 + M12; no hace falta haber hecho la práctica):
+   - texto de inicio: "10 preguntas al azar sobre lo que viste en la herramienta. Nota de 0 a 5; apruebas con 3.0. Tienes máximo 2 intentos. La nota la calcula el servicio del equipo y le llega al docente junto con el PDF." (los números salen de datos/examen.json);
+   - nombre, código, correo del docente (cferro@uao.edu.co, editable) y la misma casilla de consentimiento; «Comenzar examen» consulta los intentos: con 2 usados muestra «Ya usaste tus 2 intentos» y no deja empezar; si no, «Intento X de 2» y 10 preguntas con opciones barajadas;
+   - «Enviar examen» solo con las 10 respondidas, con confirmación en la página «¿Enviar? No podrás cambiar las respuestas» (sin window.confirm);
+   - envía {tipo: "examen", …, respuestas: {id: índice ORIGINAL}, pdfBase64}; el PDF (M10, crearPdfExamen) lleva nombre, código, fecha y hora, intento y la opción elegida en cada pregunta, sin nota;
+   - muestra nota, Aprobado/No aprobado, correctas y ✓/✗ por pregunta, SIN la respuesta correcta; intentos que quedan; «Descargar mi examen (PDF)»; los errores del servicio se muestran tal cual.
 
 ## 7. Textos de explicación (úsalos tal cual; puedes ajustar redacción menor)
 - Contacto, normal: "La fuga capacitiva del equipo (≈ 14.7 µA) se va casi toda por el conductor de protección (≈ 0.003 Ω), que está en paralelo con la persona (1 kΩ). Por divisor de corriente casi nada pasa por la persona: ≈ 0 µA. El analizador real muestra ≈ 0.1 µA por su resolución."
@@ -152,10 +160,10 @@ Estilo:
 ## 7.1 Estructura del repositorio
 ```
 index.html · ayuda.html (manual en HTML, sin scripts) · css/estilos.css · js/main.js
-js/nucleo/{secuencia,modelo_equipo,motor_calculo,evaluador_limites}.js
-js/adaptadores/{interfaz,visualizador,historial,reporte,pdf,tiempo_carga,envio}.js
-datos/parametros_r12.json
-tests/{motor_calculo,evaluador_limites,secuencia,modelo_equipo,es02_validacion,historial,pdf,envio,sri,sintaxis,tiempo_carga,version}.test.js
+js/nucleo/{secuencia,modelo_equipo,motor_calculo,evaluador_limites,examen}.js
+js/adaptadores/{interfaz,pantalla_examen,visualizador,historial,reporte,pdf,tiempo_carga,envio}.js
+datos/parametros_r12.json · datos/examen.json (banco del examen, SIN respuestas)
+tests/{motor_calculo,evaluador_limites,secuencia,modelo_equipo,es02_validacion,historial,pdf,envio,examen,conexiones,sri,sintaxis,tiempo_carga,version}.test.js
 tools/sri.mjs (calcula los hashes SHA-384 de los JS y CSS y los escribe en index.html y ayuda.html; agrega "?v=" con parte del hash a cada URL y a los import entre módulos) · tools/peso.mjs (suma el peso descargado, ES05) · tools/apps_script/ (código del servicio de envío, SIN la clave del examen, y LEEME.md para publicarlo)
 docs/ (nuestros documentos + manual_usuario.md, solucion_problemas.md, mantenimiento.md, verificacion.md)
 README.md · LICENSE (MIT) · CHANGELOG.md · CLAUDE.md · .gitignore
@@ -163,7 +171,7 @@ README.md · LICENSE (MIT) · CHANGELOG.md · CLAUDE.md · .gitignore
 JavaScript moderno con módulos ES (import/export), sin frameworks ni dependencias externas en el navegador. Para desarrollo local se sirve con `python -m http.server` o `npx serve`, porque fetch del JSON no funciona abriendo el archivo directo.
 
 ## 8. Reglas de código (pedidas por el profesor)
-- Cada archivo empieza con un bloque de cabecera: título, descripción en lenguaje sencillo, módulo (M1–M10), autores, fecha de creación y de modificación.
+- Cada archivo empieza con un bloque de cabecera: título, descripción en lenguaje sencillo, módulo (M1–M12), autores, fecha de creación y de modificación.
 - JSDoc en cada función: qué hace, parámetros con unidades y lo que retorna. Comentario antes de cada bloque y de cada ciclo.
 - Nombres descriptivos (corrienteContacto_uA, condicionPrueba); sin variables de una letra salvo índices; sin "números mágicos": todo valor viene del JSON o de una constante con nombre.
 - Programación defensiva: valida entradas en el núcleo y lanza errores con mensajes claros en español; la interfaz los muestra sin romperse.
@@ -202,6 +210,9 @@ JavaScript moderno con módulos ES (import/export), sin frameworks ni dependenci
 - **Fase 3 – Historial y reporte**: M8 y M10 (PDF + copiar resumen al portapapeles).
 - **Fase 4 – Seguridad y rendimiento**: CSP, tools/sri.mjs, revisión de innerHTML/eval, presupuesto de peso (ES05) y detener la animación en reposo.
 - **Fase 5 – Lanzamiento y documentación**: docs/manual_usuario.md (paso a paso con capturas sugeridas), docs/solucion_problemas.md, docs/mantenimiento.md (cada cuánto revisar: navegadores, parámetros y versión), docs/verificacion.md (tabla ES01–ES15 con columnas Meta, Cómo se mide, Valor medido, ¿Cumple?), versión v1.0.0 en el CHANGELOG e instrucciones para publicar en GitHub Pages.
+- **Corrección del profesor (23/11/2026)**, en dos fases (llamadas «Fase 3» y «Fase 4» en el documento de instrucciones del equipo):
+  - **Envío al docente (M12)**: envio.js, tarjeta «Enviar al docente», CSP con el servicio, tools/apps_script/ sin la clave. Commit «M12: enviar el reporte al docente por el servicio del equipo + pruebas».
+  - **Modo examen (M7)**: datos/examen.json, js/nucleo/examen.js, pestaña «6. Examen», tests/examen.test.js y documentos (docs/02 RF12 y RF13, docs/08, manual, ayuda, CHANGELOG). Commit «M7: modo examen con 2 intentos calificado por el servicio + pruebas».
 
 ## MENSAJE INICIAL (pegar en Claude Code)
 "Lee CLAUDE.md y los documentos de docs/. Antes de escribir código, explícame en 10 líneas qué vas a construir y hazme las preguntas que tengas. Después empieza la Fase 0 y detente al terminarla."

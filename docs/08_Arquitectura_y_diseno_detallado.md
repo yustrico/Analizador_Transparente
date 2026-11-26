@@ -36,10 +36,10 @@ Justificación: cumple RNF04 (sin instalación, fuera del laboratorio), RNF05 (P
 ## 3. Jerarquía (Sistema → Subsistema → Componente → Elemento)
 - Sistema: Analizador transparente.
   - Subsistema 1, Aplicación web (contenedor):
-    - Núcleo: M2 Secuencia, M3 Modelo del equipo, M4 Motor de cálculo, M5 Evaluador de límites.
+    - Núcleo: M2 Secuencia, M3 Modelo del equipo, M4 Motor de cálculo, M5 Evaluador de límites, M7 Examen.
     - Adaptadores: M1 Interfaz, M6 Visualizador, M8 Historial, M10 Reporte, M10a Generador PDF, M11 Tiempo de carga, M12 Envío.
     - Elementos: un archivo JavaScript por módulo (por ejemplo `js/nucleo/motor_calculo.js`) y sus funciones.
-  - Subsistema 2, Datos: `datos/parametros_r12.json` (D1 parámetros del modelo + D2 pasos previos medidos y límites).
+  - Subsistema 2, Datos: `datos/parametros_r12.json` (D1 parámetros del modelo + D2 pasos previos medidos y límites) y `datos/examen.json` (D4 banco de 15 preguntas del examen, SIN respuestas).
   - Subsistema 3, Memoria del navegador (D3): sessionStorage guarda el historial de lecturas (M8) y el avance de la prueba guiada (M2, a través de M8). Se conserva al recargar la página y se borra al cerrar la pestaña.
   - Subsistema 4, Reporte: archivo PDF descargable, creado por el generador propio (M10a), y copiar resumen al portapapeles (M10).
 - Sistema externo: Servicio de envío (Google Apps Script + Gmail + Hoja de registros, en la cuenta del proyecto). Recibe el PDF y el resumen, los envía al correo del docente y guarda una fila (fecha, tipo, código, nombre, correo del docente) en la hoja. Código en tools/apps_script/.
@@ -47,11 +47,12 @@ Justificación: cumple RNF04 (sin instalación, fuera del laboratorio), RNF05 (P
 ## 4. Fichas de módulos
 | Módulo | Archivo | Tipo | Qué hace | Recibe | Entrega | Requerimientos | Especificaciones |
 |---|---|---|---|---|---|---|---|
-| M1 Interfaz | js/adaptadores/interfaz.js + index.html + css/estilos.css | Adaptador | 5 secciones: Equipo, Prueba guiada, Analizador, Comparar, Historial y reporte | Clics del estudiante; Resultado | Acción (paso, condición, medición) | RF01, RF08, RNF07 | ES10, ES11, ES06 |
+| M1 Interfaz | js/adaptadores/interfaz.js + js/adaptadores/pantalla_examen.js + index.html + css/estilos.css | Adaptador | 6 secciones: Equipo, Prueba guiada, Analizador, Comparar, Historial y reporte, Examen | Clics del estudiante; Resultado | Acción (paso, condición, medición) | RF01, RF08, RNF07 | ES10, ES11, ES06 |
 | M2 Secuencia | js/nucleo/secuencia.js | Núcleo | Orden fijo de la prueba y propósito de cada paso; no deja saltar pasos; permite repasar los completados | Acción | Paso actual; avance de la prueba | RF01, RF02 | — |
 | M3 Modelo del equipo | js/nucleo/modelo_equipo.js | Núcleo | Carga y valida (tipos y rangos) los parámetros del R12 | parametros_r12.json | Parámetros | RR01, RR02 | — |
 | M4 Motor de cálculo | js/nucleo/motor_calculo.js | Núcleo | Corriente de contacto, de paciente y de fuga a tierra por condición e incertidumbre U; lista de las 16 configuraciones | Condición, Medición, Parámetros | I (µA), U (µA), corriente por rama | RF03, RF04, RNF02, RNF03 | ES01, ES02 |
 | M5 Evaluador de límites | js/nucleo/evaluador_limites.js | Núcleo | Límite IEC 60601-1 aplicable y veredicto; veredicto de los pasos 2 (resistencia de tierra) y 3 (aislamiento, mínimos de IEC 62353:2014 Tabla 2) | I, U, Medición, Condición | Resultado | RF06, RF07 | — |
+| M7 Examen | js/nucleo/examen.js | Núcleo | Valida el banco de preguntas (al menos 10, ids únicos, 4 opciones, ningún campo de respuesta), sortea 10 preguntas, baraja las opciones recordando su índice original y arma las respuestas {id: índice original}. NO califica: la clave solo está en el Servicio de envío | examen.json | Preguntas del intento; respuestas | RF12 | ES13 |
 | M6 Visualizador | js/adaptadores/visualizador.js | Adaptador | Dibuja la red MD y los conmutadores L/N/PE en SVG y anima el camino de la corriente; la animación se detiene en reposo | Corriente por rama, Condición | Dibujo SVG | RF05 | ES14, ES15 |
 | M8 Historial | js/adaptadores/historial.js | Adaptador | Guarda las lecturas de la sesión en memoria y en sessionStorage, y también el avance de la prueba guiada; resume el avance de las 16 configuraciones | Resultado; avance de M2 | Lista de registros; avance | RF11 | ES14 (RAM) |
 | M10 Reporte | js/adaptadores/reporte.js | Adaptador | Arma el reporte final (pantalla y PDF) y el resumen para copiar al portapapeles | Lista de registros, nombre, tiempo de carga | Contenido del reporte; resumen en el portapapeles | RF11, RNF09 | ES09 |
@@ -99,6 +100,7 @@ Justificación: cumple RNF04 (sin instalación, fuera del laboratorio), RNF05 (P
 | M10a Generador PDF | Archivo PDF | Fundamental | Información (descarga con Blob) | Archivo dañado → pruebas de estructura (xref, largos de flujo) en tests/pdf.test.js |
 | M10 Reporte | Correo del estudiante | Fundamental | Información (copiar resumen al portapapeles) | Datos personales → solo el nombre que escribe el estudiante |
 | M10 Reporte | M12 Envío | Fundamental | Información (PDF y resumen) | El PDF enviado es distinto al descargado → los dos salen de la misma función crearPdfReporte |
+| M7 Examen | M12 Envío | Fundamental | Información (respuestas {id: índice original} y PDF del examen) | Que el estudiante vea la clave → la página no la tiene (examen.json sin respuestas, validado por M7 y por tests/examen.test.js); el servicio califica y cuenta los intentos (máximo 2 por código) |
 | M12 Envío | Servicio de envío (Apps Script) | Fundamental | Información (HTTPS, JSON) | Datos personales a terceros → solo con consentimiento, solo al correo @uao.edu.co del docente (ES13); sin internet o servicio caído → mensaje claro y el estudiante puede descargar el PDF y enviarlo él; abuso → el servicio limita 5 reportes por código al día y PDF ≤ 2 MB |
 | GitHub Pages | Aplicación | Fundamental | Información (archivos HTTPS) | Archivos alterados → HTTPS + hashes SRI + commits firmados |
 

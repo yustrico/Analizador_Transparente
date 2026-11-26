@@ -2,13 +2,13 @@
 <!--
   ============================================================================
   Título: Página principal del Analizador transparente
-  Descripción: Estructura de las 5 secciones (Equipo, Prueba guiada,
-    Analizador, Comparar e Historial). El contenido que depende de los datos
+  Descripción: Estructura de las 6 secciones (Equipo, Prueba guiada,
+    Analizador, Comparar, Historial y Examen). El contenido que depende de los datos
     del equipo lo llena js/adaptadores/interfaz.js. No hay scripts ni estilos
     en línea (lo exige la política de seguridad de contenido, CSP).
   Módulo: M1 – Interfaz de usuario (adaptador)
   Autores: Yustin Rico, David Cardona, Santiago González
-  Creado: 2026-11-13 · Modificado: 2026-11-25
+  Creado: 2026-11-13 · Modificado: 2026-11-26
   ============================================================================
 -->
 <html lang="es">
@@ -22,21 +22,23 @@
   <meta name="description" content="Simulador educativo de las pruebas de seguridad eléctrica al electrocardiógrafo Mindray BeneHeart R12.">
   <link rel="icon" href="data:,">
   <!-- Integridad (SRI): las huellas SHA-384 las escribe tools/sri.mjs; correrlo después de cambiar JS o CSS -->
-  <link rel="stylesheet" href="css/estilos.css?v=97f5748707" integrity="sha384-l/V0hwcmHQcK62y61IbH3FuSIEbxs58yN2qojwF/JH/ziG2yzo5n9/oigHaghb1n">
+  <link rel="stylesheet" href="css/estilos.css?v=564b5e23bd" integrity="sha384-VkteI71buM/Fq7YrhiiMlf6W3yiaQ6f8HHQUzPARotUK5MSBK8u0i3riDKLifPXG">
   <!-- SRI: inicio (generado por tools/sri.mjs, no editar a mano) -->
   <link rel="modulepreload" href="js/adaptadores/envio.js?v=b9d3663c3b" integrity="sha384-udNmPDv6KWruCGcNm1OxtzwYFEZISs++UScz90XP6mdzwIYhaiToVRvc/XUHAO0p">
   <link rel="modulepreload" href="js/adaptadores/historial.js?v=37beb88db5" integrity="sha384-N764jbU0sVhRC7ghKObyjTjXmaVMHHAPvVcAtTAhaCYpBXdSrwJZ+STKTxzDL19N">
-  <link rel="modulepreload" href="js/adaptadores/interfaz.js?v=07967596b0" integrity="sha384-B5Z1lrCEEoacBD4buPcKk8h5oWGNh1c9mAHrNNDNwjYDDBQqIoDnNJefG+D8KYrx">
-  <link rel="modulepreload" href="js/adaptadores/pdf.js?v=628f37170c" integrity="sha384-Yo83Fwy41RDZlS65Om/wuMl1yX/SZVT5roDLxWU5SsNCCIKYVhnCcHPF0o/ldBtx">
-  <link rel="modulepreload" href="js/adaptadores/reporte.js?v=d4749f7c51" integrity="sha384-1HSffFGogAyThkQ7SyAPkgqvk7nUap1f0N7/BIOhkqy3sIk9HrS7dhJGlxMpsvvn">
+  <link rel="modulepreload" href="js/adaptadores/interfaz.js?v=c55fec1c5d" integrity="sha384-xV/sHF1vR+9a88AwXAmiloTL28ab7rltc/hvzeseOoAP5Q78oN+xK8rviIzMd/4y">
+  <link rel="modulepreload" href="js/adaptadores/pantalla_examen.js?v=f8182e48fb" integrity="sha384-+BguSPtTKXBp5pAe8B7EV1qlGm/wtVo1qbj2Cb3iitR15nyv3utwSZK77VLQYFdm">
+  <link rel="modulepreload" href="js/adaptadores/pdf.js?v=bfb0882a03" integrity="sha384-v7CIKgNGK+lpQsqZM3Hh3aYLncGJ3oK0L3QlRkSK4QYwGuJsLVeK0pdtChNpFmq+">
+  <link rel="modulepreload" href="js/adaptadores/reporte.js?v=8550e3a4c5" integrity="sha384-hVDjpMW7no30tOWClpB0BNATMJeJTJ226Tnw66XxRfh4iIRp6TSKh+qUoNpo2LtS">
   <link rel="modulepreload" href="js/adaptadores/tiempo_carga.js?v=1c9699f3b9" integrity="sha384-HJaZ87n6slac+sCKpiv4PovGknwW6qIsYSbPkXqTEJSFVD0wGqJegnc9QHmWVjjg">
   <link rel="modulepreload" href="js/adaptadores/visualizador.js?v=1d37bf1085" integrity="sha384-HTe/EIXNJAD0bWn0wGsNu/AoBzqtE7D+qaCh00qWqfYEPkoZjhTnTgQUX824uDcu">
   <link rel="modulepreload" href="js/nucleo/evaluador_limites.js?v=12ab74e8c1" integrity="sha384-Eqt06MFsEJC8nmrnHxhqUDVez+orZ3rGy3dmLNB0gFltj5G+NdfhkbNUcKSfB1cG">
+  <link rel="modulepreload" href="js/nucleo/examen.js?v=db2b15b911" integrity="sha384-2ysVuRHtoAEnFvqTJ0ssQwBWhbMDK1zvkIw2kJjBelPyEFsz5Mdvmec1x3OolYM/">
   <link rel="modulepreload" href="js/nucleo/modelo_equipo.js?v=5ca0bfb4e4" integrity="sha384-XKC/tOSU1bnqnTxnVs08DWpna0bP1cGP24BbDWufMn06OygGyUBk3CswydIGWaBh">
   <link rel="modulepreload" href="js/nucleo/motor_calculo.js?v=c6349ec03b" integrity="sha384-xjSewDuO4RE5LN0YcvnJ5XfgNxkZ4GzzGBSuFcnG0SfD8RlOo0ddhp04r0b6fTTH">
   <link rel="modulepreload" href="js/nucleo/secuencia.js?v=bffe121e07" integrity="sha384-v/4SHgduYquka0rL7HHdb+Z7SFxlx6UnWtzSicOu2HWYIDc2nw7ylTx8duc2u5qj">
   <!-- SRI: fin -->
-  <script type="module" src="js/main.js?v=86edb47b54" integrity="sha384-hu20e1Qg/eyHQTFCBm9T8/5FuWvaMwzZJA1/mitLvFEuP58t6eYj1swR960UyPzu"></script>
+  <script type="module" src="js/main.js?v=bac5be55f5" integrity="sha384-usW+VfVHZyq9Sax2/PQHv1bn6dPM6a4zevHUbfDMoXyQYBiM3sRZNa0YgJ9sTC4J"></script>
 </head>
 <body>
   <header class="encabezado">
@@ -54,6 +56,7 @@
         <button type="button" class="navegacion__boton" data-seccion="analizador">3. Analizador</button>
         <button type="button" class="navegacion__boton" data-seccion="comparar">4. Comparar</button>
         <button type="button" class="navegacion__boton" data-seccion="historial">5. Historial y reporte</button>
+        <button type="button" class="navegacion__boton" data-seccion="examen">6. Examen</button>
       </nav>
     </div>
   </header>
@@ -361,6 +364,60 @@
         <p class="nota" id="tiempo-carga" aria-live="polite">Tiempo de carga de esta página: midiendo…</p>
         <p class="nota" id="reporte-tiempo" aria-live="polite"></p>
       </details>
+    </section>
+
+    <!-- Sección 6: Examen (M7). Lo califica el servicio del equipo: la clave de respuestas NO está en la página -->
+    <section id="seccion-examen" class="seccion" data-seccion="examen" hidden>
+      <h2>Examen</h2>
+      <p class="introduccion" id="examen-introduccion"></p>
+
+      <div class="tarjeta envio">
+        <h3>Tus datos</h3>
+        <div class="envio__campos">
+          <label for="examen-nombre">Nombre completo</label>
+          <input type="text" id="examen-nombre" maxlength="60" autocomplete="name" spellcheck="false">
+          <label for="examen-codigo">Código estudiantil</label>
+          <input type="text" id="examen-codigo" inputmode="numeric" maxlength="10" autocomplete="off" spellcheck="false">
+          <label for="examen-correo">Correo del docente</label>
+          <div>
+            <input type="email" id="examen-correo" maxlength="120" autocomplete="off" spellcheck="false">
+            <p class="nota">Solo correos @uao.edu.co</p>
+          </div>
+        </div>
+        <label class="envio__consentimiento">
+          <input type="checkbox" id="examen-consentimiento">
+          Acepto que mi nombre, mi código y mis resultados se envíen al correo del docente, solo con fines académicos (Ley 1581 de 2012).
+        </label>
+        <button type="button" class="boton boton--principal" id="boton-comenzar-examen">Comenzar examen</button>
+        <p class="envio__estado" id="estado-examen" role="status" hidden></p>
+      </div>
+
+      <!-- Resultado (después de que el servicio califica) -->
+      <div class="tarjeta examen__resultado" id="examen-resultado" hidden>
+        <h3>Resultado</h3>
+        <p class="examen__nota" id="examen-nota"></p>
+        <p class="examen__veredicto" id="examen-veredicto"></p>
+        <p id="examen-correctas"></p>
+        <p class="nota" id="examen-intentos-restantes"></p>
+        <button type="button" class="boton" id="boton-descargar-examen">Descargar mi examen (PDF)</button>
+        <p class="nota" id="estado-pdf-examen" aria-live="polite"></p>
+      </div>
+
+      <!-- Preguntas del intento -->
+      <div id="examen-preguntas-vista" hidden>
+        <p class="examen__intento" id="examen-intento"></p>
+        <ol class="examen__lista" id="examen-lista"></ol>
+        <div class="tarjeta examen__envio">
+          <p class="nota" id="examen-avance" aria-live="polite"></p>
+          <button type="button" class="boton boton--principal" id="boton-enviar-examen" disabled>Enviar examen</button>
+          <div class="examen__confirmacion" id="examen-confirmacion" hidden>
+            <p>¿Enviar? No podrás cambiar las respuestas.</p>
+            <button type="button" class="boton boton--principal" id="boton-confirmar-examen">Sí, enviar</button>
+            <button type="button" class="boton" id="boton-cancelar-examen">Seguir revisando</button>
+          </div>
+          <p class="envio__estado" id="estado-envio-examen" role="status" hidden></p>
+        </div>
+      </div>
     </section>
   </main>
 

@@ -1,0 +1,160 @@
+{
+  "version": 1,
+  "preguntas_por_examen": 10,
+  "nota_maxima": 5,
+  "nota_aprobacion": 3.0,
+  "intentos_maximos": 2,
+  "nota": "Este archivo NO trae las respuestas: la clave está solo en el Apps Script del equipo, que es el que califica.",
+  "preguntas": [
+    {
+      "id": "q01",
+      "pregunta": "¿Por qué el cable de poder del R12 se conecta al tomacorriente de prueba del ESA620 y no a la pared?",
+      "opciones": [
+        "Para que el analizador pueda invertir la polaridad y abrir el neutro o la tierra",
+        "Porque el tomacorriente de la pared tiene más voltaje",
+        "Para cargar la batería del R12",
+        "Para que el R12 quede apagado durante la prueba"
+      ]
+    },
+    {
+      "id": "q02",
+      "pregunta": "Con la tierra cerrada, la corriente de contacto del R12 es ≈ 0.12 µA y al abrir la tierra sube a ≈ 14.5 µA. ¿Por qué?",
+      "opciones": [
+        "Es un error de lectura del analizador",
+        "Al abrir la tierra aumenta el voltaje de la red",
+        "La fuga ya no tiene el conductor de tierra y circula por la persona (MD)",
+        "El R12 consume más corriente con la tierra abierta"
+      ]
+    },
+    {
+      "id": "q03",
+      "pregunta": "¿Qué representa la MD dentro del Fluke ESA620?",
+      "opciones": [
+        "El conductor de tierra del cable de poder",
+        "La fuente de 120 V que alimenta al equipo",
+        "Un fusible de protección del analizador",
+        "Un circuito que imita el cuerpo humano para medir la corriente"
+      ]
+    },
+    {
+      "id": "q04",
+      "pregunta": "¿Por qué en el R12 invertir la polaridad casi no cambia la corriente de contacto?",
+      "opciones": [
+        "Porque las capacitancias de fuga de fase y de neutro son casi iguales",
+        "Porque el ESA620 no puede invertir la polaridad",
+        "Porque el R12 se apaga al invertir la polaridad",
+        "Porque al invertir la polaridad la tierra se abre sola"
+      ]
+    },
+    {
+      "id": "q05",
+      "pregunta": "¿Qué tipo de parte aplicada tiene el electrocardiógrafo Mindray BeneHeart R12?",
+      "opciones": [
+        "No tiene parte aplicada",
+        "Tipo BF",
+        "Tipo CF, a prueba de desfibrilación",
+        "Tipo B"
+      ]
+    },
+    {
+      "id": "q06",
+      "pregunta": "Según IEC 60601-1, ¿cuál es el límite de corriente de paciente para una parte aplicada tipo CF en condición normal?",
+      "opciones": [
+        "100 µA",
+        "500 µA",
+        "10 µA",
+        "5000 µA"
+      ]
+    },
+    {
+      "id": "q07",
+      "pregunta": "¿Cuál es el límite de corriente de contacto en condición de primer defecto (por ejemplo, con la tierra abierta)?",
+      "opciones": [
+        "50 µA",
+        "500 µA",
+        "10 µA",
+        "10 000 µA"
+      ]
+    },
+    {
+      "id": "q08",
+      "pregunta": "¿Por qué la herramienta no deja abrir la tierra y el neutro al mismo tiempo?",
+      "opciones": [
+        "Porque el ESA620 no tiene teclas para eso",
+        "Porque sería una doble falla y la norma evalúa una condición de primer defecto a la vez",
+        "Porque el R12 se dañaría",
+        "Porque la lectura siempre sería cero"
+      ]
+    },
+    {
+      "id": "q09",
+      "pregunta": "¿Por qué no existe la medición de fuga a tierra con la tierra abierta?",
+      "opciones": [
+        "Porque el R12 se apaga sin tierra",
+        "Porque no hay conductor de protección por donde circule; esa fuga pasa por la persona",
+        "Porque es demasiado alta para medirla",
+        "Porque la norma no tiene un límite para ese caso"
+      ]
+    },
+    {
+      "id": "q10",
+      "pregunta": "¿Cómo debe estar el R12 durante la prueba de resistencia de aislamiento?",
+      "opciones": [
+        "Encendido y registrando un ECG",
+        "Apagado, porque el ESA620 aplica 500 V de corriente continua",
+        "Con la tierra abierta",
+        "Desconectado del ESA620"
+      ]
+    },
+    {
+      "id": "q11",
+      "pregunta": "¿Para qué se oprime «Zero Leads» con el cable de prueba en el borne Ø/NULL?",
+      "opciones": [
+        "Para abrir la tierra del tomacorriente de prueba",
+        "Para calibrar el R12",
+        "Para que el analizador reste la resistencia del propio cable de prueba",
+        "Para apagar el analizador"
+      ]
+    },
+    {
+      "id": "q12",
+      "pregunta": "La fuga se modela como I = V · 2π · f · C. Si la capacitancia parásita C se duplica, la corriente:",
+      "opciones": [
+        "Se reduce a la mitad",
+        "Se duplica",
+        "Se vuelve cero",
+        "No cambia"
+      ]
+    },
+    {
+      "id": "q13",
+      "pregunta": "¿Cuál es el límite de la resistencia del conductor de protección que usa la prueba guiada?",
+      "opciones": [
+        "≤ 10 µA",
+        "≥ 2 MΩ",
+        "≥ 70 MΩ",
+        "≤ 0.2 Ω"
+      ]
+    },
+    {
+      "id": "q14",
+      "pregunta": "Con el neutro abierto y la tierra conectada, la corriente de contacto queda ≈ 0.1 µA. ¿Por qué?",
+      "opciones": [
+        "Porque con el neutro abierto no hay fuga",
+        "Porque la tierra sigue conectada y se lleva la fuga",
+        "Porque el analizador está mal calibrado",
+        "Porque el R12 se apaga con el neutro abierto"
+      ]
+    },
+    {
+      "id": "q15",
+      "pregunta": "Si las franjas de incertidumbre de dos lecturas se traslapan, ¿qué se puede concluir?",
+      "opciones": [
+        "Que el equipo no cumple la norma",
+        "Que la diferencia puede deberse al instrumento y no a la condición de prueba",
+        "Que una de las dos mediciones está mal hecha",
+        "Que las dos lecturas son exactamente iguales"
+      ]
+    }
+  ]
+}

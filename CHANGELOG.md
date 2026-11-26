@@ -5,6 +5,17 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Agregado (26/11/2026, corrección del profesor del 23/11/2026: modo examen)
+- `datos/examen.json`: banco de 15 preguntas (q01 a q15) con 4 opciones cada una y SIN respuestas (copiado sin cambios).
+- M7 Examen (`js/nucleo/examen.js`, núcleo): `validarBanco` (al menos 10 preguntas, ids únicos, texto, exactamente 4 opciones y ningún campo fuera de id, pregunta y opciones, para que no se cuele una respuesta), `elegirPreguntas` y `barajarOpciones` (Fisher–Yates, con el azar como parámetro para poder probarlas), `armarRespuestas` ({id: índice ORIGINAL de la opción}), `todasRespondidas` y `cargarBanco`. M7 no califica: la clave solo está en el servicio del equipo.
+- Pestaña «6. Examen» (`js/adaptadores/pantalla_examen.js` + index.html + css): datos del estudiante y consentimiento, consulta de intentos (con 2 usados no deja empezar), «Intento X de 2», 10 preguntas con opciones barajadas, «Enviar examen» solo con todas respondidas y con confirmación en la página, nota, Aprobado/No aprobado, correctas, ✓/✗ por pregunta sin la respuesta correcta, intentos que quedan y «Descargar mi examen (PDF)». Si el envío falla, las respuestas se quedan y se puede reenviar.
+- M10: `crearPdfExamen`, `contenidoDelExamen` y `nombreArchivoExamen` (examen_seguridad_electrica_AAAA-MM-DD_intentoN.pdf): datos, intento y la opción elegida en cada pregunta, sin nota.
+- M10a: la letra π se dibuja con la fuente Symbol (antes salía «?»; la usa la pregunta q12).
+- `main.js` carga el banco después de arrancar el simulador; si el banco falla, solo la sección 6 muestra el error.
+- `tests/examen.test.js` (10 pruebas): banco real, rechazo de bancos mal armados o con respuesta, sorteo y barajado con azar fijo, respuestas y PDF del examen.
+- Documentos: docs/02 (RF12 y RF13), docs/08 (M7 en la jerarquía, las fichas y las interacciones), manual de usuario y ayuda (paso 6), CLAUDE.md (alcance, sección 6, módulos y fases).
+- Probado contra el servicio real (código 99999): dos intentos calificados con ✓/✗ y el tercero bloqueado con «Ya usaste tus 2 intentos».
+
 ### Agregado (25/11/2026, corrección del profesor del 23/11/2026: el reporte debe llegarle al docente)
 - M12 Envío (`js/adaptadores/envio.js`): `validarDatosEnvio` (nombre 3–80, código de 5 a 10 dígitos, correo @uao.edu.co, consentimiento) y `bytesABase64` (funciones puras), `enviarAlServicio` (POST sin encabezados, 30 s máximo) y `consultarIntentos`. Único servicio externo: Google Apps Script + Gmail + hoja de registros, en la cuenta del proyecto.
 - Sección 5: tarjeta «Enviar al docente» (nombre, código, correo del docente lleno con cferro@uao.edu.co, casilla de consentimiento según la Ley 1581 de 2012) que envía el mismo PDF del reporte y el resumen.

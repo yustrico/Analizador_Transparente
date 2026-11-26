@@ -10,15 +10,19 @@
  *   estudiante, que adjunta el PDF. Este módulo no envía nada: solo si el
  *   estudiante lo pide (con consentimiento), M12 (envio.js) manda este mismo
  *   PDF y el resumen al correo del docente.
+ *   También arma el PDF del examen (M7): datos del estudiante, intento y la
+ *   opción que eligió en cada pregunta. Ese PDF NO trae la nota ni cuáles
+ *   respuestas son correctas: se crea antes de calificar, y la nota la
+ *   calcula el servicio del equipo y se la envía al docente por correo.
  * Módulo: M10 – Reporte (adaptador)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-25
+ * Creado: 2026-11-13 · Modificado: 2026-11-26
  * ============================================================================
  */
 
 import { VEREDICTO_CUMPLE } from "../nucleo/evaluador_limites.js?v=12ab74e8c1";
 import { filaDeRegistro, textoLectura, textoPorcentaje, textoLimite, NOMBRES_MEDICION, nombreCortoCondicion } from "./historial.js?v=37beb88db5";
-import { crearDocumentoPdf } from "./pdf.js?v=628f37170c";
+import { crearDocumentoPdf } from "./pdf.js?v=bfb0882a03";
 import { textoTiempoCarga, detalleCarga } from "./tiempo_carga.js?v=1c9699f3b9";
 
 /** Nota debajo de la tabla de lecturas (columna "Qué tan cerca del límite"). */
@@ -329,8 +333,17 @@ export function crearPdfReporte(datos) {
  * @returns {string} Nombre del archivo.
  */
 export function nombreArchivoReporte(fecha) {
+  return `${PREFIJO_ARCHIVO_PDF}${fechaParaArchivo(fecha)}.pdf`;
+}
+
+/**
+ * Fecha LOCAL en la forma AAAA-MM-DD, para el nombre de los archivos PDF.
+ * @param {Date} fecha - Fecha.
+ * @returns {string} Por ejemplo "2026-11-13".
+ */
+function fechaParaArchivo(fecha) {
   const dosCifras = (valor) => String(valor).padStart(2, "0");
-  return `${PREFIJO_ARCHIVO_PDF}${fecha.getFullYear()}-${dosCifras(fecha.getMonth() + 1)}-${dosCifras(fecha.getDate())}.pdf`;
+  return `${fecha.getFullYear()}-${dosCifras(fecha.getMonth() + 1)}-${dosCifras(fecha.getDate())}`;
 }
 
 /**
@@ -358,4 +371,63 @@ export function armarResumen(datos) {
   lineas.push(textoTiempoCarga(cargaPagina), `Navegador y hora de la carga: ${detalleCarga(cargaPagina)}`);
   lineas.push("", "Adjunto el reporte completo en PDF (botón «Descargar reporte (PDF)» de la herramienta).", TEXTO_AVISO);
   return lineas.join(SALTO_RESUMEN);
+}
+
+/* ------------------------------------------------------------------------ */
+/* PDF del examen (M7)                                                      */
+/* ------------------------------------------------------------------------ */
+
+/** Textos del PDF del examen. */
+const TITULO_EXAMEN = "Examen: pruebas de seguridad eléctrica";
+const TITULO_RESPUESTAS_EXAMEN = "Respuestas elegidas";
+const PREFIJO_RESPUESTA_EXAMEN = "Respuesta elegida: ";
+const NOTA_CALIFICACION_EXAMEN = "Este PDF solo trae las respuestas elegidas. La nota la calcula el servicio del equipo y le llega al docente por correo junto con este archivo.";
+const PREFIJO_ARCHIVO_EXAMEN = "examen_seguridad_electrica_";
+
+/**
+ * Arma el contenido del PDF del examen (texto puro, sin dibujar nada).
+ * @param {{nombre: string, codigo: string, fecha: Date, intento: number, intentosMaximos: number,
+ *   preguntas: {pregunta: string, elegida: string}[]}} datos - Datos del intento.
+ * @returns {{datosGenerales: [string, string][], respuestas: string[][]}} Contenido.
+ */
+export function contenidoDelExamen(datos) {
+  const { nombre, codigo, fecha, intento, intentosMaximos, preguntas } = datos;
+  const datosGenerales = [
+    ["Estudiante", nombre || NOMBRE_VACIO],
+    ["Código", codigo],
+    ["Fecha y hora", fecha.toLocaleString(IDIOMA_FECHAS, FORMATO_FECHA)],
+    ["Intento", `${intento} de ${intentosMaximos}`],
+  ];
+  // Cada pregunta con la opción que eligió el estudiante (sin decir si es correcta)
+  const respuestas = preguntas.map(({ pregunta, elegida }) => [pregunta, `${PREFIJO_RESPUESTA_EXAMEN}${elegida}`]);
+  return { datosGenerales, respuestas };
+}
+
+/**
+ * Crea el archivo PDF del examen con el generador propio (pdf.js).
+ * @param {object} datos - Los mismos datos de contenidoDelExamen.
+ * @returns {Uint8Array} Bytes del archivo PDF.
+ */
+export function crearPdfExamen(datos) {
+  const contenido = contenidoDelExamen(datos);
+  const documento = crearDocumentoPdf({ titulo: TITULO_EXAMEN, pie: PIE_PDF, fecha: datos.fecha });
+  documento.titulo(TITULO_EXAMEN);
+  documento.subtitulo(SUBTITULO_REPORTE);
+  documento.listaDatos(contenido.datosGenerales);
+  documento.seccion(TITULO_RESPUESTAS_EXAMEN);
+  documento.listaNumerada(contenido.respuestas);
+  documento.parrafoSinPartir(NOTA_CALIFICACION_EXAMEN);
+  documento.aviso(TEXTO_AVISO);
+  return documento.generar();
+}
+
+/**
+ * Nombre del archivo PDF del examen con la fecha local y el intento, por
+ * ejemplo "examen_seguridad_electrica_2026-11-26_intento1.pdf".
+ * @param {Date} fecha - Fecha del intento.
+ * @param {number} intento - Número del intento.
+ * @returns {string} Nombre del archivo.
+ */
+export function nombreArchivoExamen(fecha, intento) {
+  return `${PREFIJO_ARCHIVO_EXAMEN}${fechaParaArchivo(fecha)}_intento${intento}.pdf`;
 }

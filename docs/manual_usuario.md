@@ -16,7 +16,7 @@ El Analizador transparente simula las pruebas de seguridad eléctrica (IEC 60601
 - Dirección: **https://yustrico.github.io/Analizador_Transparente/**
 - En un celular la página abre, pero no se adapta a la pantalla; úsala en un computador.
 
-📷 *Captura sugerida 1: la página recién abierta, con las cinco pestañas y el aviso educativo abajo.*
+📷 *Captura sugerida 1: la página recién abierta, con las seis pestañas y el aviso educativo abajo.*
 
 ## 3. ¿Cómo se hace la práctica, paso a paso?
 
@@ -120,9 +120,22 @@ Después de generar el reporte puedes volver a medir y generarlo otra vez.
 📷 *Captura sugerida 7: el PDF abierto en el navegador.*
 📷 *Captura sugerida 8: la tarjeta «Enviar al docente» llena, con la casilla marcada y el mensaje verde de enviado.*
 
+### Paso 6 — Presenta el examen (pestaña «6. Examen»)
+Son 10 preguntas al azar sobre lo que viste en la herramienta. Nota de 0 a 5; apruebas con 3.0. Tienes **máximo 2 intentos**. Puedes presentarlo aunque no hayas hecho la práctica.
+1. Escribe tu **nombre completo**, tu **código estudiantil** y revisa el **correo del docente** (solo @uao.edu.co).
+2. Marca la casilla de consentimiento (Ley 1581 de 2012) y presiona **«Comenzar examen»**. La herramienta pregunta cuántos intentos llevas: si ya usaste los 2, aparece «Ya usaste tus 2 intentos» y no deja empezar.
+3. Arriba de las preguntas dice **«Intento X de 2»**. Elige una opción en cada pregunta (las opciones salen en desorden en cada intento).
+4. Cuando respondas las 10 se activa **«Enviar examen»**. Pide confirmación: «¿Enviar? No podrás cambiar las respuestas». Presiona **«Sí, enviar»**.
+5. Verás tu **nota**, si **aprobaste**, cuántas **correctas** y, al lado de cada pregunta, **✓ Correcta** o **✗ Incorrecta**. La herramienta **no muestra cuál era la respuesta correcta**. También dice cuántos intentos te quedan.
+6. Con **«Descargar mi examen (PDF)»** guardas el PDF que se envió: trae tus datos, el intento y la opción que elegiste en cada pregunta (sin la nota).
+
+La nota la calcula el servicio del equipo (no la página) y le llega al docente por correo con el PDF. Si el envío falla por internet, tus respuestas se quedan en pantalla y puedes presionar otra vez «Enviar examen»; un envío que falla no gasta intentos.
+
+📷 *Captura sugerida 9: el resultado del examen con la nota y las marcas ✓/✗.*
+
 ## 4. ¿Qué pasa con tus datos?
 - Tus lecturas se guardan **solo en esta pestaña del navegador**. Mientras practicas, nada se envía a ningún servidor.
-- Solo si presionas **«Enviar reporte al docente»** y marcas la casilla de consentimiento, tu nombre, tu código, tus resultados y el PDF van al correo @uao.edu.co del docente, a través del servicio del equipo (Google Apps Script en la cuenta de Gmail del proyecto). El servicio guarda una fila con la fecha, tu código, tu nombre y el correo del docente. No hay analítica ni rastreo.
+- Solo si presionas **«Enviar reporte al docente»** o **«Enviar examen»** y marcas la casilla de consentimiento, tu nombre, tu código, tus resultados y el PDF van al correo @uao.edu.co del docente, a través del servicio del equipo (Google Apps Script en la cuenta de Gmail del proyecto). El servicio guarda una fila con la fecha, tu código, tu nombre y el correo del docente. No hay analítica ni rastreo.
 - **Se borran al cerrar la pestaña.** Descarga tu reporte antes de cerrar. (Recargar la página no las borra).
 - El nombre solo aparece en tu reporte (y en el correo al docente, si lo envías).
 
