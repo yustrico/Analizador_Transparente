@@ -5,6 +5,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Agregado (25/11/2026, corrección del profesor: conexiones físicas; sin cambios en cálculos ni resultados)
+- Tarjeta «Conexiones en el laboratorio» en el Analizador, debajo del circuito: dibujo SVG del frente del ESA620 (10 bornes de ECG, jacks 2 WIRE V/Ω/A, Ø/NULL, pantalla con las teclas de la prueba, POLARITY/NEUTRAL/EARTH y tomacorriente de prueba) y del R12 (entrada de poder, borne equipotencial y conector del cable de paciente CF), con los 10 latiguillos en sus colores IEC. Cambia con la medición (contacto, paciente CF, fuga a tierra) y trae la lista de pasos.
+- Prueba guiada: el paso 2 (resistencia de tierra) y el paso 3 (aislamiento) muestran su dibujo de conexiones debajo del resultado.
+- M6: datos puros `CONEXIONES_LABORATORIO` y `obtenerConexiones(clave)` + `dibujarConexiones(svg, clave)`; pruebas nuevas en tests/conexiones.test.js. Datos tomados de docs/11_Conexiones_laboratorio.md (montaje del 23/11/2026).
+- Se quita el plegable de texto «¿Cómo se conecta en el laboratorio?» del Analizador.
+
 ### Cambiado (17/11/2026, ronda 15: recuadro del ESA620; sin cambios en cálculos ni pruebas)
 - Recuadro «Dentro del Fluke ESA620»: borde punteado y título en naranja oscuro (#A8561A, contraste ≥ 4.5:1 sobre fondo blanco) y relleno suave del mismo tono (opacidad 0.07) detrás del dibujo; el camino rojo de la corriente queda encima.
 - El borde izquierdo queda a la derecha del círculo de la red (la red es el tomacorriente de la pared, fuera del analizador) y a 18 px del chasis del R12, sin tocar textos. Para lograrlo se corrió el interruptor de neutro a la derecha, se bajó la tierra de la instalación 16 px y el dibujo pasa a 860 × 396.

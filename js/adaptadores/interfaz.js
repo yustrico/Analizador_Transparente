@@ -10,7 +10,7 @@
  *   textContent (nunca innerHTML), por seguridad.
  * Módulo: M1 – Interfaz de usuario (adaptador)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-17
+ * Creado: 2026-11-13 · Modificado: 2026-11-25
  * ============================================================================
  */
 
@@ -25,7 +25,9 @@ import {
 import {
   evaluarMedicion, evaluarAislamiento, evaluarResistenciaTierra, VEREDICTO_CUMPLE,
 } from "../nucleo/evaluador_limites.js?v=9c30cc64cc";
-import { crearVisualizador, describirPartesDelCircuito, formatearCorriente_uA, partirSubindices } from "./visualizador.js?v=7c640b2c72";
+import {
+  crearVisualizador, describirPartesDelCircuito, formatearCorriente_uA, partirSubindices, dibujarConexiones, obtenerConexiones,
+} from "./visualizador.js?v=1d37bf1085";
 import {
   crearHistorial, guardarAvancePrueba, leerAvancePrueba, filaDeRegistro, nombreCortoCondicion, textoLectura, textoPorcentaje, NOMBRES_MEDICION, UNIDAD_CORRIENTE,
   textoLimite, textoConfiguracion, resumirAvance, claveConfiguracion,
@@ -660,7 +662,58 @@ function mostrarPasoVisto(estado) {
   if (paso.claveDatoMedido !== null) {
     escribirResultadoPaso(paso.claveDatoMedido, estado.parametros.pasos_previos_medidos);
   }
+  // Pasos 2 y 3: dibujo de cómo se conecta esa prueba en el laboratorio
+  const claveConexiones = CONEXIONES_POR_PASO[paso.id];
+  elemento("paso-conexiones").hidden = claveConexiones === undefined;
+  if (claveConexiones !== undefined) {
+    mostrarConexiones(claveConexiones, ELEMENTOS_CONEXIONES_PASO);
+  }
   boton.textContent = textoBotonPaso(estado.secuencia, paso);
+}
+
+/** Dibujo de conexiones que acompaña a cada paso de la prueba guiada (solo pasos 2 y 3). */
+const CONEXIONES_POR_PASO = Object.freeze({ resistencia_tierra: "paso_tierra", aislamiento: "paso_aislamiento" });
+
+/** Identificadores de los elementos de las dos tarjetas de conexiones (Analizador y Prueba guiada). */
+const ELEMENTOS_CONEXIONES_ANALIZADOR = Object.freeze({
+  svg: "svg-conexiones", pasos: "conexiones-pasos", nota: "conexiones-nota", advertencia: "conexiones-advertencia",
+});
+const ELEMENTOS_CONEXIONES_PASO = Object.freeze({
+  svg: "svg-conexiones-paso", pasos: "paso-conexiones-pasos", nota: "paso-conexiones-nota", advertencia: "paso-conexiones-advertencia",
+});
+
+/**
+ * Escribe un texto opcional en un párrafo; si el texto es null, oculta el párrafo.
+ * @param {HTMLElement} parrafo - Párrafo de destino.
+ * @param {string|null} texto - Texto a mostrar o null.
+ */
+function mostrarTextoOpcional(parrafo, texto) {
+  parrafo.textContent = texto ?? "";
+  parrafo.hidden = texto === null;
+}
+
+/**
+ * Muestra las conexiones físicas de una prueba: el dibujo (M6), los pasos
+ * numerados, la nota y la advertencia, si las hay. Si la clave no existe,
+ * muestra el error sin romper la página.
+ * @param {string} clave - Prueba (ver obtenerConexiones de M6).
+ * @param {{svg: string, pasos: string, nota: string, advertencia: string}} ids - Elementos de destino.
+ */
+function mostrarConexiones(clave, ids) {
+  try {
+    const conexiones = obtenerConexiones(clave);
+    dibujarConexiones(elemento(ids.svg), clave);
+    const lista = elemento(ids.pasos);
+    lista.replaceChildren();
+    // Un renglón por paso
+    for (const texto of conexiones.pasos) {
+      crearConTexto("li", texto, lista);
+    }
+    mostrarTextoOpcional(elemento(ids.nota), conexiones.nota);
+    mostrarTextoOpcional(elemento(ids.advertencia), conexiones.advertencia);
+  } catch (error) {
+    mostrarError(error.message);
+  }
 }
 
 /**
@@ -861,6 +914,8 @@ function alCambiarControles(estado) {
   mostrarNotaInfo("info-tierra-cerrada-sola", TEXTOS_EXPLICACION.tierraCerradaSola, seCerroLaTierra);
   estado.visualizador.borrarCamino();
   estado.visualizador.mostrarCondicion(condicion, tipoMedicion);
+  // Las conexiones solo dependen de la medición (la condición se cambia con teclas, sin mover cables)
+  mostrarConexiones(tipoMedicion, ELEMENTOS_CONEXIONES_ANALIZADOR);
   limpiarLectura();
 }
 

@@ -12,9 +12,13 @@
  *   sección, usuario que prefiere menos movimiento o 30 s sin que el
  *   estudiante toque el mouse ni el teclado) para ahorrar CPU (ES15). El
  *   camino rojo sigue dibujado; solo dejan de moverse los guiones.
+ *   También dibuja las CONEXIONES FÍSICAS del laboratorio (qué cable va a qué
+ *   borne del ESA620 y del R12) para cada prueba. Los datos de esas
+ *   conexiones son puros (CONEXIONES_LABORATORIO, obtenerConexiones) y se
+ *   prueban sin navegador; solo dibujarConexiones usa la pantalla.
  * Módulo: M6 – Visualizador (adaptador)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-17
+ * Creado: 2026-11-13 · Modificado: 2026-11-25
  * ============================================================================
  */
 
@@ -679,4 +683,395 @@ export function crearVisualizador(svg, parametros) {
   }
 
   return { mostrarCondicion, mostrarCamino, borrarCamino, establecerVisible };
+}
+
+/* ======================================================================== */
+/* Conexiones físicas en el laboratorio (ESA620 ↔ R12)                      */
+/* ======================================================================== */
+
+/** Nombres de los puntos de conexión (se usan en los datos y en las pruebas). */
+export const JACK_2_WIRE = "2 WIRE V/Ω/A (rojo)";
+export const BORNE_EQUIPOTENCIAL = "Borne equipotencial del R12";
+export const BORNE_NULL = "Ø/NULL";
+export const TOMACORRIENTE_PRUEBA = "Tomacorriente de prueba del ESA620";
+const PARED = "Tomacorriente de la pared";
+
+/** Estados posibles del R12 durante una prueba. */
+export const R12_ENCENDIDO = "encendido";
+export const R12_APAGADO = "apagado";
+
+/**
+ * Los 10 latiguillos del cable de paciente del R12, en el orden de los bornes
+ * del ESA620 (de izquierda a derecha), con su color IEC.
+ */
+export const LATIGUILLOS = Object.freeze([
+  Object.freeze({ latiguillo: "R", borne: "RA/R", color: "rojo" }),
+  Object.freeze({ latiguillo: "F", borne: "LL/F", color: "verde" }),
+  Object.freeze({ latiguillo: "L", borne: "LA/L", color: "amarillo" }),
+  Object.freeze({ latiguillo: "N", borne: "RL/N", color: "negro" }),
+  Object.freeze({ latiguillo: "C1", borne: "V1/C1", color: "rojo" }),
+  Object.freeze({ latiguillo: "C2", borne: "V2/C2", color: "amarillo" }),
+  Object.freeze({ latiguillo: "C3", borne: "V3/C3", color: "verde" }),
+  Object.freeze({ latiguillo: "C4", borne: "V4/C4", color: "cafe" }),
+  Object.freeze({ latiguillo: "C5", borne: "V5/C5", color: "negro" }),
+  Object.freeze({ latiguillo: "C6", borne: "V6/C6", color: "morado" }),
+]);
+
+/** Cables de poder de la base común: ESA620 a la pared y R12 al tomacorriente de prueba. */
+const CABLES_BASE = Object.freeze([
+  Object.freeze({ tipo: "poder", desde: "Cable de poder del ESA620", hasta: PARED }),
+  Object.freeze({ tipo: "poder", desde: "Cable de poder del R12", hasta: TOMACORRIENTE_PRUEBA }),
+]);
+
+/** Los 10 latiguillos, cada uno en su borne. */
+const CABLES_LATIGUILLOS = Object.freeze(LATIGUILLOS.map(({ latiguillo, borne, color }) =>
+  Object.freeze({ tipo: "latiguillo", desde: `Latiguillo ${latiguillo}`, hasta: borne, color })));
+
+/** Cable de prueba desde el jack 2 WIRE hasta el borne equipotencial del R12. */
+const CABLE_2_WIRE = Object.freeze({ tipo: "prueba", desde: JACK_2_WIRE, hasta: BORNE_EQUIPOTENCIAL });
+
+/** Pasos de la base común (van primero en todas las pruebas). */
+const PASOS_BASE = Object.freeze([
+  "El ESA620 enchufado a la pared y encendido.",
+  "El cable de poder del R12 va al tomacorriente de prueba del ESA620, no a la pared.",
+  "El tomacorriente de prueba arranca sin energía: se energiza con la tecla POLARITY.",
+]);
+
+/** Paso de los 10 latiguillos, con la correspondencia de cada uno. */
+const PASO_LATIGUILLOS = "Los 10 latiguillos en sus bornes: R→RA/R, L→LA/L, F→LL/F, N→RL/N y C1…C6→V1/C1…V6/C6.";
+
+/**
+ * Conexiones de cada prueba en el laboratorio (docs/11_Conexiones_laboratorio.md).
+ * Cada entrada: titulo, cables (qué se conecta con qué), estadoR12, teclas
+ * (secuencia en el ESA620), pasos (textos para el estudiante) y, si aplica,
+ * nota y advertencia.
+ */
+export const CONEXIONES_LABORATORIO = Object.freeze({
+  paso_tierra: Object.freeze({
+    titulo: "Resistencia de tierra (paso 2)",
+    cables: Object.freeze([...CABLES_BASE, Object.freeze({ tipo: "cero", desde: JACK_2_WIRE, hasta: BORNE_NULL }), CABLE_2_WIRE]),
+    // No se oprime POLARITY: el tomacorriente de prueba sigue sin energía y el R12 no enciende
+    estadoR12: R12_APAGADO,
+    teclas: Object.freeze(["Ω", "Zero Leads", "TEST"]),
+    pasos: Object.freeze([
+      ...PASOS_BASE,
+      "R12 conectado al tomacorriente de prueba.",
+      "Cable de prueba desde el jack 2 WIRE V/Ω/A rojo.",
+      "Primero se pone en cero: la punta o la pinza en el borne Ø/NULL, tecla Ω y luego «Zero Leads».",
+      "Después, la punta o la pinza en el borne equipotencial del R12 y TEST.",
+    ]),
+    nota: "Según el manual del ESA620, el cable va al chasis o a la conexión de tierra de protección del equipo; en el R12 es el borne equipotencial de la parte de atrás.",
+    advertencia: null,
+  }),
+  paso_aislamiento: Object.freeze({
+    titulo: "Resistencia de aislamiento (paso 3)",
+    cables: Object.freeze([...CABLES_BASE, ...CABLES_LATIGUILLOS]),
+    estadoR12: R12_APAGADO,
+    teclas: Object.freeze(["MΩ", "F1 TEST", "F2 TEST", "F3 TEST"]),
+    pasos: Object.freeze([
+      ...PASOS_BASE,
+      "R12 APAGADO.",
+      PASO_LATIGUILLOS,
+      "Tecla MΩ; F1 (red–tierra), F2 (partes aplicadas–tierra) y F3 (red–partes aplicadas), cada una con TEST, a 500 V DC.",
+    ]),
+    nota: null,
+    advertencia: "No tocar latiguillos ni bornes durante la prueba.",
+  }),
+  fuga_tierra: Object.freeze({
+    titulo: "Corriente de fuga a tierra",
+    cables: Object.freeze([...CABLES_BASE, ...CABLES_LATIGUILLOS]),
+    estadoR12: R12_ENCENDIDO,
+    teclas: Object.freeze(["µA", "POLARITY"]),
+    pasos: Object.freeze([
+      ...PASOS_BASE,
+      "R12 ENCENDIDO.",
+      PASO_LATIGUILLOS,
+      "No se agrega ningún cable.",
+      "Tecla µA y POLARITY para energizar el tomacorriente; la fuga a tierra la mide el ESA620 por el conductor de tierra del cable de poder.",
+    ]),
+    nota: null,
+    advertencia: null,
+  }),
+  paciente: Object.freeze({
+    titulo: "Corriente de paciente CF",
+    cables: Object.freeze([...CABLES_BASE, ...CABLES_LATIGUILLOS]),
+    estadoR12: R12_ENCENDIDO,
+    teclas: Object.freeze(["µA", "F4 (More)", "▲▼ hasta todos los bornes", "F1 (Select)"]),
+    pasos: Object.freeze([
+      ...PASOS_BASE,
+      "R12 ENCENDIDO.",
+      PASO_LATIGUILLOS,
+      "Tecla µA → F4 (More) → flechas ▲▼ hasta el grupo que abarca todos los bornes → F1 (Select).",
+      "Revisar que el modo sea «Leakage AC+DC».",
+    ]),
+    nota: null,
+    advertencia: null,
+  }),
+  contacto: Object.freeze({
+    titulo: "Corriente de contacto",
+    cables: Object.freeze([...CABLES_BASE, ...CABLES_LATIGUILLOS, CABLE_2_WIRE]),
+    estadoR12: R12_ENCENDIDO,
+    teclas: Object.freeze(["µA", "Enclosure"]),
+    pasos: Object.freeze([
+      ...PASOS_BASE,
+      "R12 ENCENDIDO.",
+      `${PASO_LATIGUILLOS} IEC 60601-1 pide las partes aplicadas conectadas en esta medición.`,
+      "Cable de prueba desde el jack 2 WIRE V/Ω/A rojo hasta una parte metálica accesible del R12 unida a tierra (el borne equipotencial).",
+      "Tecla µA → «Enclosure».",
+    ]),
+    nota: null,
+    advertencia: null,
+  }),
+});
+
+/**
+ * Devuelve las conexiones de una prueba. Función pura (no usa la pantalla).
+ * @param {string} clave - "contacto", "paciente", "fuga_tierra", "paso_tierra" o "paso_aislamiento".
+ * @returns {object} Entrada de CONEXIONES_LABORATORIO.
+ * @throws {Error} Si la clave no existe.
+ */
+export function obtenerConexiones(clave) {
+  if (typeof clave !== "string" || !Object.hasOwn(CONEXIONES_LABORATORIO, clave)) {
+    const validas = Object.keys(CONEXIONES_LABORATORIO).join(", ");
+    throw new Error(`No hay conexiones de laboratorio para la prueba "${String(clave)}". Las pruebas válidas son: ${validas}.`);
+  }
+  return CONEXIONES_LABORATORIO[clave];
+}
+
+/**
+ * Arma la frase que describe las conexiones (para lectores de pantalla).
+ * Función pura.
+ * @param {object} conexiones - Entrada de CONEXIONES_LABORATORIO.
+ * @returns {string} Por ejemplo "Conexiones para Corriente de contacto: ...".
+ */
+export function describirConexiones(conexiones) {
+  const latiguillos = conexiones.cables.filter((cable) => cable.tipo === "latiguillo");
+  const otros = conexiones.cables.filter((cable) => cable.tipo !== "latiguillo").map((cable) => `${cable.desde} a ${cable.hasta}`);
+  // Los 10 latiguillos se resumen en una sola frase
+  if (latiguillos.length > 0) {
+    otros.push(`los ${latiguillos.length} latiguillos del cable de paciente en sus bornes del ESA620`);
+  }
+  return `Conexiones para ${conexiones.titulo}: ${otros.join("; ")}. R12 ${conexiones.estadoR12}.`;
+}
+
+/** Medidas del dibujo de conexiones (unidades del viewBox 900 × 400). */
+const VIEWBOX_CONEXIONES = "0 0 900 400";
+const BORNES_X_INICIAL = 70;
+const BORNES_SEPARACION = 48;
+const BORNES_Y = 80;
+const RADIO_BORNE = 9;
+const RADIO_JACK = 8;
+const RADIO_PUNTA_LATIGUILLO = 6;
+const LINEA_TECLAS_SEPARACION = 16;
+
+/** Posiciones con nombre del dibujo de conexiones (x, y). */
+const PUNTOS_CONEXION = Object.freeze({
+  jackRojo: [45, 175],
+  jackNegro: [75, 175],
+  borneNull: [140, 250],
+  borneEquipotencial: [640, 280],
+  horquilla: [560, 24],
+  pantallaTexto: [200, 150],
+  estadoR12: [755, 240],
+});
+
+/** Recorridos de los cables que no son latiguillos (listas de [x, y]). */
+const RECORRIDOS = Object.freeze({
+  poderR12: [[525, 185], [612, 185]],
+  poderESA: [[20, 300], [8, 300], [8, 380]],
+  cero: [[45, 183], [45, 250], [131, 250]],
+  prueba: [[45, 183], [45, 372], [600, 372], [600, 280], [632, 280]],
+  troncoPaciente: [[660, 112], [660, 24], [560, 24]],
+});
+
+/** Rectángulos y símbolos fijos del dibujo de conexiones. */
+const FIGURAS_CONEXIONES = Object.freeze([
+  { etiqueta: "rect", atributos: { x: 20, y: 50, width: 520, height: 290, rx: 10, class: "equipo-esa620" } },
+  { etiqueta: "rect", atributos: { x: 190, y: 130, width: 230, height: 100, rx: 4, class: "pantalla-esa620" } },
+  { etiqueta: "rect", atributos: { x: 440, y: 140, width: 85, height: 95, rx: 6, class: "tomacorriente-prueba" } },
+  { etiqueta: "rect", atributos: { x: 466, y: 165, width: 6, height: 18, class: "orificio-tomacorriente" } },
+  { etiqueta: "rect", atributos: { x: 492, y: 165, width: 6, height: 18, class: "orificio-tomacorriente" } },
+  { etiqueta: "circle", atributos: { cx: 482, cy: 205, r: 6, class: "orificio-tomacorriente" } },
+  { etiqueta: "rect", atributos: { x: 620, y: 120, width: 270, height: 220, rx: 10, class: "equipo-r12" } },
+  { etiqueta: "rect", atributos: { x: 612, y: 173, width: 14, height: 24, class: "entrada-poder" } },
+  { etiqueta: "rect", atributos: { x: 648, y: 112, width: 24, height: 16, class: "conector-paciente" } },
+  // Símbolo de tierra junto al borne equipotencial (tres rayas)
+  { etiqueta: "line", atributos: { x1: 654, y1: 272, x2: 654, y2: 288, class: "simbolo-tierra" } },
+  { etiqueta: "line", atributos: { x1: 660, y1: 275, x2: 660, y2: 285, class: "simbolo-tierra" } },
+  { etiqueta: "line", atributos: { x1: 666, y1: 278, x2: 666, y2: 282, class: "simbolo-tierra" } },
+]);
+
+/** Textos fijos del dibujo de conexiones: [contenido, x, y, clase, alineación]. */
+const TEXTOS_CONEXIONES = Object.freeze([
+  ["Fluke ESA620 (frente)", 60, 330, CLASE_TITULO, "start"],
+  ["2 WIRE V/Ω/A", 60, 150, CLASE_PEQUENO, "middle"],
+  ["Ø/NULL", 140, 276, CLASE_PEQUENO, "middle"],
+  ["Tomacorriente", 482, 254, CLASE_PEQUENO, "middle"],
+  ["de prueba", 482, 268, CLASE_PEQUENO, "middle"],
+  ["A la pared", 4, 394, CLASE_PEQUENO, "start"],
+  ["Mindray BeneHeart R12", 755, 325, CLASE_TITULO, "middle"],
+  ["Conector del cable de paciente", 680, 144, CLASE_PEQUENO, "start"],
+  ["CF a prueba de desfibrilación", 680, 158, CLASE_PEQUENO, "start"],
+  ["Entrada del cable de poder", 636, 190, CLASE_PEQUENO, "start"],
+  ["(parte de atrás)", 636, 204, CLASE_PEQUENO, "start"],
+  ["Borne equipotencial", 676, 284, CLASE_PEQUENO, "start"],
+  ["(parte de atrás)", 676, 298, CLASE_PEQUENO, "start"],
+]);
+
+/** Teclas físicas que cambian la condición de prueba: [nombre, x]. */
+const TECLAS_CONDICION = Object.freeze([["POLARITY", 190], ["NEUTRAL", 270], ["EARTH", 350]]);
+const TECLA_Y = 250;
+const TECLA_ANCHO = 70;
+const TECLA_ALTO = 24;
+const TECLA_TEXTO_Y = 16;
+
+/** Clases CSS propias del dibujo de conexiones. */
+const CLASE_TEXTO_PANTALLA = "texto-circuito texto-pantalla";
+
+/**
+ * Convierte una lista de [x, y] en el texto del atributo "points".
+ * @param {readonly number[][]} puntos - Puntos del recorrido.
+ * @returns {string} Por ejemplo "45,175 45,250".
+ */
+function recorridoComoTexto(puntos) {
+  return puntos.map((punto) => punto.join(",")).join(" ");
+}
+
+/**
+ * Dibuja un círculo en un punto con nombre.
+ * @param {string} nombre - Punto de PUNTOS_CONEXION.
+ * @param {number} radio - Radio del círculo.
+ * @param {string} clase - Clase CSS.
+ * @param {Element} padre - Grupo SVG.
+ */
+function dibujarCirculoEn(nombre, radio, clase, padre) {
+  const [x, y] = PUNTOS_CONEXION[nombre];
+  crearElementoSvg("circle", { cx: x, cy: y, r: radio, class: clase }, padre);
+}
+
+/**
+ * Posición horizontal del borne de ECG número «indice» (0 = RA/R).
+ * @param {number} indice - Posición del borne (0 a 9).
+ * @returns {number} Coordenada x.
+ */
+function xDelBorne(indice) {
+  return BORNES_X_INICIAL + indice * BORNES_SEPARACION;
+}
+
+/**
+ * Dibuja el ESA620 (bornes de ECG, jacks 2 WIRE, Ø/NULL, pantalla, teclas de
+ * condición y tomacorriente de prueba) y el R12 (entrada de poder, borne
+ * equipotencial y conector del cable de paciente).
+ * @param {Element} padre - Grupo SVG.
+ * @param {object} conexiones - Entrada de CONEXIONES_LABORATORIO.
+ */
+function dibujarEquipos(padre, conexiones) {
+  // Cajas, orificios y símbolos fijos
+  for (const figura of FIGURAS_CONEXIONES) {
+    crearElementoSvg(figura.etiqueta, figura.atributos, padre);
+  }
+  // Fila de los 10 bornes de ECG con su rótulo
+  for (const [indice, { borne }] of LATIGUILLOS.entries()) {
+    crearElementoSvg("circle", { cx: xDelBorne(indice), cy: BORNES_Y, r: RADIO_BORNE, class: "borne-esa620" }, padre);
+    escribirTexto(borne, xDelBorne(indice), BORNES_Y + 24, padre, CLASE_PEQUENO);
+  }
+  // Jacks 2 WIRE (rojo y negro), borne Ø/NULL y borne equipotencial del R12
+  dibujarCirculoEn("jackRojo", RADIO_JACK, "jack jack--rojo", padre);
+  dibujarCirculoEn("jackNegro", RADIO_JACK, "jack jack--negro", padre);
+  dibujarCirculoEn("borneNull", RADIO_BORNE, "borne-esa620", padre);
+  dibujarCirculoEn("borneEquipotencial", RADIO_JACK, "borne-equipotencial", padre);
+  // Teclas de condición; se resaltan las que la prueba usa
+  for (const [nombre, x] of TECLAS_CONDICION) {
+    const clase = conexiones.teclas.includes(nombre) ? "tecla-esa620 tecla-esa620--usada" : "tecla-esa620";
+    crearElementoSvg("rect", { x, y: TECLA_Y, width: TECLA_ANCHO, height: TECLA_ALTO, rx: 4, class: clase }, padre);
+    escribirTexto(nombre, x + TECLA_ANCHO / 2, TECLA_Y + TECLA_TEXTO_Y, padre, CLASE_PEQUENO);
+  }
+  // Textos fijos
+  for (const [contenido, x, y, clase, ancla] of TEXTOS_CONEXIONES) {
+    escribirTexto(contenido, x, y, padre, clase, ancla);
+  }
+}
+
+/**
+ * Escribe en la pantalla del ESA620 las teclas de la prueba (una por renglón)
+ * y el estado del R12 dentro de su caja.
+ * @param {Element} padre - Grupo SVG.
+ * @param {object} conexiones - Entrada de CONEXIONES_LABORATORIO.
+ */
+function escribirTeclasYEstado(padre, conexiones) {
+  const [x, y] = PUNTOS_CONEXION.pantallaTexto;
+  escribirTexto("Teclas:", x, y, padre, CLASE_TITULO, "start");
+  // Una tecla por renglón, numeradas en el orden en que se oprimen
+  for (const [indice, tecla] of conexiones.teclas.entries()) {
+    escribirTexto(`${indice + 1}. ${tecla}`, x, y + (indice + 1) * LINEA_TECLAS_SEPARACION, padre, CLASE_TEXTO_PANTALLA, "start");
+  }
+  const claseEstado = `texto-circuito estado-r12 estado-r12--${conexiones.estadoR12}`;
+  escribirTexto(`R12 ${conexiones.estadoR12.toUpperCase()}`, ...PUNTOS_CONEXION.estadoR12, padre, claseEstado);
+}
+
+/**
+ * Dibuja el cable de paciente: el tronco que sale del R12 y un latiguillo por
+ * borne, con su color IEC (con borde oscuro para que el amarillo se vea).
+ * @param {Element} padre - Grupo SVG.
+ */
+function dibujarLatiguillos(padre) {
+  crearElementoSvg("polyline", { points: recorridoComoTexto(RECORRIDOS.troncoPaciente), class: "cable-conexion cable-conexion--tronco" }, padre);
+  escribirTexto("Cable de paciente del R12", 600, 16, padre, CLASE_PEQUENO, "start");
+  // Un latiguillo por borne: baja de la horquilla y entra en el borne
+  for (const [indice, { latiguillo, color }] of LATIGUILLOS.entries()) {
+    const x = xDelBorne(indice);
+    const recorrido = recorridoComoTexto([PUNTOS_CONEXION.horquilla, [x, BORNES_Y - 30], [x, BORNES_Y]]);
+    crearElementoSvg("polyline", { points: recorrido, class: "latiguillo-borde" }, padre);
+    crearElementoSvg("polyline", { points: recorrido, class: `latiguillo latiguillo--${color}` }, padre);
+    crearElementoSvg("circle", { cx: x, cy: BORNES_Y, r: RADIO_PUNTA_LATIGUILLO, class: `punta-latiguillo latiguillo--${color}` }, padre);
+    escribirTexto(latiguillo, x + 5, BORNES_Y - 14, padre, CLASE_PEQUENO, "start");
+  }
+}
+
+/**
+ * Dibuja un cable que no es latiguillo (poder, prueba o puesta en cero).
+ * @param {readonly number[][]} recorrido - Puntos del cable.
+ * @param {string} clase - Clase CSS del tipo de cable.
+ * @param {Element} padre - Grupo SVG.
+ */
+function dibujarCableConexion(recorrido, clase, padre) {
+  crearElementoSvg("polyline", { points: recorridoComoTexto(recorrido), class: `cable-conexion ${clase}` }, padre);
+}
+
+/**
+ * Dibuja las conexiones físicas de una prueba sobre un elemento <svg>: el
+ * frente del ESA620 a la izquierda, el R12 a la derecha y solo los cables
+ * que usa la prueba, resaltados (los que no usa no se dibujan).
+ * @param {SVGSVGElement} svg - Elemento SVG de la página (se borra y se vuelve a dibujar).
+ * @param {string} clave - Prueba (ver obtenerConexiones).
+ * @throws {Error} Si la clave no existe.
+ */
+export function dibujarConexiones(svg, clave) {
+  const conexiones = obtenerConexiones(clave);
+  const tipos = new Set(conexiones.cables.map((cable) => cable.tipo));
+  svg.replaceChildren();
+  svg.setAttribute("viewBox", VIEWBOX_CONEXIONES);
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", describirConexiones(conexiones));
+
+  dibujarEquipos(svg, conexiones);
+  // Cables de poder: siempre (base común)
+  dibujarCableConexion(RECORRIDOS.poderR12, "cable-conexion--poder", svg);
+  dibujarCableConexion(RECORRIDOS.poderESA, "cable-conexion--poder", svg);
+  // Latiguillos, solo si la prueba los usa
+  if (tipos.has("latiguillo")) {
+    dibujarLatiguillos(svg);
+  }
+  // Puesta en cero del cable de prueba (antes de medir)
+  if (tipos.has("cero")) {
+    dibujarCableConexion(RECORRIDOS.cero, "cable-conexion--cero", svg);
+    escribirTexto("1.º en cero", 52, 240, svg, CLASE_PEQUENO, "start");
+  }
+  // Cable de prueba hasta el borne equipotencial del R12
+  if (tipos.has("prueba")) {
+    dibujarCableConexion(RECORRIDOS.prueba, "cable-conexion--prueba", svg);
+    const rotulo = tipos.has("cero") ? "2.º: cable de prueba al borne equipotencial" : "Cable de prueba al borne equipotencial";
+    escribirTexto(rotulo, 320, 390, svg, CLASE_PEQUENO);
+  }
+  escribirTeclasYEstado(svg, conexiones);
 }
