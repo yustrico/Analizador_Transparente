@@ -23,7 +23,7 @@
  * aplicación web; termina en /exec). Si cambia la implementación del
  * servicio, se actualiza aquí.
  */
-export const URL_SERVICIO = "PEGAR_AQUI_LA_URL_QUE_TERMINA_EN_/exec";
+export const URL_SERVICIO = "https://script.google.com/macros/s/AKfycby34BCGJejumB45gO3zZ5SHS46s6-I7n8yO-YC86zhVmcjZOuKL7BtXjXf3txvfGQYJPQ/exec";
 
 /** Forma que debe tener la dirección de un Apps Script publicado. */
 const PATRON_URL_SERVICIO = /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/;
