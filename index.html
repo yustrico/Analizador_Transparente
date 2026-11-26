@@ -24,10 +24,10 @@
   <!-- Integridad (SRI): las huellas SHA-384 las escribe tools/sri.mjs; correrlo después de cambiar JS o CSS -->
   <link rel="stylesheet" href="css/estilos.css?v=564b5e23bd" integrity="sha384-VkteI71buM/Fq7YrhiiMlf6W3yiaQ6f8HHQUzPARotUK5MSBK8u0i3riDKLifPXG">
   <!-- SRI: inicio (generado por tools/sri.mjs, no editar a mano) -->
-  <link rel="modulepreload" href="js/adaptadores/envio.js?v=b9d3663c3b" integrity="sha384-udNmPDv6KWruCGcNm1OxtzwYFEZISs++UScz90XP6mdzwIYhaiToVRvc/XUHAO0p">
+  <link rel="modulepreload" href="js/adaptadores/envio.js?v=096afc80cc" integrity="sha384-CWr8gMxcOMt4hMW9ra5o9iOC81ie70DixgbIHPA+u9Qz36RVXeB+v2l2a9Dmmm3g">
   <link rel="modulepreload" href="js/adaptadores/historial.js?v=37beb88db5" integrity="sha384-N764jbU0sVhRC7ghKObyjTjXmaVMHHAPvVcAtTAhaCYpBXdSrwJZ+STKTxzDL19N">
-  <link rel="modulepreload" href="js/adaptadores/interfaz.js?v=c55fec1c5d" integrity="sha384-xV/sHF1vR+9a88AwXAmiloTL28ab7rltc/hvzeseOoAP5Q78oN+xK8rviIzMd/4y">
-  <link rel="modulepreload" href="js/adaptadores/pantalla_examen.js?v=f8182e48fb" integrity="sha384-+BguSPtTKXBp5pAe8B7EV1qlGm/wtVo1qbj2Cb3iitR15nyv3utwSZK77VLQYFdm">
+  <link rel="modulepreload" href="js/adaptadores/interfaz.js?v=6b6bbd1bf4" integrity="sha384-a2u9G/SvegYTypy+KB/WXNvbdvRXn3vz0UqU4Jv4aruvGyKWixVvGkogRr1yzQZI">
+  <link rel="modulepreload" href="js/adaptadores/pantalla_examen.js?v=5ac449d82d" integrity="sha384-WsRJ2C2QOvr8U0P6fWERE++Mx7eRHwcGp5u0vybOezxRWsgzSrMafH0O5R1U4q0m">
   <link rel="modulepreload" href="js/adaptadores/pdf.js?v=bfb0882a03" integrity="sha384-v7CIKgNGK+lpQsqZM3Hh3aYLncGJ3oK0L3QlRkSK4QYwGuJsLVeK0pdtChNpFmq+">
   <link rel="modulepreload" href="js/adaptadores/reporte.js?v=8550e3a4c5" integrity="sha384-hVDjpMW7no30tOWClpB0BNATMJeJTJ226Tnw66XxRfh4iIRp6TSKh+qUoNpo2LtS">
   <link rel="modulepreload" href="js/adaptadores/tiempo_carga.js?v=1c9699f3b9" integrity="sha384-HJaZ87n6slac+sCKpiv4PovGknwW6qIsYSbPkXqTEJSFVD0wGqJegnc9QHmWVjjg">
@@ -38,7 +38,7 @@
   <link rel="modulepreload" href="js/nucleo/motor_calculo.js?v=c6349ec03b" integrity="sha384-xjSewDuO4RE5LN0YcvnJ5XfgNxkZ4GzzGBSuFcnG0SfD8RlOo0ddhp04r0b6fTTH">
   <link rel="modulepreload" href="js/nucleo/secuencia.js?v=bffe121e07" integrity="sha384-v/4SHgduYquka0rL7HHdb+Z7SFxlx6UnWtzSicOu2HWYIDc2nw7ylTx8duc2u5qj">
   <!-- SRI: fin -->
-  <script type="module" src="js/main.js?v=bac5be55f5" integrity="sha384-usW+VfVHZyq9Sax2/PQHv1bn6dPM6a4zevHUbfDMoXyQYBiM3sRZNa0YgJ9sTC4J"></script>
+  <script type="module" src="js/main.js?v=4e91705ff3" integrity="sha384-TpFwX/Ntcf857Sb5b8O7FYUREFufUbBlhRA0luoxulMlfaAR4ia71VnNo7Cyffx/"></script>
 </head>
 <body>
   <header class="encabezado">
@@ -344,8 +344,8 @@
             <input type="text" id="envio-codigo" inputmode="numeric" maxlength="10" autocomplete="off" spellcheck="false">
             <label for="envio-correo">Correo del docente</label>
             <div>
-              <input type="email" id="envio-correo" maxlength="120" autocomplete="off" spellcheck="false">
-              <p class="nota">Solo correos @uao.edu.co</p>
+              <input type="email" id="envio-correo" maxlength="120" autocomplete="off" spellcheck="false" placeholder="nombre@uao.edu.co">
+              <p class="nota">Escribe el correo de tu docente (solo @uao.edu.co)</p>
             </div>
           </div>
           <label class="envio__consentimiento">
@@ -380,8 +380,8 @@
           <input type="text" id="examen-codigo" inputmode="numeric" maxlength="10" autocomplete="off" spellcheck="false">
           <label for="examen-correo">Correo del docente</label>
           <div>
-            <input type="email" id="examen-correo" maxlength="120" autocomplete="off" spellcheck="false">
-            <p class="nota">Solo correos @uao.edu.co</p>
+            <input type="email" id="examen-correo" maxlength="120" autocomplete="off" spellcheck="false" placeholder="nombre@uao.edu.co">
+            <p class="nota">Escribe el correo de tu docente (solo @uao.edu.co)</p>
           </div>
         </div>
         <label class="envio__consentimiento">

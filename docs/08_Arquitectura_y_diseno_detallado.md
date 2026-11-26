@@ -79,8 +79,8 @@ Justificación: cumple RNF04 (sin instalación, fuera del laboratorio), RNF05 (P
 | Resultado | I_uA, U_uA, limite_uA, veredicto ("Cumple" o "No cumple"), hora | {I_uA:14.73, U_uA:1.32, limite_uA:500, veredicto:"Cumple"} |
 | Registro | Resultado + Condición + Medición | Una fila del historial y del reporte |
 | Avance de la prueba | pasos completados (1 a 4) | Se guarda en sessionStorage |
-| Envío del reporte | tipo: "reporte"; nombre (3–80); codigo (5–10 dígitos); correoDocente (@uao.edu.co); consentimiento: true; resumen; pdfBase64 | {tipo:"reporte", nombre:"Ana Pérez", codigo:"2235552", correoDocente:"cferro@uao.edu.co", consentimiento:true, …} |
-| Respuesta del servicio | ok (sí/no); error o mensaje | {ok:true, mensaje:"Reporte enviado a cferro@uao.edu.co."} |
+| Envío del reporte | tipo: "reporte"; nombre (3–80); codigo (5–10 dígitos); correoDocente (@uao.edu.co); consentimiento: true; resumen; pdfBase64 | {tipo:"reporte", nombre:"Ana Pérez", codigo:"2235552", correoDocente:"docente@uao.edu.co", consentimiento:true, …} |
+| Respuesta del servicio | ok (sí/no); error o mensaje | {ok:true, mensaje:"Reporte enviado a docente@uao.edu.co."} |
 
 ## 7. Tabla de interacciones cruzadas (guía del Corte 3, punto 2.3)
 | Origen | Destino | Tipo | Naturaleza | Riesgo asociado |

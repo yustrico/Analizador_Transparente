@@ -133,12 +133,12 @@ Estilo:
    - tabla de lecturas (condición, medición, I, U, límite, veredicto, hora);
    - botón "Finalizar práctica" → pide el nombre (máximo 60 caracteres; texto plano) → vista de reporte;
    - "Descargar reporte (PDF)": descarga directa del archivo reporte_seguridad_electrica_AAAA-MM-DD.pdf, creado por el generador propio js/adaptadores/pdf.js (sin librerías; Blob + enlace con download);
-   - Tarjeta «Enviar al docente» (M12): nombre, código estudiantil, correo del docente (cferro@uao.edu.co, editable, solo @uao.edu.co) y casilla de consentimiento (Ley 1581 de 2012); envía el mismo PDF y el resumen al servicio del equipo;
+   - Tarjeta «Enviar al docente» (M12): nombre, código estudiantil, correo del docente (vacío por defecto, placeholder "nombre@uao.edu.co", solo @uao.edu.co; vacío → "Escribe el correo de tu docente") y casilla de consentimiento (Ley 1581 de 2012); envía el mismo PDF y el resumen al servicio del equipo;
    - "Copiar resumen" copia el resumen al portapapeles (navigator.clipboard.writeText); el estudiante lo pega en su correo y adjunta el PDF. (Antes era un enlace mailto: se quitó porque en Windows abre una lista de programas y no sirve con correo web.)
    - Sin límite de tiempo: la práctica se puede pausar.
 6. **Examen** (M7 + M12; no hace falta haber hecho la práctica):
    - texto de inicio: "10 preguntas al azar sobre lo que viste en la herramienta. Nota de 0 a 5; apruebas con 3.0. Tienes máximo 2 intentos. La nota la calcula el servicio del equipo y le llega al docente junto con el PDF." (los números salen de datos/examen.json);
-   - nombre, código, correo del docente (cferro@uao.edu.co, editable) y la misma casilla de consentimiento; «Comenzar examen» consulta los intentos: con 2 usados muestra «Ya usaste tus 2 intentos» y no deja empezar; si no, «Intento X de 2» y 10 preguntas con opciones barajadas;
+   - nombre, código, correo del docente (vacío por defecto, igual que en la sección 5) y la misma casilla de consentimiento; «Comenzar examen» consulta los intentos: con 2 usados muestra «Ya usaste tus 2 intentos» y no deja empezar; si no, «Intento X de 2» y 10 preguntas con opciones barajadas;
    - «Enviar examen» solo con las 10 respondidas, con confirmación en la página «¿Enviar? No podrás cambiar las respuestas» (sin window.confirm);
    - envía {tipo: "examen", …, respuestas: {id: índice ORIGINAL}, pdfBase64}; el PDF (M10, crearPdfExamen) lleva nombre, código, fecha y hora, intento y la opción elegida en cada pregunta, sin nota;
    - muestra nota, Aprobado/No aprobado, correctas y ✓/✗ por pregunta, SIN la respuesta correcta; intentos que quedan; «Descargar mi examen (PDF)»; los errores del servicio se muestran tal cual.

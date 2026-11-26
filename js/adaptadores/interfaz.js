@@ -41,7 +41,7 @@ import {
 } from "./reporte.js?v=8550e3a4c5";
 import { descargarPdf } from "./pdf.js?v=bfb0882a03";
 import { medirCargaPagina, textoTiempoCarga, detalleCarga } from "./tiempo_carga.js?v=1c9699f3b9";
-import { validarDatosEnvio, bytesABase64, enviarAlServicio, CORREO_DOCENTE_POR_DEFECTO } from "./envio.js?v=b9d3663c3b";
+import { validarDatosEnvio, bytesABase64, enviarAlServicio, CORREO_DOCENTE_POR_DEFECTO } from "./envio.js?v=096afc80cc";
 
 /* ------------------------------------------------------------------------ */
 /* Constantes                                                               */

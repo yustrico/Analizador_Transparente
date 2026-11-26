@@ -14,8 +14,8 @@
 
 import { cargarParametros } from "./nucleo/modelo_equipo.js?v=5ca0bfb4e4";
 import { cargarBanco } from "./nucleo/examen.js?v=db2b15b911";
-import { iniciarInterfaz, mostrarError } from "./adaptadores/interfaz.js?v=c55fec1c5d";
-import { iniciarExamen, mostrarErrorExamen } from "./adaptadores/pantalla_examen.js?v=f8182e48fb";
+import { iniciarInterfaz, mostrarError } from "./adaptadores/interfaz.js?v=6b6bbd1bf4";
+import { iniciarExamen, mostrarErrorExamen } from "./adaptadores/pantalla_examen.js?v=5ac449d82d";
 
 /** Ruta del archivo de parámetros, relativa a index.html. */
 const RUTA_PARAMETROS = "datos/parametros_r12.json?v=350fa3291d";

@@ -7,7 +7,7 @@
  *   También revisa que el código del servicio publicado no traiga la clave.
  * Módulo: M12 – Envío (pruebas)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-25 · Modificado: 2026-11-25
+ * Creado: 2026-11-25 · Modificado: 2026-11-26
  * ============================================================================
  */
 
@@ -20,7 +20,7 @@ import { validarDatosEnvio, bytesABase64, ERRORES_ENVIO, CORREO_DOCENTE_POR_DEFE
 const DATOS_VALIDOS = Object.freeze({
   nombre: "Ana María Pérez",
   codigo: "2235552",
-  correoDocente: CORREO_DOCENTE_POR_DEFECTO,
+  correoDocente: "docente@uao.edu.co",
   consentimiento: true,
 });
 
@@ -58,12 +58,20 @@ test("Código: solo números, de 5 a 10 dígitos", () => {
 
 test("Correo del docente: solo @uao.edu.co, sin importar mayúsculas", () => {
   // Casos válidos (incluido todo en mayúsculas)
-  for (const correoDocente of ["cferro@uao.edu.co", "X@UAO.EDU.CO", "nombre.apellido@uao.edu.co"]) {
+  for (const correoDocente of ["docente@uao.edu.co", "X@UAO.EDU.CO", "nombre.apellido@uao.edu.co"]) {
     assert.deepEqual(validarCon({ correoDocente }), [], `correo: ${correoDocente}`);
   }
-  // Casos inválidos: otro dominio, subdominio falso, sin usuario, con espacio, vacío
-  for (const correoDocente of ["x@gmail.com", "x@uao.edu.co.evil.com", "@uao.edu.co", "a b@uao.edu.co", "uao.edu.co", ""]) {
+  // Casos inválidos: otro dominio, subdominio falso, sin usuario, con espacio
+  for (const correoDocente of ["x@gmail.com", "x@uao.edu.co.evil.com", "@uao.edu.co", "a b@uao.edu.co", "uao.edu.co"]) {
     assert.deepEqual(validarCon({ correoDocente }), [ERRORES_ENVIO.correo], `correo: ${correoDocente}`);
+  }
+});
+
+test("Correo del docente vacío: pide escribirlo (la casilla empieza vacía)", () => {
+  assert.equal(CORREO_DOCENTE_POR_DEFECTO, "");
+  // Vacío, solo espacios o ausente
+  for (const correoDocente of ["", "   ", undefined, null]) {
+    assert.deepEqual(validarCon({ correoDocente }), ["Escribe el correo de tu docente"], `correo: ${String(correoDocente)}`);
   }
 });
 

@@ -107,7 +107,7 @@ Debajo aparece la última lectura de cada configuración que hayas medido, en un
 **Enviar al docente (directo desde la herramienta).** Debajo de los botones está la tarjeta **«Enviar al docente»**:
 1. Revisa tu **nombre completo** (viene del reporte; de 3 a 60 caracteres).
 2. Escribe tu **código estudiantil** (solo números, de 5 a 10 dígitos).
-3. Revisa el **correo del docente**: viene lleno con `cferro@uao.edu.co` y lo puedes cambiar, pero solo se aceptan correos **@uao.edu.co**.
+3. Escribe el **correo de tu docente**: la casilla viene vacía y solo se aceptan correos **@uao.edu.co**. Si la dejas vacía, la página te pide «Escribe el correo de tu docente».
 4. Marca la casilla **«Acepto que mi nombre, mi código y mis resultados se envíen al correo del docente, solo con fines académicos (Ley 1581 de 2012)»**. Sin ella no se envía nada.
 5. Presiona **«Enviar reporte al docente»**. El botón dice «Enviando…» mientras tanto. Al final aparece un mensaje en verde (enviado) o un aviso con el problema.
 6. Si no hay internet o el servicio no responde, **descarga el PDF y envíalo tú** (pasos 3 a 5).
@@ -122,7 +122,7 @@ Después de generar el reporte puedes volver a medir y generarlo otra vez.
 
 ### Paso 6 — Presenta el examen (pestaña «6. Examen»)
 Son 10 preguntas al azar sobre lo que viste en la herramienta. Nota de 0 a 5; apruebas con 3.0. Tienes **máximo 2 intentos**. Puedes presentarlo aunque no hayas hecho la práctica.
-1. Escribe tu **nombre completo**, tu **código estudiantil** y revisa el **correo del docente** (solo @uao.edu.co).
+1. Escribe tu **nombre completo**, tu **código estudiantil** y el **correo de tu docente** (viene vacío; solo @uao.edu.co).
 2. Marca la casilla de consentimiento (Ley 1581 de 2012) y presiona **«Comenzar examen»**. La herramienta pregunta cuántos intentos llevas: si ya usaste los 2, aparece «Ya usaste tus 2 intentos» y no deja empezar.
 3. Arriba de las preguntas dice **«Intento X de 2»**. Elige una opción en cada pregunta (las opciones salen en desorden en cada intento).
 4. Cuando respondas las 10 se activa **«Enviar examen»**. Pide confirmación: «¿Enviar? No podrás cambiar las respuestas». Presiona **«Sí, enviar»**.

@@ -5,6 +5,13 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Cambiado (26/11/2026, pedido del equipo: correo del docente vacío)
+- M12: `CORREO_DOCENTE_POR_DEFECTO = ""`. Las casillas de correo del envío del reporte (sección 5) y del examen (sección 6) empiezan vacías, con el texto de ayuda «nombre@uao.edu.co» y la nota «Escribe el correo de tu docente (solo @uao.edu.co)».
+- `validarDatosEnvio`: si el correo está vacío, el error es «Escribe el correo de tu docente» (antes salía el de @uao.edu.co). Prueba nueva en `tests/envio.test.js`.
+- Se quita el correo de un docente en particular del código, las pruebas, ayuda.html, el manual, docs/08 y CLAUDE.md.
+- docs/verificacion.md: ES13 cumple (prueba real del 26/11/2026).
+- docs/Diagramas/C4_N3_Componentes_v2.png: diagrama N3 nuevo.
+
 ### Agregado (26/11/2026, corrección del profesor del 23/11/2026: modo examen)
 - `datos/examen.json`: banco de 15 preguntas (q01 a q15) con 4 opciones cada una y SIN respuestas (copiado sin cambios).
 - M7 Examen (`js/nucleo/examen.js`, núcleo): `validarBanco` (al menos 10 preguntas, ids únicos, texto, exactamente 4 opciones y ningún campo fuera de id, pregunta y opciones, para que no se cuele una respuesta), `elegirPreguntas` y `barajarOpciones` (Fisher–Yates, con el azar como parámetro para poder probarlas), `armarRespuestas` ({id: índice ORIGINAL de la opción}), `todasRespondidas` y `cargarBanco`. M7 no califica: la clave solo está en el servicio del equipo.
@@ -18,7 +25,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ### Agregado (25/11/2026, corrección del profesor del 23/11/2026: el reporte debe llegarle al docente)
 - M12 Envío (`js/adaptadores/envio.js`): `validarDatosEnvio` (nombre 3–80, código de 5 a 10 dígitos, correo @uao.edu.co, consentimiento) y `bytesABase64` (funciones puras), `enviarAlServicio` (POST sin encabezados, 30 s máximo) y `consultarIntentos`. Único servicio externo: Google Apps Script + Gmail + hoja de registros, en la cuenta del proyecto.
-- Sección 5: tarjeta «Enviar al docente» (nombre, código, correo del docente lleno con cferro@uao.edu.co, casilla de consentimiento según la Ley 1581 de 2012) que envía el mismo PDF del reporte y el resumen.
+- Sección 5: tarjeta «Enviar al docente» (nombre, código, correo del docente, casilla de consentimiento según la Ley 1581 de 2012) que envía el mismo PDF del reporte y el resumen.
 - `tools/apps_script/Codigo_AppsScript.gs` (SIN la clave del examen: `const CLAVE = {};`) y `tools/apps_script/LEEME.md` con los pasos para publicarlo.
 - Pruebas nuevas en `tests/envio.test.js` (validación, base64 contra Buffer y que la clave no esté en el repositorio).
 

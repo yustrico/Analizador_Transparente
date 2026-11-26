@@ -14,7 +14,7 @@
  *   para avisarle al estudiante antes de enviar.
  * Módulo: M12 – Envío (adaptador)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-25 · Modificado: 2026-11-25
+ * Creado: 2026-11-25 · Modificado: 2026-11-26
  * ============================================================================
  */
 
@@ -28,8 +28,8 @@ export const URL_SERVICIO = "https://script.google.com/macros/s/AKfycby34BCGJeju
 /** Forma que debe tener la dirección de un Apps Script publicado. */
 const PATRON_URL_SERVICIO = /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/;
 
-/** Correo del docente que aparece lleno por defecto (se puede cambiar). */
-export const CORREO_DOCENTE_POR_DEFECTO = "cferro@uao.edu.co";
+/** Correo del docente con el que empieza la casilla: vacío, el estudiante escribe el de su docente. */
+export const CORREO_DOCENTE_POR_DEFECTO = "";
 
 /** Reglas de los datos (las mismas del servicio, CONFIG en Codigo_AppsScript.gs). */
 export const LARGO_MINIMO_NOMBRE_ENVIO = 3;
@@ -44,6 +44,7 @@ const TIEMPO_MAXIMO_ENVIO_MS = 30000;
 export const ERRORES_ENVIO = Object.freeze({
   nombre: `Escribe tu nombre completo (de ${LARGO_MINIMO_NOMBRE_ENVIO} a ${LARGO_MAXIMO_NOMBRE_ENVIO} caracteres).`,
   codigo: "El código estudiantil debe tener solo números (5 a 10 dígitos).",
+  correoVacio: "Escribe el correo de tu docente",
   correo: "El correo del docente debe terminar en @uao.edu.co.",
   consentimiento: "Debes aceptar el envío de tus datos al docente.",
 });
@@ -77,8 +78,11 @@ export function validarDatosEnvio({ nombre, codigo, correoDocente, consentimient
   if (!PATRON_CODIGO.test(String(codigo ?? "").trim())) {
     errores.push(ERRORES_ENVIO.codigo);
   }
-  // Correo del docente: solo de la universidad (sin importar mayúsculas)
-  if (!PATRON_CORREO_DOCENTE.test(String(correoDocente ?? "").trim())) {
+  // Correo del docente: obligatorio y solo de la universidad (sin importar mayúsculas)
+  const correoLimpio = String(correoDocente ?? "").trim();
+  if (correoLimpio === "") {
+    errores.push(ERRORES_ENVIO.correoVacio);
+  } else if (!PATRON_CORREO_DOCENTE.test(correoLimpio)) {
     errores.push(ERRORES_ENVIO.correo);
   }
   // Consentimiento: tiene que ser exactamente true (casilla marcada)
