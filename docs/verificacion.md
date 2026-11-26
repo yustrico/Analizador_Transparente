@@ -23,11 +23,11 @@ Equipo de medición: PC con Windows 11 (16 núcleos lógicos), Chrome 157.0.8103
 | ES10 | Usabilidad (SUS) | Media ≥ 68 (media ± DE) | Cuestionario SUS, n ≥ 5 (`docs/protocolo_prueba_usuarios.md` §4) | Pendiente: sesión con estudiantes 18/11 | Pendiente |
 | ES11 | Completan la prueba guiada sin ayuda | ≥ 80 % (≥ 4 de 5) | Tareas observadas (`docs/protocolo_prueba_usuarios.md` §3) | Pendiente: sesión con estudiantes 18/11 | Pendiente |
 | ES12 | Costo de licencias por usuario | 0 COP | Lista de dependencias y licencias | **0 COP**: 0 dependencias; código propio con licencia MIT | ✅ Sí |
-| ES13 | Peticiones que envían datos a un servidor | 0 | Registro de todas las peticiones de red (CDP) durante una práctica completa en la URL publicada | **0** peticiones a otros sitios; solo descargas (GET) de los 13 archivos propios | ✅ Sí |
+| ES13 | Datos a terceros | 0 datos a terceros: solo nombre, código y resultados al correo del docente, con consentimiento | Registro de todas las peticiones de red (CDP) durante una práctica completa en la URL publicada, incluido «Enviar reporte al docente» | Antes del 25/11: **0** peticiones a otros sitios. Con M12: pendiente repetir (se espera 1 POST a script.google.com, solo al pulsar el botón con la casilla marcada) | Pendiente (ver §ES13) |
 | ES14 | RAM de la pestaña | Máximo ≤ 300 MB | Memoria del proceso de la pestaña al final de una práctica completa (Chrome y Edge, sin ventana) | Máximo **46 MB** de memoria privada (91 MB de conjunto de trabajo) | ✅ Sí (preliminar; confirmar 18/11) |
 | ES15 | CPU de la pestaña | Promedio ≤ 20 % | Tiempo de CPU del proceso de la pestaña: 60 s con el circuito animado y actividad, y 30 s en reposo | **10.0 %** de un núcleo animando; **0.0 %** en reposo | ✅ Sí (preliminar; confirmar 18/11) |
 
-**Estado:** 10 cumplen (2 de ellas preliminares) y 4 quedan pendientes: ES03 (prueba con 30 usuarios reales) y ES08, ES10 y ES11 (sesión con estudiantes del 18/11).
+**Estado:** 9 cumplen (2 de ellas preliminares) y 5 quedan pendientes: ES03 (prueba con 30 usuarios reales), ES08, ES10 y ES11 (sesión con estudiantes del 18/11) y ES13 (repetir con el envío al docente, M12, 25/11).
 
 ## Detalle de cada medición
 
@@ -121,11 +121,18 @@ Resultado: Chrome 157.0.8103.51 y Edge 157.0.4341.57 con 0 errores ni avisos en 
 - Licencia del proyecto: MIT (`LICENSE`).
 - Para medir se usaron autocannon (MIT) y Lighthouse (Apache-2.0) con `npx`, sin instalarlos en el proyecto. Ambos son gratuitos.
 
-### ES13 — Datos enviados
+### ES13 — Datos a terceros
+**Cambio del 25/11/2026:** el profesor pidió que el reporte le llegue directamente. La meta pasó de «0 datos enviados» a «0 datos a terceros»: solo se envían nombre, código y resultados al correo @uao.edu.co del docente, por el servicio del equipo (Google Apps Script), y solo si el estudiante marca la casilla de consentimiento (Ley 1581 de 2012). Cómo repetir la medición:
+1. F12 → Red → «Conservar registro». Hacer una práctica completa SIN pulsar «Enviar reporte al docente»: debe haber **0** peticiones a otros sitios.
+2. Pulsar «Enviar reporte al docente» sin marcar la casilla: **0** peticiones (la página muestra el error antes de enviar).
+3. Marcar la casilla y enviar: exactamente **1** POST a `script.google.com` (más la redirección a `script.googleusercontent.com`) y ninguna otra petición externa.
+4. La CSP solo permite conectarse a esos dos dominios de Google; cualquier otro lo bloquea el navegador.
+
+Medición anterior (13/11/2026, sin M12):
 - Se registraron todas las peticiones de red (Chrome DevTools Protocol) durante una práctica completa en la URL publicada: carga, 12 mediciones, Comparar, reporte, PDF, copiar resumen y recarga.
 - Resultado: 13 peticiones GET a `yustrico.github.io/Analizador_Transparente/` y **0 a cualquier otro sitio**. No hay POST, analítica, fuentes ni CDN.
 - El PDF se crea en el navegador (Blob) y el resumen va al portapapeles local.
-- La CSP (`connect-src 'self'`) impide enviar datos a otros sitios aunque se intentara.
+- La CSP de entonces (`connect-src 'self'`) impedía enviar datos a otros sitios. Desde el 25/11 index.html permite además `https://script.google.com https://script.googleusercontent.com` (servicio de envío); ayuda.html sigue con `connect-src 'self'`.
 
 ### ES14 y ES15 — RAM y CPU (preliminar)
 - Medición automatizada en Chrome y Edge sin ventana (`--headless=new`), con el movimiento activado (el peor caso), una práctica completa (12 mediciones y reporte) y el Analizador animado.
@@ -143,6 +150,6 @@ Resultado: Chrome 157.0.8103.51 y Edge 157.0.4341.57 con 0 errores ni avisos en 
 | ES03 | `docs/protocolo_ES03_30_usuarios.md` (30 usuarios reales; no usar autocannon) |
 | ES04 | `npx lighthouse https://yustrico.github.io/Analizador_Transparente/ --preset=desktop --only-categories=performance` × 5; tomar la mediana del LCP |
 | ES05 | `npm run peso`; o F12 → Red → «Desactivar caché» → recargar → el total «transferido» |
-| ES06, ES13 | F12 → Consola (sin errores) y Red (solo archivos de yustrico.github.io) durante una práctica completa en Chrome y en Edge |
+| ES06, ES13 | F12 → Consola (sin errores) y Red (solo archivos de yustrico.github.io, más 1 POST a script.google.com al enviar al docente) durante una práctica completa en Chrome y en Edge |
 | ES09 | Generar el reporte 10 veces y, en Historial y reporte, abrir «Datos técnicos (para las especificaciones ES03 y ES09)» y leer «Reporte generado en … ms» |
 | ES08, ES10, ES11, ES14, ES15 | `docs/protocolo_prueba_usuarios.md` |

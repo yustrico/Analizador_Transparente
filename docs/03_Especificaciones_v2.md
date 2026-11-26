@@ -79,7 +79,7 @@ CORRECCIÓN: antes se mostraba neutro abierto = 145 µA. Ese valor supone que la
 | ES10 | Usabilidad: puntaje SUS (0–100) | Media ≥ 68, reportada como media ± DE | n ≥ 5 estudiantes del nicho que no participaron en el diseño | 68 = promedio de referencia del SUS (Brooke 1996; Bangor 2009, ya citados) | RNF07 | E14 |
 | ES11 | Tasa de estudiantes que completan la prueba guiada sin ayuda (%) | ≥ 80 % (≥ 4 de 5) | En la misma sesión de ES10 | Eficacia según ISO 9241-11 (uso sin manual, N24, y prueba completa por cada estudiante, N02) | RF01, RNF07 | NUEVA |
 | ES12 | Costo de licencias por usuario (COP) | = 0 | Lista de dependencias y sus licencias | Restricción económica | RR05 | E15 |
-| ES13 | Peticiones de red que envían datos del estudiante a un servidor | = 0 | Pestaña Red del navegador durante una práctica completa | Ley 1581 de 2012 (datos personales) | RNF10 | NUEVA |
+| ES13 | Datos del estudiante enviados a terceros | = 0 datos a terceros: solo se envían nombre, código y resultados al correo del docente, con consentimiento | Pestaña Red del navegador durante una práctica completa: la única petición a otro sitio es la del botón «Enviar reporte al docente» (script.google.com), y solo con la casilla de consentimiento marcada | Ley 1581 de 2012 (datos personales). CAMBIO del 25/11/2026: antes «0 datos enviados»; el profesor pidió que el reporte le llegue directamente | RNF10 | NUEVA (REFORMULADA) |
 
 | ES14 | Memoria RAM usada por la pestaña durante una práctica completa (MB) | Máximo ≤ 300 MB | Administrador de tareas de Chrome (Shift + Esc), valor máximo, en un PC del laboratorio | Confirmado por el profesor (12/11/2026). Una página sin librerías pesadas suele gastar menos; confirmar con la primera versión | RNF06 | NUEVA |
 | ES15 | Uso de CPU de la pestaña durante una práctica completa (%) | Promedio ≤ 20 % | Administrador de tareas de Chrome, promedio de lecturas cada 10 s | Confirmado por el profesor (12/11/2026) | RNF01, RNF06 | NUEVA |
@@ -145,7 +145,7 @@ Nota honesta sobre ES02: C_L, C_N y C_AP se ajustan con la propia medición. Por
 - El profesor no ve la utilidad del CSV. Pidió que al terminar la práctica el software entregue una "nota" o algo al correo. ES09 pasa a ser "tiempo para generar el reporte final" (ver 02: RF11 y RNF09).
 - C4 + diagrama de flujo de datos (DFD) confirmados; NO se requiere UML.
 - RAM y CPU confirmadas → ES14 y ES15 nuevas.
-- Seguridad: no se alcanzó a preguntar. Se adopta el mínimo (ver 07): HTTPS (lo da GitHub Pages), commits firmados en GitHub, hashes SRI en los archivos y 0 datos enviados (ES13).
+- Seguridad: no se alcanzó a preguntar. Se adopta el mínimo (ver 07): HTTPS (lo da GitHub Pages), commits firmados en GitHub, hashes SRI en los archivos y 0 datos a terceros (ES13; desde el 25/11/2026 el reporte se envía solo al correo del docente, con consentimiento).
 
 ## 13. Cambio de ES03 (13/11/2026)
 - Se midió ES03 con `npx autocannon -c 30 -d 60` contra la página publicada (una corrida). autocannon no simula 30 personas: sus 30 conexiones piden la página **sin pausa**, y en un minuto hicieron unas 28 500 solicitudes (≈ 475 por segundo), unas 73 veces más que un curso de 30 abriendo la herramienta una vez (30 × 13 archivos = 390).

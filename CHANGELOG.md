@@ -5,6 +5,16 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Agregado (25/11/2026, corrección del profesor del 23/11/2026: el reporte debe llegarle al docente)
+- M12 Envío (`js/adaptadores/envio.js`): `validarDatosEnvio` (nombre 3–80, código de 5 a 10 dígitos, correo @uao.edu.co, consentimiento) y `bytesABase64` (funciones puras), `enviarAlServicio` (POST sin encabezados, 30 s máximo) y `consultarIntentos`. Único servicio externo: Google Apps Script + Gmail + hoja de registros, en la cuenta del proyecto.
+- Sección 5: tarjeta «Enviar al docente» (nombre, código, correo del docente lleno con cferro@uao.edu.co, casilla de consentimiento según la Ley 1581 de 2012) que envía el mismo PDF del reporte y el resumen.
+- `tools/apps_script/Codigo_AppsScript.gs` (SIN la clave del examen: `const CLAVE = {};`) y `tools/apps_script/LEEME.md` con los pasos para publicarlo.
+- Pruebas nuevas en `tests/envio.test.js` (validación, base64 contra Buffer y que la clave no esté en el repositorio).
+
+### Cambiado (25/11/2026)
+- CSP de index.html: `connect-src 'self' https://script.google.com https://script.googleusercontent.com` (ayuda.html sigue con `connect-src 'self'`).
+- ES13 pasa de «0 datos enviados» a «0 datos a terceros: solo se envían nombre, código y resultados al correo del docente, con consentimiento». Actualizados CLAUDE.md, docs/03, docs/08, docs/verificacion.md (ES13 pendiente de volver a medir), README (privacidad), manual de usuario, ayuda.html y solución de problemas.
+
 ### Agregado (25/11/2026, corrección del profesor: conexiones físicas; sin cambios en cálculos ni resultados)
 - Tarjeta «Conexiones en el laboratorio» en el Analizador, debajo del circuito: dibujo SVG del frente del ESA620 (10 bornes de ECG, jacks 2 WIRE V/Ω/A, Ø/NULL, pantalla con las teclas de la prueba, POLARITY/NEUTRAL/EARTH y tomacorriente de prueba) y del R12 (entrada de poder, borne equipotencial y conector del cable de paciente CF), con los 10 latiguillos en sus colores IEC. Cambia con la medición (contacto, paciente CF, fuga a tierra) y trae la lista de pasos.
 - Prueba guiada: el paso 2 (resistencia de tierra) y el paso 3 (aislamiento) muestran su dibujo de conexiones debajo del resultado.

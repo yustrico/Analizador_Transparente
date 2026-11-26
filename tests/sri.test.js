@@ -10,7 +10,7 @@
  *   scripts, estilos ni eventos en línea.
  * Módulo: Seguridad (pruebas, Fase 4)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-14
+ * Creado: 2026-11-13 · Modificado: 2026-11-25
  * ============================================================================
  */
 
@@ -20,8 +20,11 @@ import {
   calcularIntegridad, calcularArchivosVersionados, calcularPaginaConIntegridad, calcularAyudaConIntegridad, resolverImport,
 } from "../tools/sri.mjs";
 
-/** CSP exigida por CLAUDE.md (sección 9). */
-const CSP_ESPERADA = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'";
+/** CSP de ayuda.html (CLAUDE.md, sección 9): solo archivos propios. */
+const CSP_AYUDA = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'";
+
+/** CSP de index.html: la misma, más el servicio de envío al docente (M12, Google Apps Script). */
+const CSP_INDEX = CSP_AYUDA.replace("connect-src 'self'", "connect-src 'self' https://script.google.com https://script.googleusercontent.com");
 
 /** Huella sha384 en base64 (64 caracteres). */
 const PATRON_HUELLA = "sha384-[A-Za-z0-9+/]{64}";
@@ -73,9 +76,9 @@ test("Todos los JS y el CSS se cargan con versión e integrity sha384", () => {
 });
 
 test("Las dos páginas tienen la CSP exigida y nada en línea (scripts, estilos ni eventos)", () => {
-  // index.html y ayuda.html cumplen las mismas reglas
-  for (const html of [pagina, ayuda]) {
-    assert.ok(html.includes(`<meta http-equiv="Content-Security-Policy" content="${CSP_ESPERADA}">`));
+  // index.html y ayuda.html cumplen las mismas reglas (cada una con su CSP)
+  for (const [html, csp] of [[pagina, CSP_INDEX], [ayuda, CSP_AYUDA]]) {
+    assert.ok(html.includes(`<meta http-equiv="Content-Security-Policy" content="${csp}">`));
     assert.doesNotMatch(html, /<script(?![^>]*\ssrc=)[^>]*>/, "Hay un <script> en línea");
     assert.doesNotMatch(html, /<style\b|\sstyle="/, "Hay estilos en línea");
     assert.doesNotMatch(html, /\son[a-z]+="/, "Hay un atributo de evento (onclick...)");

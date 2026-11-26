@@ -17,14 +17,14 @@
 ## 2. Alcance (qué SÍ y qué NO)
 SÍ:
 - Solo **computador**: Chrome y Edge en Windows.
-- **Sin servidor propio, sin base de datos y sin cuentas.** Todo corre en el navegador. Se publica gratis en GitHub Pages.
+- **Sin servidor propio y sin cuentas. Único servicio externo: el Apps Script del equipo, solo para enviar al docente el reporte y el examen.** Todo lo demás corre en el navegador. Se publica gratis en GitHub Pages.
 - 5 secciones (sección 6), un solo equipo (R12), tres tipos de medición (**corriente de contacto**, **corriente de paciente CF** y **corriente de fuga a tierra**) y cuatro condiciones: 16 configuraciones validadas con el ESA620 (la fuga a tierra no existe con la tierra abierta).
 - Página de ayuda (ayuda.html) con el manual de usuario en HTML, enlazada desde el encabezado.
 - Reporte final descargable en PDF + botón para copiar resumen al portapapeles.
 
 NO (fuera del alcance: no lo construyas):
 - Versión para celular; otros equipos; predecir antes de medir (RF09); ayuda contextual avanzada (RF10).
-- Backend; inicio de sesión; analítica o rastreo de cualquier tipo.
+- Servidor o base de datos propios; inicio de sesión; analítica o rastreo de cualquier tipo.
 - Red en parte aplicada y corriente auxiliar de paciente: NO se calculan. Se miden con el ESA620 sin abrir el equipo, pero no hay mediciones de la práctica para calibrarlas y validarlas.
 
 ## 3. Arquitectura (obligatoria; ver docs/08 y docs/Diagramas, versiones _v2: C4 N1, N2 y N3, DFD nivel 0 y nivel 1, flujo de control y ciclo de vida)
@@ -42,6 +42,7 @@ Modular tipo **hexagonal**:
 | M6 Visualizador | js/adaptadores/visualizador.js | Adaptador | Circuito en SVG (red MD, conmutadores L/N/PE, chasis, parte aplicada) y animación del camino de la corriente |
 | M8 Historial | js/adaptadores/historial.js | Adaptador | Registro de lecturas en memoria (y sessionStorage); nota visible de que las lecturas se borran al cerrar la pestaña (sin aviso beforeunload) |
 | M10 Reporte | js/adaptadores/reporte.js | Adaptador | Reporte final en PDF (generador propio js/adaptadores/pdf.js, descarga directa) y copiar resumen al portapapeles |
+| M12 Envío | js/adaptadores/envio.js | Adaptador | Envía el reporte (y el examen) al correo del docente por el servicio del equipo (Google Apps Script + Gmail + hoja de registros), con consentimiento; código del servicio en tools/apps_script/ (sin la clave del examen) |
 
 Regla: el núcleo NO importa nada de los adaptadores. Los adaptadores sí usan el núcleo.
 
@@ -130,6 +131,7 @@ Estilo:
    - tabla de lecturas (condición, medición, I, U, límite, veredicto, hora);
    - botón "Finalizar práctica" → pide el nombre (máximo 60 caracteres; texto plano) → vista de reporte;
    - "Descargar reporte (PDF)": descarga directa del archivo reporte_seguridad_electrica_AAAA-MM-DD.pdf, creado por el generador propio js/adaptadores/pdf.js (sin librerías; Blob + enlace con download);
+   - Tarjeta «Enviar al docente» (M12): nombre, código estudiantil, correo del docente (cferro@uao.edu.co, editable, solo @uao.edu.co) y casilla de consentimiento (Ley 1581 de 2012); envía el mismo PDF y el resumen al servicio del equipo;
    - "Copiar resumen" copia el resumen al portapapeles (navigator.clipboard.writeText); el estudiante lo pega en su correo y adjunta el PDF. (Antes era un enlace mailto: se quitó porque en Windows abre una lista de programas y no sirve con correo web.)
    - Sin límite de tiempo: la práctica se puede pausar.
 
@@ -151,10 +153,10 @@ Estilo:
 ```
 index.html · ayuda.html (manual en HTML, sin scripts) · css/estilos.css · js/main.js
 js/nucleo/{secuencia,modelo_equipo,motor_calculo,evaluador_limites}.js
-js/adaptadores/{interfaz,visualizador,historial,reporte,pdf,tiempo_carga}.js
+js/adaptadores/{interfaz,visualizador,historial,reporte,pdf,tiempo_carga,envio}.js
 datos/parametros_r12.json
-tests/{motor_calculo,evaluador_limites,secuencia,modelo_equipo,es02_validacion,historial,pdf,sri,sintaxis,tiempo_carga,version}.test.js
-tools/sri.mjs (calcula los hashes SHA-384 de los JS y CSS y los escribe en index.html y ayuda.html; agrega "?v=" con parte del hash a cada URL y a los import entre módulos) · tools/peso.mjs (suma el peso descargado, ES05)
+tests/{motor_calculo,evaluador_limites,secuencia,modelo_equipo,es02_validacion,historial,pdf,envio,sri,sintaxis,tiempo_carga,version}.test.js
+tools/sri.mjs (calcula los hashes SHA-384 de los JS y CSS y los escribe en index.html y ayuda.html; agrega "?v=" con parte del hash a cada URL y a los import entre módulos) · tools/peso.mjs (suma el peso descargado, ES05) · tools/apps_script/ (código del servicio de envío, SIN la clave del examen, y LEEME.md para publicarlo)
 docs/ (nuestros documentos + manual_usuario.md, solucion_problemas.md, mantenimiento.md, verificacion.md)
 README.md · LICENSE (MIT) · CHANGELOG.md · CLAUDE.md · .gitignore
 ```
@@ -169,11 +171,11 @@ JavaScript moderno con módulos ES (import/export), sin frameworks ni dependenci
 - Commits pequeños, en español y descriptivos ("M4: corriente de contacto con tierra abierta + pruebas").
 
 ## 9. Seguridad (obligatoria)
-- Content-Security-Policy en una meta etiqueta de index.html: `default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'` (frame-ancestors no funciona en meta; GitHub Pages no permite cabeceras propias, así que no se incluye). Por eso NO uses scripts ni estilos en línea ni atributos onclick.
+- Content-Security-Policy en una meta etiqueta de index.html: `default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'` (connect-src abre SOLO el servicio de envío; ayuda.html conserva `connect-src 'self'`; frame-ancestors no funciona en meta; GitHub Pages no permite cabeceras propias, así que no se incluye). Por eso NO uses scripts ni estilos en línea ni atributos onclick.
 - Integridad de subrecursos (SRI): atributos integrity (sha384) en los script y link, generados por tools/sri.mjs antes de cada versión. Cada URL de JS y CSS (y cada import entre módulos) lleva "?v=" con parte del hash, para que el navegador no use copias viejas en caché durante un despliegue.
 - No subir cambios el mismo día de una prueba con usuarios; después de cada push, esperar a que GitHub Pages termine (Actions en verde) antes de compartir el enlace.
 - Nunca uses innerHTML con texto del usuario (el nombre): usa textContent. Sin eval ni new Function.
-- 0 peticiones de red fuera de los archivos propios: sin CDN, fuentes, analítica ni APIs (ES13).
+- 0 peticiones de red fuera de los archivos propios (sin CDN, fuentes, analítica ni APIs), salvo el servicio de envío al docente, y solo cuando el estudiante lo pide y da su consentimiento (ES13).
 - HTTPS: lo da GitHub Pages (activar "Enforce HTTPS").
 - Commits firmados: los configuramos nosotros (llave SSH de firma en GitHub y `git config commit.gpgsign true`). Tú solo recuérdanos verificarlo; no generes llaves.
 
@@ -190,7 +192,7 @@ JavaScript moderno con módulos ES (import/export), sin frameworks ni dependenci
 | ES09 | Generar el reporte | ≤ 3 s | Reporte en el mismo navegador |
 | ES10–ES11 | SUS ≥ 68; ≥ 80 % completan sin ayuda | Sesión con estudiantes | Interfaz clara; plantilla en docs/verificacion.md |
 | ES12 | Licencias | 0 COP | Licencia MIT; sin dependencias pagas |
-| ES13 | Datos enviados a servidores | 0 | Sin red; revisar la pestaña Red |
+| ES13 | Datos a terceros | 0 | Solo se envían nombre, código y resultados al correo del docente, con consentimiento; revisar la pestaña Red |
 | ES14–ES15 | RAM ≤ 300 MB; CPU promedio ≤ 20 % | Administrador de tareas de Chrome | Animación con requestAnimationFrame y que se detenga cuando no hace falta |
 
 ## 11. Fases de trabajo (detente y explica al final de cada una)

@@ -1,6 +1,6 @@
 # 08 — Arquitectura y diseño detallado del software (Corte 3)
 
-Fecha: 12/11/2026 · Actualizado al estado real del código: 17/11/2026.
+Fecha: 12/11/2026 · Actualizado al estado real del código: 25/11/2026.
 
 Diagramas en la carpeta Diagramas/ (versiones _v2, 17/11/2026):
 - C4_N1_Contexto_v2.png: nivel 1, contexto (caja negra).
@@ -12,6 +12,8 @@ Diagramas en la carpeta Diagramas/ (versiones _v2, 17/11/2026):
 - Ciclo_de_vida_v2.png: ciclo de vida del software.
 
 Confirmado por el profesor (12/11/2026): C4 + DFD, sin UML; solo computador; sin servidor.
+
+Cambio del 25/11/2026 (corrección del profesor): el reporte debe llegarle directamente al docente. Se agregó el módulo M12 Envío y un único sistema externo, el **Servicio de envío: Google Apps Script + Gmail + Hoja de registros** (en la cuenta de Gmail del proyecto). Sigue sin haber servidor ni base de datos propios ni cuentas de usuario. Los diagramas _v2 aún no muestran este sistema externo: hay que agregarlo al C4 N1/N2/N3 y a los DFD.
 
 ## 1. Software de escritorio vs. aplicativo web (lo pidió el profesor)
 | Criterio | Software de escritorio | Aplicativo web (ELEGIDO) |
@@ -28,18 +30,19 @@ Justificación: cumple RNF04 (sin instalación, fuera del laboratorio), RNF05 (P
 ## 2. Tipo de arquitectura: modular (hexagonal)
 - Modular y no integral: cada módulo cumple una función completa y las interfaces entre módulos son datos bien definidos (sección 6). Así los 3 integrantes pueden trabajar en paralelo y se pueden agregar equipos o módulos sin tocar el núcleo.
 - Hexagonal: el NÚCLEO (M2–M5) son funciones puras, sin pantalla. Se prueban solas (pruebas unitarias) y no cambian si cambia la interfaz.
-- Los ADAPTADORES (M1, M6, M8, M10, M10a y M11) conectan el núcleo con la pantalla, la memoria del navegador y el reporte.
+- Los ADAPTADORES (M1, M6, M8, M10, M10a, M11 y M12) conectan el núcleo con la pantalla, la memoria del navegador, el reporte y el servicio de envío.
 - Alcance de las mediciones (actualizado 14/11/2026): corriente de contacto, corriente de paciente CF y corriente de fuga a tierra (16 configuraciones validadas con el ESA620). Fuera del alcance: corriente con red en la parte aplicada y corriente auxiliar de paciente. Se miden con el ESA620 sin abrir el equipo y están en la inspección del manual del R12, pero no hay mediciones del laboratorio para calibrarlas y validarlas, así que la herramienta no las simula.
 
 ## 3. Jerarquía (Sistema → Subsistema → Componente → Elemento)
 - Sistema: Analizador transparente.
   - Subsistema 1, Aplicación web (contenedor):
     - Núcleo: M2 Secuencia, M3 Modelo del equipo, M4 Motor de cálculo, M5 Evaluador de límites.
-    - Adaptadores: M1 Interfaz, M6 Visualizador, M8 Historial, M10 Reporte, M10a Generador PDF, M11 Tiempo de carga.
+    - Adaptadores: M1 Interfaz, M6 Visualizador, M8 Historial, M10 Reporte, M10a Generador PDF, M11 Tiempo de carga, M12 Envío.
     - Elementos: un archivo JavaScript por módulo (por ejemplo `js/nucleo/motor_calculo.js`) y sus funciones.
   - Subsistema 2, Datos: `datos/parametros_r12.json` (D1 parámetros del modelo + D2 pasos previos medidos y límites).
   - Subsistema 3, Memoria del navegador (D3): sessionStorage guarda el historial de lecturas (M8) y el avance de la prueba guiada (M2, a través de M8). Se conserva al recargar la página y se borra al cerrar la pestaña.
   - Subsistema 4, Reporte: archivo PDF descargable, creado por el generador propio (M10a), y copiar resumen al portapapeles (M10).
+- Sistema externo: Servicio de envío (Google Apps Script + Gmail + Hoja de registros, en la cuenta del proyecto). Recibe el PDF y el resumen, los envía al correo del docente y guarda una fila (fecha, tipo, código, nombre, correo del docente) en la hoja. Código en tools/apps_script/.
 
 ## 4. Fichas de módulos
 | Módulo | Archivo | Tipo | Qué hace | Recibe | Entrega | Requerimientos | Especificaciones |
@@ -54,6 +57,7 @@ Justificación: cumple RNF04 (sin instalación, fuera del laboratorio), RNF05 (P
 | M10 Reporte | js/adaptadores/reporte.js | Adaptador | Arma el reporte final (pantalla y PDF) y el resumen para copiar al portapapeles | Lista de registros, nombre, tiempo de carga | Contenido del reporte; resumen en el portapapeles | RF11, RNF09 | ES09 |
 | M10a Generador PDF | js/adaptadores/pdf.js | Adaptador | Escribe el archivo PDF 1.4 a mano, sin librerías (fuentes estándar Helvetica y Symbol, codificación WinAnsi), con salto de página, tablas, listas numeradas y bloques que no se parten; lo descarga directo (Blob + enlace con download) | Contenido del reporte | Archivo reporte_seguridad_electrica_AAAA-MM-DD.pdf | RF11 | ES09, ES12 |
 | M11 Tiempo de carga | js/adaptadores/tiempo_carga.js | Adaptador | Mide cuánto tardó en cargar la página con la API Navigation Timing (navegación → fin de load) | Datos del navegador | Tiempo de carga (ms), navegador, tipo de carga | — | ES03 |
+| M12 Envío | js/adaptadores/envio.js | Adaptador | Valida los datos del envío (mismas reglas del servicio), pasa el PDF a base64 y lo envía con fetch (POST text/plain, 30 s máximo) al Servicio de envío; consulta los intentos del examen | Nombre, código, correo del docente, consentimiento, PDF y resumen (M10) | Respuesta del servicio {ok, error, mensaje} | RF13, RNF10 | ES13 |
 
 ## 5. Correspondencia con la guía del Corte 3 (punto 9.3)
 | Función de la guía | Módulos | Cómo la cumple |
@@ -62,7 +66,7 @@ Justificación: cumple RNF04 (sin instalación, fuera del laboratorio), RNF05 (P
 | Procesamiento | M4 y M5 | M4 calcula la corriente y su incertidumbre; M5 decide el límite aplicable y el veredicto |
 | Control | M2 | Orden fijo de la prueba; no deja saltar pasos |
 | Interfaz | M1 y M6 | M1 muestra las 5 secciones y los resultados; M6 dibuja y anima el circuito |
-| Registro | M8 y M10 | M8 guarda las lecturas (memoria y sessionStorage); M10 arma el reporte (con M10a para el PDF) y el resumen |
+| Registro | M8, M10 y M12 | M8 guarda las lecturas (memoria y sessionStorage); M10 arma el reporte (con M10a para el PDF) y el resumen; M12 lo envía al docente, y el servicio guarda una fila en la hoja de registros |
 
 ## 6. Diccionario de datos (interfaces entre módulos)
 | Dato | Campos | Ejemplo |
@@ -74,6 +78,8 @@ Justificación: cumple RNF04 (sin instalación, fuera del laboratorio), RNF05 (P
 | Resultado | I_uA, U_uA, limite_uA, veredicto ("Cumple" o "No cumple"), hora | {I_uA:14.73, U_uA:1.32, limite_uA:500, veredicto:"Cumple"} |
 | Registro | Resultado + Condición + Medición | Una fila del historial y del reporte |
 | Avance de la prueba | pasos completados (1 a 4) | Se guarda en sessionStorage |
+| Envío del reporte | tipo: "reporte"; nombre (3–80); codigo (5–10 dígitos); correoDocente (@uao.edu.co); consentimiento: true; resumen; pdfBase64 | {tipo:"reporte", nombre:"Ana Pérez", codigo:"2235552", correoDocente:"cferro@uao.edu.co", consentimiento:true, …} |
+| Respuesta del servicio | ok (sí/no); error o mensaje | {ok:true, mensaje:"Reporte enviado a cferro@uao.edu.co."} |
 
 ## 7. Tabla de interacciones cruzadas (guía del Corte 3, punto 2.3)
 | Origen | Destino | Tipo | Naturaleza | Riesgo asociado |
@@ -91,7 +97,9 @@ Justificación: cumple RNF04 (sin instalación, fuera del laboratorio), RNF05 (P
 | M11 Tiempo de carga | M10 Reporte | Incidental | Información (tiempo de carga) | Navegador sin Navigation Timing → se muestra «no disponible» sin romper el reporte |
 | M10 Reporte | M10a Generador PDF | Fundamental | Información (contenido del reporte) | Caracteres que no existen en las fuentes estándar → se cambian por uno equivalente o por «?» (prueba en tests/pdf.test.js) |
 | M10a Generador PDF | Archivo PDF | Fundamental | Información (descarga con Blob) | Archivo dañado → pruebas de estructura (xref, largos de flujo) en tests/pdf.test.js |
-| M10 Reporte | Correo del estudiante | Fundamental | Información (copiar resumen al portapapeles) | Datos personales → solo el nombre que escribe el estudiante; 0 envíos a servidores (ES13) |
+| M10 Reporte | Correo del estudiante | Fundamental | Información (copiar resumen al portapapeles) | Datos personales → solo el nombre que escribe el estudiante |
+| M10 Reporte | M12 Envío | Fundamental | Información (PDF y resumen) | El PDF enviado es distinto al descargado → los dos salen de la misma función crearPdfReporte |
+| M12 Envío | Servicio de envío (Apps Script) | Fundamental | Información (HTTPS, JSON) | Datos personales a terceros → solo con consentimiento, solo al correo @uao.edu.co del docente (ES13); sin internet o servicio caído → mensaje claro y el estudiante puede descargar el PDF y enviarlo él; abuso → el servicio limita 5 reportes por código al día y PDF ≤ 2 MB |
 | GitHub Pages | Aplicación | Fundamental | Información (archivos HTTPS) | Archivos alterados → HTTPS + hashes SRI + commits firmados |
 
 ## 8. Seguridad
@@ -102,10 +110,11 @@ Medidas adoptadas y el riesgo que cubre cada una:
 | 1 | HTTPS obligatorio (lo da GitHub Pages, «Enforce HTTPS») | Que alguien lea o cambie los archivos en el camino entre GitHub y el navegador |
 | 2 | Commits firmados en GitHub (aparecen como «Verified») | Que se publique código a nombre del equipo sin ser del equipo |
 | 3 | Integridad de subrecursos (SRI, SHA-384) en cada JS y CSS, con versión ?v= en cada URL e import (tools/sri.mjs) | Que el navegador ejecute un archivo alterado; que use una copia vieja en caché después de un despliegue |
-| 4 | Política de seguridad de contenido (CSP) en una meta etiqueta: solo archivos propios, sin scripts ni estilos en línea, sin objetos, sin formularios | Inyección de código (XSS) y carga de recursos de otros sitios |
+| 4 | Política de seguridad de contenido (CSP) en una meta etiqueta: solo archivos propios, sin scripts ni estilos en línea, sin objetos, sin formularios; connect-src solo abre script.google.com y script.googleusercontent.com (servicio de envío) | Inyección de código (XSS), carga de recursos de otros sitios y envío de datos a cualquier otro sitio |
 | 5 | Sin librerías, CDN, fuentes externas ni dependencias de npm | Ataque a la cadena de suministro (una librería comprometida) |
 | 6 | Sin innerHTML con texto del usuario (el nombre va con textContent), sin eval ni new Function | XSS a través del nombre del estudiante |
-| 7 | 0 datos enviados a servidores; sin cuentas ni base de datos; las lecturas solo viven en sessionStorage de la pestaña (ES13) | Fuga de datos personales; privacidad |
+| 7 | 0 datos a terceros: solo se envían nombre, código y resultados al correo @uao.edu.co del docente, con casilla de consentimiento (Ley 1581 de 2012); sin cuentas ni base de datos propia; las lecturas solo viven en sessionStorage de la pestaña (ES13) | Fuga de datos personales; privacidad |
+| 8 | La clave de respuestas del examen solo está en el Apps Script de la cuenta del proyecto; el código publicado en GitHub trae `const CLAVE = {};` (lo revisa tests/envio.test.js) | Que un estudiante lea las respuestas en el código de la página o del repositorio |
 
 Riesgo residual (lo que estas medidas no cubren):
 - Clickjacking: otra página podría mostrar el simulador dentro de un marco (iframe). La protección (frame-ancestors o X-Frame-Options) solo funciona como cabecera HTTP y GitHub Pages no permite cabeceras propias. El impacto es bajo, porque la página no tiene acciones sensibles ni datos de cuentas.

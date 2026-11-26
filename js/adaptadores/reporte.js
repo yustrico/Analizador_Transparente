@@ -7,11 +7,12 @@
  *   contenido se muestra en pantalla y se descarga como archivo PDF (con el
  *   generador propio de pdf.js, sin diálogo de imprimir). Un resumen
  *   corto se copia al portapapeles para pegarlo en el correo del
- *   estudiante, que adjunta el PDF. NADA se envía a un servidor: el reporte
- *   es del estudiante.
+ *   estudiante, que adjunta el PDF. Este módulo no envía nada: solo si el
+ *   estudiante lo pide (con consentimiento), M12 (envio.js) manda este mismo
+ *   PDF y el resumen al correo del docente.
  * Módulo: M10 – Reporte (adaptador)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-17
+ * Creado: 2026-11-13 · Modificado: 2026-11-25
  * ============================================================================
  */
 

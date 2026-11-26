@@ -17,7 +17,9 @@ Autores: Yustin Rico, David Cardona y Santiago González.
 - Genera un reporte final que se descarga en PDF y un resumen que se copia al portapapeles para pegarlo en el correo.
 - Trae el manual de usuario en la misma página web (enlace «Ayuda», `ayuda.html`).
 
-Todo corre en el navegador: sin servidor propio, sin base de datos, sin cuentas y sin enviar datos a ningún lado.
+Todo corre en el navegador: sin servidor propio, sin base de datos propia y sin cuentas.
+
+**Privacidad.** La herramienta no envía nada mientras practicas: las lecturas viven solo en la pestaña. El único servicio externo es el del equipo (Google Apps Script en la cuenta de Gmail del proyecto), y solo se usa si pulsas «Enviar reporte al docente» y marcas la casilla de consentimiento (Ley 1581 de 2012). Entonces se envían tu nombre, tu código, tus resultados y el PDF al correo @uao.edu.co del docente, y el servicio guarda una fila (fecha, código, nombre, correo del docente) en la hoja de registros del proyecto. No hay analítica ni rastreo. El código del servicio está en `tools/apps_script/` (sin la clave del examen).
 
 ## Cómo correrlo en el computador
 El navegador no deja leer el archivo `datos/parametros_r12.json` si se abre `index.html` con doble clic, así que hay que servir la carpeta:

@@ -21,7 +21,7 @@
   <meta name="description" content="Manual de usuario del Analizador transparente: cómo hacer la práctica de seguridad eléctrica del electrocardiógrafo Mindray BeneHeart R12.">
   <link rel="icon" href="data:,">
   <!-- Integridad (SRI): la huella SHA-384 la escribe tools/sri.mjs -->
-  <link rel="stylesheet" href="css/estilos.css?v=3728351d09" integrity="sha384-Nyg1HQn3AMXyW3ZsJzH66PJ6dA5eGE9MzNl9TeGgO0LguDxRbhBLkGBFrjBQtHRL">
+  <link rel="stylesheet" href="css/estilos.css?v=97f5748707" integrity="sha384-l/V0hwcmHQcK62y61IbH3FuSIEbxs58yN2qojwF/JH/ziG2yzo5n9/oigHaghb1n">
 </head>
 <body>
   <header class="encabezado">
@@ -136,17 +136,29 @@
         <li>Presiona <strong>«Finalizar práctica»</strong> y escribe tu nombre (opcional, máximo 60 caracteres). Presiona <strong>«Generar reporte»</strong>.</li>
         <li>Presiona <strong>«Descargar reporte (PDF)»</strong>: se descarga el archivo <code>reporte_seguridad_electrica_AAAA-MM-DD.pdf</code> a tu carpeta de <strong>Descargas</strong>.</li>
         <li>Presiona <strong>«Copiar resumen»</strong>: se copia un resumen corto.</li>
-        <li><strong>Para enviarlo:</strong> abre tu correo (Outlook, Gmail o el de la universidad), <strong>pega</strong> el resumen (Ctrl + V) y <strong>adjunta</strong> el PDF.</li>
+        <li><strong>Para enviarlo tú:</strong> abre tu correo (Outlook, Gmail o el de la universidad), <strong>pega</strong> el resumen (Ctrl + V) y <strong>adjunta</strong> el PDF.</li>
       </ol>
+      <h3>Enviar al docente (directo desde la herramienta)</h3>
+      <p>Debajo de los botones del reporte está la tarjeta <strong>«Enviar al docente»</strong>:</p>
+      <ol>
+        <li>Revisa tu <strong>nombre completo</strong> (viene del reporte; de 3 a 60 caracteres).</li>
+        <li>Escribe tu <strong>código estudiantil</strong> (solo números, de 5 a 10 dígitos).</li>
+        <li>Revisa el <strong>correo del docente</strong>: viene lleno con <code>cferro@uao.edu.co</code> y lo puedes cambiar, pero solo se aceptan correos <strong>@uao.edu.co</strong>.</li>
+        <li>Marca la casilla de consentimiento (Ley 1581 de 2012). Sin ella no se envía nada.</li>
+        <li>Presiona <strong>«Enviar reporte al docente»</strong>. Al final aparece un mensaje en verde (enviado) o un aviso con el problema.</li>
+        <li>Si no hay internet o el servicio no responde, <strong>descarga el PDF y envíalo tú</strong>.</li>
+      </ol>
+      <p>El docente recibe un correo con el resumen y el <strong>mismo PDF</strong> que descargas. Se pueden enviar hasta 5 reportes por código al día.</p>
       <p>Después de generar el reporte puedes volver a medir y generarlo otra vez.</p>
     </article>
 
     <article class="tarjeta">
       <h2>4. ¿Qué pasa con tus datos?</h2>
       <ul>
-        <li>Tus lecturas se guardan <strong>solo en esta pestaña del navegador</strong>. Nada se envía a ningún servidor.</li>
+        <li>Tus lecturas se guardan <strong>solo en esta pestaña del navegador</strong>. Mientras practicas, nada se envía a ningún servidor.</li>
+        <li>Solo si presionas <strong>«Enviar reporte al docente»</strong> y marcas la casilla de consentimiento, tu nombre, tu código, tus resultados y el PDF van al correo @uao.edu.co del docente, a través del servicio del equipo (Google Apps Script en la cuenta de Gmail del proyecto). El servicio guarda una fila con la fecha, tu código, tu nombre y el correo del docente. No hay analítica ni rastreo.</li>
         <li><strong>Se borran al cerrar la pestaña.</strong> Descarga tu reporte antes de cerrar. (Recargar la página no las borra; abrir esta Ayuda y volver tampoco).</li>
-        <li>El nombre solo aparece en tu reporte.</li>
+        <li>El nombre solo aparece en tu reporte (y en el correo al docente, si lo envías).</li>
       </ul>
 
       <h2>5. ¿Cómo se leen los números?</h2>
@@ -173,6 +185,8 @@
           <tr><td>Perdí mis lecturas</td><td>No se pueden recuperar (nada se guarda fuera de la pestaña). Repite las mediciones y descarga el reporte antes de cerrar.</td></tr>
           <tr><td>«Descargar reporte (PDF)» no hace nada visible</td><td>Busca <code>reporte_seguridad_electrica_AAAA-MM-DD.pdf</code> en <em>Descargas</em> (Ctrl + J). Si aparece un aviso de descarga bloqueada, permítela.</td></tr>
           <tr><td>«No se pudo copiar» al presionar «Copiar resumen»</td><td>Abre la dirección https publicada y vuelve a intentar. Si sigue fallando, copia a mano los datos del reporte en tu correo.</td></tr>
+          <tr><td>«No se pudo conectar con el servicio de envío»</td><td>Revisa tu internet y vuelve a intentar. Si sigue fallando, descarga el PDF y envíaselo tú al docente.</td></tr>
+          <tr><td>«Ya enviaste 5 reportes hoy»</td><td>El servicio permite 5 envíos por código al día. Intenta mañana o envía el PDF tú.</td></tr>
           <tr><td>El PDF muestra «?» en mi nombre</td><td>Escribe el nombre solo con letras del español.</td></tr>
           <tr><td>«429 Too Many Requests» al abrir la página</td><td>Espera unos minutos y recarga.</td></tr>
         </tbody>

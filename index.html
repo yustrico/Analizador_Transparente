@@ -14,19 +14,21 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <!-- Política de seguridad de contenido: solo se cargan archivos de este mismo sitio; nada en línea -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <!-- Política de seguridad de contenido: solo se cargan archivos de este mismo sitio; nada en línea.
+       Única conexión externa: el servicio de envío al docente (Google Apps Script del equipo, M12) -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Analizador transparente</title>
   <meta name="description" content="Simulador educativo de las pruebas de seguridad eléctrica al electrocardiógrafo Mindray BeneHeart R12.">
   <link rel="icon" href="data:,">
   <!-- Integridad (SRI): las huellas SHA-384 las escribe tools/sri.mjs; correrlo después de cambiar JS o CSS -->
-  <link rel="stylesheet" href="css/estilos.css?v=3728351d09" integrity="sha384-Nyg1HQn3AMXyW3ZsJzH66PJ6dA5eGE9MzNl9TeGgO0LguDxRbhBLkGBFrjBQtHRL">
+  <link rel="stylesheet" href="css/estilos.css?v=97f5748707" integrity="sha384-l/V0hwcmHQcK62y61IbH3FuSIEbxs58yN2qojwF/JH/ziG2yzo5n9/oigHaghb1n">
   <!-- SRI: inicio (generado por tools/sri.mjs, no editar a mano) -->
+  <link rel="modulepreload" href="js/adaptadores/envio.js?v=ba55f1c2d3" integrity="sha384-ulXxwtPZlV1VXP0LcqCAQpAOVbt+LqBzua2bJJon2srIdjTBDy2n8pmcIpYVvQKK">
   <link rel="modulepreload" href="js/adaptadores/historial.js?v=37beb88db5" integrity="sha384-N764jbU0sVhRC7ghKObyjTjXmaVMHHAPvVcAtTAhaCYpBXdSrwJZ+STKTxzDL19N">
-  <link rel="modulepreload" href="js/adaptadores/interfaz.js?v=a27961a50d" integrity="sha384-onlhpQ0cLZh46IebBv6PUq6dy8UFR1kiHGdcV9RJU16jKrXBHH5Xk47sRDa4taE+">
+  <link rel="modulepreload" href="js/adaptadores/interfaz.js?v=83869aa158" integrity="sha384-g4aaoVjnD84FdMQvUQxgdX8Gw+pn6uY0XG5huGdLVp5gF1CYLlIQUH3Jjx3xh55J">
   <link rel="modulepreload" href="js/adaptadores/pdf.js?v=628f37170c" integrity="sha384-Yo83Fwy41RDZlS65Om/wuMl1yX/SZVT5roDLxWU5SsNCCIKYVhnCcHPF0o/ldBtx">
-  <link rel="modulepreload" href="js/adaptadores/reporte.js?v=577ca59cef" integrity="sha384-V3ylnO/QMvK/tMr7yeIBrklgPr7/faYcaITYALrKB1aAXZw2OOt+lxsiR97tOhAr">
+  <link rel="modulepreload" href="js/adaptadores/reporte.js?v=d4749f7c51" integrity="sha384-1HSffFGogAyThkQ7SyAPkgqvk7nUap1f0N7/BIOhkqy3sIk9HrS7dhJGlxMpsvvn">
   <link rel="modulepreload" href="js/adaptadores/tiempo_carga.js?v=1c9699f3b9" integrity="sha384-HJaZ87n6slac+sCKpiv4PovGknwW6qIsYSbPkXqTEJSFVD0wGqJegnc9QHmWVjjg">
   <link rel="modulepreload" href="js/adaptadores/visualizador.js?v=1d37bf1085" integrity="sha384-HTe/EIXNJAD0bWn0wGsNu/AoBzqtE7D+qaCh00qWqfYEPkoZjhTnTgQUX824uDcu">
   <link rel="modulepreload" href="js/nucleo/evaluador_limites.js?v=12ab74e8c1" integrity="sha384-Eqt06MFsEJC8nmrnHxhqUDVez+orZ3rGy3dmLNB0gFltj5G+NdfhkbNUcKSfB1cG">
@@ -34,7 +36,7 @@
   <link rel="modulepreload" href="js/nucleo/motor_calculo.js?v=c6349ec03b" integrity="sha384-xjSewDuO4RE5LN0YcvnJ5XfgNxkZ4GzzGBSuFcnG0SfD8RlOo0ddhp04r0b6fTTH">
   <link rel="modulepreload" href="js/nucleo/secuencia.js?v=bffe121e07" integrity="sha384-v/4SHgduYquka0rL7HHdb+Z7SFxlx6UnWtzSicOu2HWYIDc2nw7ylTx8duc2u5qj">
   <!-- SRI: fin -->
-  <script type="module" src="js/main.js?v=17134569f3" integrity="sha384-FxNFafM9vxXpTlNqcSb2cujjWOoqWETIxmyUp8tON6AL1dVxMG736Vf/TZv8HlgK"></script>
+  <script type="module" src="js/main.js?v=2359e6a53d" integrity="sha384-I1nmpT3Blo2/oByM406hc1uXK1/hNH9j/BQtLojPhRN1amqItnwUuJXOOVo7nwLB"></script>
 </head>
 <body>
   <header class="encabezado">
@@ -324,8 +326,31 @@
               <button type="button" class="boton" id="boton-volver-historial">Volver al historial</button>
             </div>
           </div>
-          <p class="instruccion-envio">Para enviarlo: pega el resumen en tu correo (Outlook, Gmail o el de la universidad) y adjunta el PDF.</p>
-          <p class="nota">El PDF y el resumen se crean en tu navegador: la herramienta no envía nada a ningún servidor.</p>
+          <p class="instruccion-envio">Para enviarlo tú: pega el resumen en tu correo (Outlook, Gmail o el de la universidad) y adjunta el PDF.</p>
+          <p class="nota">El PDF y el resumen se crean en tu navegador. Solo salen de él si usas «Enviar reporte al docente».</p>
+        </div>
+
+        <!-- Envío directo al docente (M12): único uso de un servicio externo -->
+        <div class="tarjeta envio no-imprimir">
+          <h3>Enviar al docente</h3>
+          <p>El servicio del equipo le envía al docente tu reporte en PDF y el resumen, desde la cuenta de correo del proyecto.</p>
+          <div class="envio__campos">
+            <label for="envio-nombre">Nombre completo</label>
+            <input type="text" id="envio-nombre" maxlength="60" autocomplete="name" spellcheck="false">
+            <label for="envio-codigo">Código estudiantil</label>
+            <input type="text" id="envio-codigo" inputmode="numeric" maxlength="10" autocomplete="off" spellcheck="false">
+            <label for="envio-correo">Correo del docente</label>
+            <div>
+              <input type="email" id="envio-correo" maxlength="120" autocomplete="off" spellcheck="false">
+              <p class="nota">Solo correos @uao.edu.co</p>
+            </div>
+          </div>
+          <label class="envio__consentimiento">
+            <input type="checkbox" id="envio-consentimiento">
+            Acepto que mi nombre, mi código y mis resultados se envíen al correo del docente, solo con fines académicos (Ley 1581 de 2012).
+          </label>
+          <button type="button" class="boton boton--principal" id="boton-enviar-reporte">Enviar reporte al docente</button>
+          <p class="envio__estado" id="estado-envio" role="status" hidden></p>
         </div>
         <article class="tarjeta reporte" id="reporte-contenido"></article>
       </div>

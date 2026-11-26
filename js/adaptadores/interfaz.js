@@ -4,7 +4,8 @@
  * Descripción: Conecta la página (index.html) con el núcleo. Escucha los
  *   clics del estudiante, le pide al núcleo los cálculos (M2 secuencia,
  *   M4 motor, M5 evaluador) y muestra los resultados en las 5 secciones:
- *   Equipo, Prueba guiada, Analizador, Comparar e Historial.
+ *   Equipo, Prueba guiada, Analizador, Comparar e Historial. En el reporte,
+ *   la tarjeta «Enviar al docente» usa M12 (envio.js) para mandar el PDF.
  *   Este archivo NO calcula corrientes ni decide veredictos: solo pregunta al
  *   núcleo y pinta lo que el núcleo responde. Todo texto se escribe con
  *   textContent (nunca innerHTML), por seguridad.
@@ -35,9 +36,10 @@ import {
 import {
   generarReporte, crearPdfReporte, nombreArchivoReporte, armarResumen, limpiarNombre, mostrarExplicacionIncertidumbre, TEXTO_CERCA_DEL_LIMITE,
   normasDelEquipo, conSaltosDeLinea,
-} from "./reporte.js?v=577ca59cef";
+} from "./reporte.js?v=d4749f7c51";
 import { descargarPdf } from "./pdf.js?v=628f37170c";
 import { medirCargaPagina, textoTiempoCarga, detalleCarga } from "./tiempo_carga.js?v=1c9699f3b9";
+import { validarDatosEnvio, bytesABase64, enviarAlServicio, CORREO_DOCENTE_POR_DEFECTO } from "./envio.js?v=ba55f1c2d3";
 
 /* ------------------------------------------------------------------------ */
 /* Constantes                                                               */
@@ -60,6 +62,11 @@ const TIEMPO_MAXIMO_REPORTE_S = 3;
 const MENSAJE_RESUMEN_COPIADO = "Resumen copiado: pégalo en tu correo y adjunta el PDF";
 const MENSAJE_COPIA_FALLIDA = "No se pudo copiar (el navegador no dio permiso). Copia los datos del reporte a mano.";
 const MENSAJE_PDF_FALLIDO = "No se pudo crear el PDF. Recarga la página e inténtalo de nuevo.";
+
+/** Textos del botón «Enviar reporte al docente» (M12). */
+const TEXTO_BOTON_ENVIAR = "Enviar reporte al docente";
+const TEXTO_BOTON_ENVIANDO = "Enviando…";
+const MENSAJE_ENVIO_EXITOSO = "Reporte enviado al docente.";
 
 /** Conversiones de unidades para mostrar los valores. */
 const PICOFARADIOS_POR_FARADIO = 1e12;
@@ -1578,6 +1585,9 @@ function generarYMostrarReporte(estado) {
   generarReporte(elemento("reporte-contenido"), datos);
   elemento("estado-pdf").textContent = "";
   elemento("estado-copia").textContent = "";
+  // El formulario de envío reutiliza el nombre del reporte
+  elemento("envio-nombre").value = datos.nombre;
+  mostrarEstadoEnvio("", true);
   cambiarVistaHistorial(true);
   window.scrollTo(0, 0);
   // El tiempo se toma en el siguiente cuadro, cuando el reporte ya está dibujado
@@ -1623,6 +1633,80 @@ async function copiarResumen(estado) {
 }
 
 /**
+ * Muestra (u oculta, si el texto está vacío) el resultado del envío al docente.
+ * @param {string} texto - Mensaje (solo texto plano).
+ * @param {boolean} exito - true: estilo verde; false: estilo de error.
+ */
+function mostrarEstadoEnvio(texto, exito) {
+  const mensaje = elemento("estado-envio");
+  mensaje.textContent = texto;
+  mensaje.hidden = texto === "";
+  mensaje.classList.toggle("envio__estado--exito", exito);
+  mensaje.classList.toggle("envio__estado--error", !exito);
+}
+
+/**
+ * Lee el formulario «Enviar al docente».
+ * @returns {{nombre: string, codigo: string, correoDocente: string, consentimiento: boolean}} Datos escritos.
+ */
+function leerFormularioEnvio() {
+  return {
+    nombre: limpiarNombre(elemento("envio-nombre").value),
+    codigo: elemento("envio-codigo").value.trim(),
+    correoDocente: elemento("envio-correo").value.trim(),
+    consentimiento: elemento("envio-consentimiento").checked,
+  };
+}
+
+/**
+ * Envía el reporte al docente (M12): valida, crea el MISMO PDF del botón
+ * «Descargar», lo pasa a base64 y lo manda al servicio con el resumen.
+ * Si el estudiante cambió el nombre, el reporte en pantalla se actualiza
+ * para que diga lo mismo que el PDF enviado.
+ * @param {object} estado - Estado de la interfaz (con los datos del reporte generado).
+ */
+async function enviarReporteAlDocente(estado) {
+  const formulario = leerFormularioEnvio();
+  const errores = validarDatosEnvio(formulario);
+  if (errores.length > 0) {
+    mostrarEstadoEnvio(errores.join(" "), false);
+    return;
+  }
+  // El nombre del envío pasa al reporte (pantalla, PDF y resumen dicen lo mismo)
+  if (formulario.nombre !== estado.datosReporte.nombre) {
+    estado.datosReporte = { ...estado.datosReporte, nombre: formulario.nombre };
+    elemento("campo-nombre").value = formulario.nombre;
+    generarReporte(elemento("reporte-contenido"), estado.datosReporte);
+  }
+  const boton = elemento("boton-enviar-reporte");
+  boton.disabled = true;
+  boton.textContent = TEXTO_BOTON_ENVIANDO;
+  mostrarEstadoEnvio("", true);
+  try {
+    const respuesta = await enviarAlServicio({
+      tipo: "reporte",
+      nombre: formulario.nombre,
+      codigo: formulario.codigo,
+      correoDocente: formulario.correoDocente,
+      consentimiento: true,
+      resumen: armarResumen(estado.datosReporte),
+      pdfBase64: bytesABase64(crearPdfReporte(estado.datosReporte)),
+    });
+    // El mensaje del servicio se muestra tal cual (siempre como texto)
+    if (respuesta.ok) {
+      mostrarEstadoEnvio(respuesta.mensaje || MENSAJE_ENVIO_EXITOSO, true);
+    } else {
+      mostrarEstadoEnvio(respuesta.error, false);
+    }
+  } catch (error) {
+    mostrarEstadoEnvio(`${MENSAJE_PDF_FALLIDO} (${error.message})`, false);
+  } finally {
+    boton.disabled = false;
+    boton.textContent = TEXTO_BOTON_ENVIAR;
+  }
+}
+
+/**
  * Conecta los botones del historial y del reporte.
  * @param {object} estado - Estado de la interfaz.
  */
@@ -1642,6 +1726,8 @@ function configurarHistorial(estado) {
   elemento("boton-descargar-pdf").addEventListener("click", () => descargarReporte(estado));
   elemento("boton-copiar-resumen").addEventListener("click", () => copiarResumen(estado));
   elemento("boton-volver-historial").addEventListener("click", () => cambiarVistaHistorial(false));
+  elemento("envio-correo").value = CORREO_DOCENTE_POR_DEFECTO;
+  elemento("boton-enviar-reporte").addEventListener("click", () => enviarReporteAlDocente(estado));
 }
 
 /* ------------------------------------------------------------------------ */

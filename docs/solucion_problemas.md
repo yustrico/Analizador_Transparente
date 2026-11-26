@@ -18,6 +18,10 @@ Cada problema tiene la **causa** y lo que hay que **hacer**. La primera parte es
 | Perdí mis lecturas | Se cerró la pestaña o el navegador | No se pueden recuperar (nada se guarda fuera de la pestaña). Repite las mediciones y descarga el reporte antes de cerrar. |
 | «Descargar reporte (PDF)» no hace nada visible | El navegador guardó el archivo sin preguntar, o pide permiso para descargar | Busca `reporte_seguridad_electrica_AAAA-MM-DD.pdf` en *Descargas* (Ctrl + J). Si aparece un aviso de descarga bloqueada, permítela. |
 | «No se pudo copiar» al presionar «Copiar resumen» | El navegador no dio permiso para usar el portapapeles (o la página no se abrió con https) | Abre la dirección https publicada y vuelve a intentar. Si sigue fallando, copia a mano los datos del reporte en tu correo. |
+| «No se pudo conectar con el servicio de envío» al presionar «Enviar reporte al docente» | Sin internet, el servicio de Google no respondió en 30 s, o una red/extensión bloquea `script.google.com` | Revisa el internet y vuelve a intentar. Si sigue, descarga el PDF y envíaselo tú al docente. |
+| «El servicio de envío aún no está configurado…» | En `js/adaptadores/envio.js` falta la dirección real del Apps Script (`URL_SERVICIO`) | Mantenimiento: sigue `tools/apps_script/LEEME.md`, pega la URL que termina en `/exec`, corre `npm run sri` y `npm test`. |
+| «Ya enviaste 5 reportes hoy» | El servicio limita 5 reportes por código al día | Intenta mañana o envía el PDF tú. |
+| «El correo del docente debe terminar en @uao.edu.co» | Se escribió otro dominio (por ejemplo, Gmail) | Usa el correo institucional del docente. |
 | El PDF muestra «?» en mi nombre | Se escribió un carácter que no existe en las fuentes estándar del PDF (emoji, otro alfabeto) | Escribe el nombre solo con letras del español. |
 | «429 Too Many Requests» al abrir la página | GitHub Pages limita temporalmente una red que hace demasiadas solicitudes seguidas | Espera unos minutos y recarga. |
 

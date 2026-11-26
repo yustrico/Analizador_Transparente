@@ -102,17 +102,29 @@ Debajo aparece la última lectura de cada configuración que hayas medido, en un
 2. Presiona **«Finalizar práctica»** y escribe tu nombre (opcional, máximo 60 caracteres). Presiona **«Generar reporte»**.
 3. Presiona **«Descargar reporte (PDF)»**: se descarga el archivo `reporte_seguridad_electrica_AAAA-MM-DD.pdf` a tu carpeta de **Descargas**.
 4. Presiona **«Copiar resumen»**: se copia un resumen corto.
-5. **Para enviarlo:** abre tu correo (Outlook, Gmail o el de la universidad), **pega** el resumen (Ctrl + V) y **adjunta** el PDF.
+5. **Para enviarlo tú:** abre tu correo (Outlook, Gmail o el de la universidad), **pega** el resumen (Ctrl + V) y **adjunta** el PDF.
+
+**Enviar al docente (directo desde la herramienta).** Debajo de los botones está la tarjeta **«Enviar al docente»**:
+1. Revisa tu **nombre completo** (viene del reporte; de 3 a 60 caracteres).
+2. Escribe tu **código estudiantil** (solo números, de 5 a 10 dígitos).
+3. Revisa el **correo del docente**: viene lleno con `cferro@uao.edu.co` y lo puedes cambiar, pero solo se aceptan correos **@uao.edu.co**.
+4. Marca la casilla **«Acepto que mi nombre, mi código y mis resultados se envíen al correo del docente, solo con fines académicos (Ley 1581 de 2012)»**. Sin ella no se envía nada.
+5. Presiona **«Enviar reporte al docente»**. El botón dice «Enviando…» mientras tanto. Al final aparece un mensaje en verde (enviado) o un aviso con el problema.
+6. Si no hay internet o el servicio no responde, **descarga el PDF y envíalo tú** (pasos 3 a 5).
+
+El docente recibe un correo con el resumen y el **mismo PDF** que descargas. Se pueden enviar hasta 5 reportes por código al día.
 
 Después de generar el reporte puedes volver a medir y generarlo otra vez.
 
 📷 *Captura sugerida 6: la vista del reporte con los botones «Descargar reporte (PDF)» y «Copiar resumen».*
 📷 *Captura sugerida 7: el PDF abierto en el navegador.*
+📷 *Captura sugerida 8: la tarjeta «Enviar al docente» llena, con la casilla marcada y el mensaje verde de enviado.*
 
 ## 4. ¿Qué pasa con tus datos?
-- Tus lecturas se guardan **solo en esta pestaña del navegador**. Nada se envía a ningún servidor.
+- Tus lecturas se guardan **solo en esta pestaña del navegador**. Mientras practicas, nada se envía a ningún servidor.
+- Solo si presionas **«Enviar reporte al docente»** y marcas la casilla de consentimiento, tu nombre, tu código, tus resultados y el PDF van al correo @uao.edu.co del docente, a través del servicio del equipo (Google Apps Script en la cuenta de Gmail del proyecto). El servicio guarda una fila con la fecha, tu código, tu nombre y el correo del docente. No hay analítica ni rastreo.
 - **Se borran al cerrar la pestaña.** Descarga tu reporte antes de cerrar. (Recargar la página no las borra).
-- El nombre solo aparece en tu reporte.
+- El nombre solo aparece en tu reporte (y en el correo al docente, si lo envías).
 
 ## 5. ¿Cómo se leen los números?
 - **0.00 µA en condición normal:** casi toda la fuga se va por la tierra. El analizador real muestra ≈ 0.1 µA por su resolución.
