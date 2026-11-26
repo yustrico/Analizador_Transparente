@@ -3,7 +3,8 @@
  * Título: Pruebas del envío al docente (sin red)
  * Descripción: Revisa las dos funciones puras de M12: la validación de los
  *   datos del formulario (mismas reglas que el servicio) y la conversión de
- *   bytes a base64 (se compara con Buffer de Node). La red NO se prueba aquí.
+ *   bytes a base64 (se compara con Buffer de Node) y la dirección con que se
+ *   consultan los intentos (con y sin correo). La red NO se prueba aquí.
  *   También revisa que el código del servicio publicado no traiga la clave.
  * Módulo: M12 – Envío (pruebas)
  * Autores: Yustin Rico, David Cardona, Santiago González
@@ -14,7 +15,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { validarDatosEnvio, bytesABase64, ERRORES_ENVIO, CORREO_DOCENTE_POR_DEFECTO } from "../js/adaptadores/envio.js";
+import { validarDatosEnvio, bytesABase64, urlConsultaIntentos, URL_SERVICIO, ERRORES_ENVIO, CORREO_DOCENTE_POR_DEFECTO } from "../js/adaptadores/envio.js";
 
 /** Datos válidos de referencia; cada prueba cambia un solo campo. */
 const DATOS_VALIDOS = Object.freeze({
@@ -102,6 +103,26 @@ test("bytesABase64 con todos los valores de byte posibles (0 a 255)", () => {
 
 test("bytesABase64 rechaza lo que no es Uint8Array", () => {
   assert.throws(() => bytesABase64("hola"), TypeError);
+});
+
+test("Consulta de intentos sin correo: solo accion y código", () => {
+  assert.equal(urlConsultaIntentos("99999"), `${URL_SERVICIO}?accion=intentos&codigo=99999`);
+  // Correo vacío o con solo espacios: tampoco se agrega
+  for (const correo of ["", "   ", undefined, null]) {
+    assert.equal(urlConsultaIntentos("99999", correo), `${URL_SERVICIO}?accion=intentos&codigo=99999`, `correo: ${String(correo)}`);
+  }
+});
+
+test("Consulta de intentos con correo: agrega &correo= codificado", () => {
+  assert.equal(
+    urlConsultaIntentos("2235552", "docente@uao.edu.co"),
+    `${URL_SERVICIO}?accion=intentos&codigo=2235552&correo=docente%40uao.edu.co`,
+  );
+  // Los caracteres especiales (+, &, =) no rompen la consulta
+  const url = new URL(urlConsultaIntentos("12345", " a+b&c=d@uao.edu.co "));
+  assert.equal(url.searchParams.get("correo"), "a+b&c=d@uao.edu.co");
+  assert.equal(url.searchParams.get("codigo"), "12345");
+  assert.equal(url.searchParams.get("accion"), "intentos");
 });
 
 test("El código del servicio que está en el repositorio NO trae la clave del examen", async () => {

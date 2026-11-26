@@ -7,8 +7,8 @@
  *   servidor propio: este es el ÚNICO servicio externo y solo recibe el
  *   nombre, el código, el correo del docente, los resultados y el PDF, y
  *   únicamente si el estudiante marca la casilla de consentimiento.
- *   - validarDatosEnvio y bytesABase64 son funciones puras (se prueban con
- *     node --test, sin red).
+ *   - validarDatosEnvio, bytesABase64 y urlConsultaIntentos son funciones
+ *     puras (se prueban con node --test, sin red).
  *   - enviarAlServicio y consultarIntentos usan la red (fetch).
  *   El servicio revisa OTRA VEZ las mismas reglas: esta validación es solo
  *   para avisarle al estudiante antes de enviar.
@@ -176,12 +176,29 @@ export async function enviarAlServicio(datos) {
 }
 
 /**
- * Pregunta al servicio cuántos intentos del examen lleva un código.
+ * Arma la dirección con que se consultan los intentos del examen. Si viene el
+ * correo del docente, se agrega para que el servicio revise que esté en su
+ * lista de docentes ANTES de empezar el examen. Función pura (sin red).
  * @param {string} codigo - Código estudiantil.
+ * @param {string} [correoDocente] - Correo del docente (opcional).
+ * @returns {string} URL completa: …/exec?accion=intentos&codigo=…[&correo=…].
+ */
+export function urlConsultaIntentos(codigo, correoDocente) {
+  const consulta = `${URL_SERVICIO}?accion=intentos&codigo=${encodeURIComponent(codigo)}`;
+  // El correo solo se agrega si se pasó uno (no vacío)
+  const correoLimpio = String(correoDocente ?? "").trim();
+  return correoLimpio === "" ? consulta : `${consulta}&correo=${encodeURIComponent(correoLimpio)}`;
+}
+
+/**
+ * Pregunta al servicio cuántos intentos del examen lleva un código y, si se
+ * pasa el correo del docente, si ese correo está autorizado.
+ * @param {string} codigo - Código estudiantil.
+ * @param {string} [correoDocente] - Correo del docente (opcional).
  * @returns {Promise<{ok: boolean, intentosUsados?: number, intentosMaximos?: number, error?: string}>} Respuesta.
  */
-export async function consultarIntentos(codigo) {
-  const respuesta = await pedirAlServicio(`${URL_SERVICIO}?accion=intentos&codigo=${encodeURIComponent(codigo)}`, { method: "GET" });
+export async function consultarIntentos(codigo, correoDocente) {
+  const respuesta = await pedirAlServicio(urlConsultaIntentos(codigo, correoDocente), { method: "GET" });
   return {
     ok: respuesta.ok,
     intentosUsados: respuesta.intentosUsados,

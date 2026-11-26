@@ -6,13 +6,15 @@
  *   2. Califica el examen (la clave de respuestas está SOLO aquí, no en la página),
  *      cuenta los intentos por código (máximo 2) y envía el reporte del examen al docente.
  *   3. Guarda cada envío en la hoja "Registros".
- * Reglas de seguridad: solo acepta correos de docente @uao.edu.co, exige consentimiento,
+ * Reglas de seguridad: solo acepta correos de docente que estén en la pestaña "Docentes" de esta hoja
+ * (y que terminen en @uao.edu.co), exige consentimiento,
  * limita el tamaño del PDF y los reportes por día, y usa un candado para que dos envíos
  * al mismo tiempo no cuenten mal los intentos.
  */
 
 const CONFIG = {
   HOJA: 'Registros',
+  HOJA_DOCENTES: 'Docentes',
   DOMINIO_DOCENTE: /^[a-z0-9._%+-]+@uao\.edu\.co$/i,
   CODIGO: /^[0-9]{5,10}$/,
   MAX_NOMBRE: 80,
@@ -28,11 +30,17 @@ const CONFIG = {
 const CLAVE = {}; // La clave real está solo en la cuenta del proyecto; no se publica.
 
 function doGet(e) {
-  // Consulta de intentos: ?accion=intentos&codigo=2235552
+  // Consulta de intentos: ?accion=intentos&codigo=2235552[&correo=docente@uao.edu.co]
   const p = (e && e.parameter) || {};
   if (p.accion !== 'intentos') return responder({ ok: true, servicio: 'Analizador transparente' });
   const codigo = String(p.codigo || '').trim();
   if (!CONFIG.CODIGO.test(codigo)) return responder({ ok: false, error: 'Código estudiantil no válido.' });
+  // Si la página manda también el correo del docente, se revisa ANTES de empezar el examen.
+  if (p.correo !== undefined) {
+    const correo = String(p.correo || '').trim().toLowerCase();
+    if (!CONFIG.DOMINIO_DOCENTE.test(correo)) return responder({ ok: false, error: 'El correo del docente debe terminar en @uao.edu.co.' });
+    if (docentesAutorizados().indexOf(correo) === -1) return responder({ ok: false, error: 'Ese correo no está en la lista de docentes del curso. Revisa que esté bien escrito o pregúntale a tu docente.' });
+  }
   const usados = contarFilas('examen', codigo, false);
   return responder({ ok: true, intentosUsados: usados, intentosMaximos: CONFIG.INTENTOS_MAXIMOS });
 }
@@ -60,6 +68,7 @@ function validarComunes(d) {
   if (nombre.length < 3 || nombre.length > CONFIG.MAX_NOMBRE) return 'Escribe tu nombre completo (máximo 80 caracteres).';
   if (!CONFIG.CODIGO.test(String(d.codigo || '').trim())) return 'El código estudiantil debe tener solo números (5 a 10 dígitos).';
   if (!CONFIG.DOMINIO_DOCENTE.test(String(d.correoDocente || '').trim())) return 'El correo del docente debe terminar en @uao.edu.co.';
+  if (docentesAutorizados().indexOf(String(d.correoDocente).trim().toLowerCase()) === -1) return 'Ese correo no está en la lista de docentes del curso. Revisa que esté bien escrito o pregúntale a tu docente.';
   if (typeof d.pdfBase64 !== 'string' || d.pdfBase64.length === 0) return 'Falta el PDF.';
   if (d.pdfBase64.length * 3 / 4 > CONFIG.MAX_PDF_BYTES) return 'El PDF es demasiado grande.';
   return '';
@@ -133,6 +142,21 @@ function hoja() {
   return h;
 }
 
+// Lista de docentes: pestaña "Docentes", columna A desde la fila 2 (un correo por fila).
+// Para agregar o quitar un docente basta con editar esa pestaña; no hay que tocar el código.
+function docentesAutorizados() {
+  const libro = SpreadsheetApp.getActiveSpreadsheet();
+  let h = libro.getSheetByName(CONFIG.HOJA_DOCENTES);
+  if (!h) {
+    h = libro.insertSheet(CONFIG.HOJA_DOCENTES);
+    h.appendRow(['Correo del docente (uno por fila, desde la fila 2)']);
+    return [];
+  }
+  const filas = h.getRange(1, 1, Math.max(h.getLastRow(), 1), 1).getValues();
+  return filas.slice(1).map(function (f) { return String(f[0] || '').trim().toLowerCase(); })
+    .filter(function (c) { return CONFIG.DOMINIO_DOCENTE.test(c); });
+}
+
 function registrar(tipo, d, nota, correctas, intento) {
   hoja().appendRow([new Date(), tipo, "'" + String(d.codigo).trim(), String(d.nombre).trim(),
     String(d.correoDocente).trim(), nota, correctas, intento]);
@@ -158,5 +182,6 @@ function responder(objeto) {
 /** Prueba manual desde el editor: ejecuta esta función una vez para dar los permisos. */
 function probarPermisos() {
   hoja();
+  Logger.log('Docentes autorizados: ' + JSON.stringify(docentesAutorizados()));
   Logger.log('Correos que quedan hoy: ' + MailApp.getRemainingDailyQuota());
 }
