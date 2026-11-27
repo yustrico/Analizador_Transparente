@@ -81,9 +81,9 @@ Condición = {polaridad: "normal" | "invertida", tierra: "cerrada" | "abierta", 
 - Es "normal" si tierra y neutro están cerrados (la polaridad no cambia esto). Es "primer_defecto" si uno de los dos está abierto.
 
 Fórmulas (k = V_rms · 2πf = 45 238.93 A/F; resultados en µA):
-- C_activa = C_L con polaridad normal y C_N con polaridad invertida. Con neutro abierto: C_total = C_L + C_N.
+- C_activa = C_L con polaridad normal y C_N con polaridad invertida; C_otra es la otra. Con neutro abierto: C_eq = C_activa + k_N·C_otra (la misma fuga hacia el chasis en contacto y en fuga a tierra).
 - **Contacto**:
-  - Tierra cerrada: I = k·C · R_PE / (R_PE + R_MD), con C = C_activa (o C_total si el neutro está abierto). Divisor de corriente: casi todo se va por la tierra.
+  - Tierra cerrada: I = k·C · R_PE / (R_PE + R_MD), con C = C_activa (o C_eq si el neutro está abierto). Divisor de corriente: casi todo se va por la tierra.
   - Tierra abierta: I = k·C_activa (toda la fuga pasa por la persona). Se usa esta aproximación porque X_C ≈ 8 MΩ ≫ R_MD; documéntalo.
 - **Paciente CF**:
   - Normal o neutro abierto: I = k·C_AP.
@@ -100,7 +100,7 @@ Fórmulas (k = V_rms · 2πf = 45 238.93 A/F; resultados en µA):
 |---|---|---|---|---|---|
 | Contacto | Normal (pol. normal o invertida) | 3.83e-5 (≈ 0.00) | 1.15 | 100 | Cumple |
 | Contacto | Tierra abierta (pol. normal o invertida) | 14.734 | 1.32 | 500 | Cumple |
-| Contacto | Neutro abierto (cualquier polaridad) | 7.66e-5 (≈ 0.00) | 1.15 | 500 | Cumple |
+| Contacto | Neutro abierto (cualquier polaridad) | 7.06e-5 (≈ 0.00) | 1.15 | 500 | Cumple |
 | Paciente CF | Normal | 1.267 | 1.17 | 10 | Cumple |
 | Paciente CF | Tierra abierta | 2.097 | 1.18 | 50 | Cumple |
 | Paciente CF | Neutro abierto | 1.267 | 1.17 | 50 | Cumple |

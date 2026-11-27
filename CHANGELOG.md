@@ -5,6 +5,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Corregido (26/11/2026: la misma fuga en contacto y en fuga a tierra)
+- M4: con neutro abierto y tierra cerrada, la corriente de contacto usaba C_L + C_N (29.47 µA de fuga total por el conductor de protección), mientras la fuga a tierra usaba C_activa + k_N·C_otra (27.14 µA) para la misma corriente física. Ahora las dos usan `capacitanciaFugaATierra_F`; se elimina `capacitanciaDeFuga_F`. La corriente de contacto con neutro abierto pasa de 7.66e-5 a 7.06e-5 µA (CLAUDE.md §4 y §5 actualizados). E_n de ES02 para esa configuración: 0.0864 → 0.0865; los demás no cambian.
+- «Fórmula usada» de contacto con neutro abierto: C_eq = C_activa + k_N · C_otra = 325.7 pF + 0.8418 × 325.7 pF = 599.9 pF, igual que en fuga a tierra.
+- M6: en el dibujo del circuito, las corrientes menores de 0.01 µA se escriben «≈ 0 µA (7×10⁻⁵)» (`formatearCorrienteDibujo_uA`). La lectura grande no cambia.
+- Prueba nueva en `tests/motor_calculo.test.js`: en las 4 condiciones con tierra cerrada, la fuga total de contacto es igual a la fuga a tierra (tolerancia 1e-9 µA).
+
 ### Cambiado (26/11/2026, pedido del equipo: correo del docente vacío)
 - M12: `CORREO_DOCENTE_POR_DEFECTO = ""`. Las casillas de correo del envío del reporte (sección 5) y del examen (sección 6) empiezan vacías, con el texto de ayuda «nombre@uao.edu.co» y la nota «Escribe el correo de tu docente (solo @uao.edu.co)».
 - `validarDatosEnvio`: si el correo está vacío, el error es «Escribe el correo de tu docente» (antes salía el de @uao.edu.co). Prueba nueva en `tests/envio.test.js`.

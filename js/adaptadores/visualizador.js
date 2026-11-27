@@ -18,7 +18,7 @@
  *   prueban sin navegador; solo dibujarConexiones usa la pantalla.
  * Módulo: M6 – Visualizador (adaptador)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-25
+ * Creado: 2026-11-13 · Modificado: 2026-11-26
  * ============================================================================
  */
 
@@ -56,6 +56,15 @@ const UMBRAL_VALOR_PEQUENO_UA = 0.01;
 /** Decimales de las lecturas normales y cifras significativas de las muy pequeñas. */
 const DECIMALES_LECTURA = 2;
 const CIFRAS_VALOR_PEQUENO = 3;
+
+/** En el dibujo, por debajo de este valor (µA) la corriente se muestra como «≈ 0 µA». */
+const UMBRAL_CASI_CERO_DIBUJO_UA = 0.01;
+
+/** Dígitos en superíndice para escribir exponentes (índice = dígito). */
+const DIGITOS_SUPERINDICE = Object.freeze(["⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"]);
+
+/** Signo menos en superíndice. */
+const MENOS_SUPERINDICE = "⁻";
 
 /**
  * Coordenadas (x, y) de cada punto del dibujo, en unidades del viewBox (780 × 380).
@@ -183,6 +192,35 @@ export function formatearCorriente_uA(corriente_uA) {
     return String(Number(corriente_uA.toPrecision(CIFRAS_VALOR_PEQUENO)));
   }
   return corriente_uA.toFixed(DECIMALES_LECTURA);
+}
+
+/**
+ * Escribe un número en notación científica corta, con una sola cifra y el
+ * exponente en superíndice; por ejemplo 7.06e-5 → "7×10⁻⁵".
+ * @param {number} valor - Número distinto de cero.
+ * @returns {string} Texto en notación científica.
+ */
+function notacionCientificaCorta(valor) {
+  const [mantisa, exponente] = valor.toExponential(0).split("e");
+  // Cambia cada carácter del exponente por su superíndice
+  const exponenteSuperindice = [...String(Number(exponente))]
+    .map((caracter) => (caracter === "-" ? MENOS_SUPERINDICE : DIGITOS_SUPERINDICE[Number(caracter)]))
+    .join("");
+  return `${mantisa}×10${exponenteSuperindice}`;
+}
+
+/**
+ * Formatea una corriente para el DIBUJO del circuito, con su unidad. Las
+ * corrientes menores de 0.01 µA se escriben «≈ 0 µA» con el valor corto entre
+ * paréntesis, por ejemplo «≈ 0 µA (7×10⁻⁵)». La lectura grande no usa esto.
+ * @param {number} corriente_uA - Corriente en µA.
+ * @returns {string} Texto con la unidad.
+ */
+export function formatearCorrienteDibujo_uA(corriente_uA) {
+  if (corriente_uA !== 0 && Math.abs(corriente_uA) < UMBRAL_CASI_CERO_DIBUJO_UA) {
+    return `≈ 0 µA (${notacionCientificaCorta(corriente_uA)})`;
+  }
+  return `${formatearCorriente_uA(corriente_uA)} µA`;
 }
 
 /**
@@ -665,10 +703,10 @@ export function crearVisualizador(svg, parametros) {
     // Valores por rama, calculados por el motor
     const esFugaATierra = medicion.tipoMedicion === MEDICION_FUGA_TIERRA;
     if (!esFugaATierra) {
-      escribirTexto(`${formatearCorriente_uA(medicion.ramas.porPersona_uA)} µA`, ...POSICION_VALOR_PERSONA, grupoValores, CLASE_VALOR, "start");
+      escribirTexto(formatearCorrienteDibujo_uA(medicion.ramas.porPersona_uA), ...POSICION_VALOR_PERSONA, grupoValores, CLASE_VALOR, "start");
     }
     if (esFugaATierra || (medicion.tipoMedicion === "contacto" && medicion.condicion.tierra === "cerrada")) {
-      escribirTexto(`${formatearCorriente_uA(medicion.ramas.porTierra_uA)} µA`, ...POSICION_VALOR_TIERRA, grupoValores, CLASE_VALOR, "start");
+      escribirTexto(formatearCorrienteDibujo_uA(medicion.ramas.porTierra_uA), ...POSICION_VALOR_TIERRA, grupoValores, CLASE_VALOR, "start");
     }
     actualizarAnimacion();
   }

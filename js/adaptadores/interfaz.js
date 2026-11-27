@@ -22,15 +22,15 @@ import {
   pasoDisponible, pasoCompletado, verPaso,
 } from "../nucleo/secuencia.js?v=bffe121e07";
 import {
-  calcularMedicion, capacitanciaDeFuga_F, capacitanciaFugaATierra_F, listarConfiguraciones,
+  calcularMedicion, capacitanciaFugaATierra_F, listarConfiguraciones,
   medicionPosible, MENSAJE_FUGA_SIN_TIERRA,
-} from "../nucleo/motor_calculo.js?v=c6349ec03b";
+} from "../nucleo/motor_calculo.js?v=32a30b477c";
 import {
   evaluarMedicion, evaluarAislamiento, evaluarResistenciaTierra, VEREDICTO_CUMPLE,
-} from "../nucleo/evaluador_limites.js?v=12ab74e8c1";
+} from "../nucleo/evaluador_limites.js?v=ff663605e5";
 import {
   crearVisualizador, describirPartesDelCircuito, formatearCorriente_uA, partirSubindices, dibujarConexiones, obtenerConexiones,
-} from "./visualizador.js?v=1d37bf1085";
+} from "./visualizador.js?v=8e51469638";
 import {
   crearHistorial, guardarAvancePrueba, leerAvancePrueba, filaDeRegistro, nombreCortoCondicion, textoLectura, textoPorcentaje, NOMBRES_MEDICION, UNIDAD_CORRIENTE,
   textoLimite, textoConfiguracion, resumirAvance, claveConfiguracion,
@@ -38,7 +38,7 @@ import {
 import {
   generarReporte, crearPdfReporte, nombreArchivoReporte, armarResumen, limpiarNombre, mostrarExplicacionIncertidumbre, TEXTO_CERCA_DEL_LIMITE,
   normasDelEquipo, conSaltosDeLinea,
-} from "./reporte.js?v=8550e3a4c5";
+} from "./reporte.js?v=be6a3cc909";
 import { descargarPdf } from "./pdf.js?v=bfb0882a03";
 import { medirCargaPagina, textoTiempoCarga, detalleCarga } from "./tiempo_carga.js?v=1c9699f3b9";
 import { validarDatosEnvio, bytesABase64, enviarAlServicio, CORREO_DOCENTE_POR_DEFECTO } from "./envio.js?v=e1f0334a7f";
@@ -1036,8 +1036,7 @@ function significadoDeSiglas(parametros) {
     X_C: { texto: "X_C (reactancia capacitiva: cuánto se opone el capacitor a la corriente alterna; entre más pequeño el capacitor, más grande X_C)" },
     C_L: { texto: `C_L (capacitancia de fuga entre fase y chasis) = ${capacitancia_pF("C_L")} pF`, origen: ORIGEN_PARAMETROS.C_L },
     C_N: { texto: `C_N (capacitancia de fuga entre neutro y chasis) = ${capacitancia_pF("C_N")} pF`, origen: ORIGEN_PARAMETROS.C_N },
-    C_TOTAL: { texto: "C_total (las dos capacitancias de fuga juntas: con el neutro abierto ambos lados de la red quedan a tensión de fase)" },
-    C_EQ: { texto: "C_eq (capacitancia equivalente de la fuga a tierra con el neutro abierto)" },
+    C_EQ: { texto: "C_eq (capacitancia equivalente de la fuga hacia el chasis con el neutro abierto; la misma en contacto y en fuga a tierra)" },
     C_AP: { texto: `C_AP (capacitancia del aislamiento entre la red y los electrodos) = ${capacitancia_pF("C_AP")} pF`, origen: ORIGEN_PARAMETROS.C_AP },
     K_N: { texto: `k_N (factor empírico de la fuga a tierra con neutro abierto) = ${parametros.factor_neutro_abierto_fuga_tierra}`, origen: ORIGEN_PARAMETROS.K_N },
     R_PE: { texto: `R_PE (resistencia del conductor de protección, PE) = ${parametros.R_PE_ohm} Ω` },
@@ -1120,17 +1119,19 @@ function formulaFugaATierra(resultado, parametros) {
  */
 function formulaContacto(resultado, parametros) {
   const { condicion } = resultado;
-  const capacitancia_F = capacitanciaDeFuga_F(condicion, parametros);
+  const capacitancia_F = capacitanciaFugaATierra_F(condicion, parametros);
   const { R_PE_ohm, R_MD_ohm } = parametros;
-  let siglasC = [condicion.polaridad === "normal" ? "C_L" : "C_N"];
-  let nombreC = siglasC[0];
+  const [activa, otra] = condicion.polaridad === "normal" ? ["C_L", "C_N"] : ["C_N", "C_L"];
+  let siglasC = [activa];
+  let nombreC = activa;
   const lineas = [];
-  // Neutro abierto: las dos capacitancias de fuga se suman
+  // Neutro abierto: la misma capacitancia equivalente que en la fuga a tierra (con k_N)
   if (condicion.neutro === "abierto") {
-    siglasC = ["C_L", "C_N", "C_TOTAL"];
-    nombreC = "C_total";
-    const { C_L, C_N } = parametros.capacitancias_F;
-    lineas.push(`C_total = C_L + C_N = ${textoCapacitancia_pF(C_L)} pF + ${textoCapacitancia_pF(C_N)} pF = ${textoCapacitancia_pF(capacitancia_F)} pF`);
+    siglasC = ["C_L", "C_N", "K_N", "C_EQ"];
+    nombreC = "C_eq";
+    const activa_pF = textoCapacitancia_pF(parametros.capacitancias_F[activa]);
+    const otra_pF = textoCapacitancia_pF(parametros.capacitancias_F[otra]);
+    lineas.push(`C_eq = ${activa} + k_N · ${otra} = ${activa_pF} pF + ${parametros.factor_neutro_abierto_fuga_tierra} × ${otra_pF} pF = ${textoCapacitancia_pF(capacitancia_F)} pF`);
   }
   // Tierra abierta: toda la fuga pasa por la persona (aproximación X_C ≫ R_MD)
   if (condicion.tierra === "abierta") {

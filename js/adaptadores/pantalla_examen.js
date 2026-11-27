@@ -26,8 +26,8 @@
  */
 
 import { elegirPreguntas, barajarOpciones, armarRespuestas, todasRespondidas } from "../nucleo/examen.js?v=db2b15b911";
-import { elemento, crearConTexto } from "./interfaz.js?v=97927adc6d";
-import { crearPdfExamen, nombreArchivoExamen, limpiarNombre } from "./reporte.js?v=8550e3a4c5";
+import { elemento, crearConTexto } from "./interfaz.js?v=d5fb8aab22";
+import { crearPdfExamen, nombreArchivoExamen, limpiarNombre } from "./reporte.js?v=be6a3cc909";
 import { descargarPdf } from "./pdf.js?v=bfb0882a03";
 import { validarDatosEnvio, bytesABase64, enviarAlServicio, consultarIntentos, CORREO_DOCENTE_POR_DEFECTO } from "./envio.js?v=e1f0334a7f";
 

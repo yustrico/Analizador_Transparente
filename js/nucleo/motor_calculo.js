@@ -11,7 +11,7 @@
  *   Modelo: la fuga del equipo es capacitiva, I = V · 2πf · C.
  * Módulo: M4 – Motor de cálculo (núcleo)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-25
+ * Creado: 2026-11-13 · Modificado: 2026-11-26
  * ============================================================================
  */
 
@@ -141,20 +141,27 @@ export function corrientePorFaradio_A_F(parametros) {
 }
 
 /**
- * Capacitancia de fuga que está "activa" (conectada a la fase) en la condición dada.
- * - Polaridad normal: la fase llega por L, se usa C_L.
- * - Polaridad invertida: la fase llega por N, se usa C_N.
- * - Neutro abierto: ambos lados quedan a tensión de fase, se suman C_L + C_N.
+ * Capacitancia equivalente de la fuga que sale del equipo hacia el chasis, en F.
+ * Es la misma en la corriente de contacto (antes de repartirse entre el
+ * conductor de protección y la persona) y en la corriente de fuga a tierra:
+ * físicamente es la misma corriente.
+ * - Condición normal: solo la capacitancia conectada a la fase (C_activa:
+ *   C_L con polaridad normal, C_N con polaridad invertida).
+ * - Neutro abierto: C_activa + k_N · C_otra. k_N es un factor EMPÍRICO
+ *   calibrado en el laboratorio con la polaridad normal (27.13/14.73 − 1 ≈
+ *   0.84): con el neutro abierto el otro lado no queda exactamente a la
+ *   tensión de fase, así que no suma toda su fuga (docs/06).
  * @param {object} condicion - Condición de prueba ya validada.
  * @param {object} parametros - Parámetros del equipo.
- * @returns {number} Capacitancia en F.
+ * @returns {number} Capacitancia equivalente en F.
  */
-export function capacitanciaDeFuga_F(condicion, parametros) {
+export function capacitanciaFugaATierra_F(condicion, parametros) {
   const { C_L, C_N } = parametros.capacitancias_F;
+  const [activa_F, otra_F] = condicion.polaridad === "normal" ? [C_L, C_N] : [C_N, C_L];
   if (condicion.neutro === "abierto") {
-    return C_L + C_N;
+    return activa_F + parametros.factor_neutro_abierto_fuga_tierra * otra_F;
   }
-  return condicion.polaridad === "normal" ? C_L : C_N;
+  return activa_F;
 }
 
 /**
@@ -170,8 +177,9 @@ export function capacitanciaDeFuga_F(condicion, parametros) {
  * @returns {{corriente_uA: number, ramas: {fugaTotal_uA: number, porTierra_uA: number, porPersona_uA: number}}}
  */
 function calcularCorrienteContacto(condicion, parametros) {
+  // Fuga total: la misma capacitancia equivalente que en la fuga a tierra (incluye k_N con neutro abierto)
   const fugaTotal_uA =
-    corrientePorFaradio_A_F(parametros) * capacitanciaDeFuga_F(condicion, parametros) * MICROAMPERIOS_POR_AMPERIO;
+    corrientePorFaradio_A_F(parametros) * capacitanciaFugaATierra_F(condicion, parametros) * MICROAMPERIOS_POR_AMPERIO;
 
   // Tierra abierta: no hay camino por la tierra, toda la fuga pasa por la persona
   if (condicion.tierra === "abierta") {
@@ -205,27 +213,6 @@ function calcularCorrientePaciente(condicion, parametros) {
     : 0;
   const corriente_uA = barreraAislamiento_uA + terminoEmpirico_uA;
   return { corriente_uA, ramas: { barreraAislamiento_uA, terminoEmpirico_uA, porPersona_uA: corriente_uA } };
-}
-
-/**
- * Capacitancia equivalente de la fuga a tierra, en F.
- * - Condición normal: solo la capacitancia conectada a la fase (C_activa:
- *   C_L con polaridad normal, C_N con polaridad invertida).
- * - Neutro abierto: C_activa + k_N · C_otra. k_N es un factor EMPÍRICO
- *   calibrado en el laboratorio con la polaridad normal (27.13/14.73 − 1 ≈
- *   0.84): con el neutro abierto el otro lado no queda exactamente a la
- *   tensión de fase, así que no suma toda su fuga (docs/06).
- * @param {object} condicion - Condición de prueba ya validada.
- * @param {object} parametros - Parámetros del equipo.
- * @returns {number} Capacitancia equivalente en F.
- */
-export function capacitanciaFugaATierra_F(condicion, parametros) {
-  const { C_L, C_N } = parametros.capacitancias_F;
-  const [activa_F, otra_F] = condicion.polaridad === "normal" ? [C_L, C_N] : [C_N, C_L];
-  if (condicion.neutro === "abierto") {
-    return activa_F + parametros.factor_neutro_abierto_fuga_tierra * otra_F;
-  }
-  return activa_F;
 }
 
 /**

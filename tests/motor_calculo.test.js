@@ -7,7 +7,7 @@
  *   inválidas con mensajes claros.
  * Módulo: M4 – Motor de cálculo (pruebas)
  * Autores: Yustin Rico, David Cardona, Santiago González
- * Creado: 2026-11-13 · Modificado: 2026-11-14
+ * Creado: 2026-11-13 · Modificado: 2026-11-26
  * ============================================================================
  */
 
@@ -19,6 +19,9 @@ import { calcularMedicion, validarCondicion, listarConfiguraciones } from "../js
 
 /** Error relativo máximo permitido por ES01 (1 %). */
 const ERROR_RELATIVO_MAXIMO_PORCENTAJE = 1;
+
+/** Diferencia máxima (µA) entre dos cálculos de la misma corriente física. */
+const TOLERANCIA_MISMA_CORRIENTE_UA = 1e-9;
 
 /** Factor para pasar una fracción a porcentaje. */
 const PORCENTAJE_POR_FRACCION = 100;
@@ -47,14 +50,16 @@ const TABLA_REFERENCIA = [
   { tipo: "contacto", nombre: "normalPolInvertida", I_uA: 3.83e-5, U_uA: 1.15 },
   { tipo: "contacto", nombre: "tierraAbiertaPolNormal", I_uA: 14.734, U_uA: 1.32 },
   { tipo: "contacto", nombre: "tierraAbiertaPolInvertida", I_uA: 14.734, U_uA: 1.32 },
-  { tipo: "contacto", nombre: "neutroAbiertoPolNormal", I_uA: 7.66e-5, U_uA: 1.15 },
-  { tipo: "contacto", nombre: "neutroAbiertoPolInvertida", I_uA: 7.66e-5, U_uA: 1.15 },
+  { tipo: "contacto", nombre: "neutroAbiertoPolNormal", I_uA: 7.06e-5, U_uA: 1.15 },
+  { tipo: "contacto", nombre: "neutroAbiertoPolInvertida", I_uA: 7.06e-5, U_uA: 1.15 },
   { tipo: "paciente", nombre: "normalPolNormal", I_uA: 1.267, U_uA: 1.17 },
   { tipo: "paciente", nombre: "normalPolInvertida", I_uA: 1.267, U_uA: 1.17 },
   { tipo: "paciente", nombre: "tierraAbiertaPolNormal", I_uA: 2.097, U_uA: 1.18 },
   { tipo: "paciente", nombre: "tierraAbiertaPolInvertida", I_uA: 2.097, U_uA: 1.18 },
   { tipo: "paciente", nombre: "neutroAbiertoPolNormal", I_uA: 1.267, U_uA: 1.17 },
   { tipo: "paciente", nombre: "neutroAbiertoPolInvertida", I_uA: 1.267, U_uA: 1.17 },
+  // Contacto con neutro abierto: la fuga total es la misma de la fuga a tierra (C_activa + k_N·C_otra),
+  // repartida por el divisor R_PE / (R_PE + R_MD): 27.138 µA × 0.0026 / 1000.0026 = 7.06e-5 µA
   // Fuga a tierra: normal I = V·2πf·C_activa; neutro abierto I = V·2πf·(C_activa + k_N·C_otra), k_N = 0.8418
   { tipo: "fuga_tierra", nombre: "normalPolNormal", I_uA: 14.734, U_uA: 1.32 },
   { tipo: "fuga_tierra", nombre: "normalPolInvertida", I_uA: 14.734, U_uA: 1.32 },
@@ -143,6 +148,19 @@ test("Fuga a tierra con neutro abierto usa el factor empírico k_N del JSON", ()
   const neutroAbierto = calcularMedicion("fuga_tierra", CONDICIONES.neutroAbiertoPolNormal, parametros).corriente_uA;
   // Con C_L = C_N: I_neutro_abierto / I_normal = 1 + k_N
   assert.ok(Math.abs(neutroAbierto / normal - (1 + parametros.factor_neutro_abierto_fuga_tierra)) < 1e-12);
+});
+
+test("La fuga total de contacto es la misma corriente de fuga a tierra (tierra cerrada, con y sin neutro abierto)", () => {
+  const condicionesConTierra = ["normalPolNormal", "normalPolInvertida", "neutroAbiertoPolNormal", "neutroAbiertoPolInvertida"];
+  // Compara, en cada condición con tierra cerrada, la fuga total de contacto con la fuga a tierra
+  for (const nombre of condicionesConTierra) {
+    const contacto = calcularMedicion("contacto", CONDICIONES[nombre], parametros);
+    const fugaATierra = calcularMedicion("fuga_tierra", CONDICIONES[nombre], parametros);
+    assert.ok(
+      Math.abs(contacto.ramas.fugaTotal_uA - fugaATierra.corriente_uA) <= TOLERANCIA_MISMA_CORRIENTE_UA,
+      `${nombre}: fuga total de contacto ${contacto.ramas.fugaTotal_uA} µA ≠ fuga a tierra ${fugaATierra.corriente_uA} µA`
+    );
+  }
 });
 
 test("Fuga a tierra no se puede medir con la tierra abierta", () => {

@@ -15,7 +15,7 @@
  * ============================================================================
  */
 
-import { validarCondicion, validarTipoMedicion } from "./motor_calculo.js?v=c6349ec03b";
+import { validarCondicion, validarTipoMedicion } from "./motor_calculo.js?v=32a30b477c";
 
 /** Estados de la condición según la norma. */
 export const ESTADO_NORMAL = "normal";
