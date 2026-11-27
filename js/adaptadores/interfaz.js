@@ -30,7 +30,7 @@ import {
 } from "../nucleo/evaluador_limites.js?v=ff663605e5";
 import {
   crearVisualizador, describirPartesDelCircuito, formatearCorriente_uA, partirSubindices, dibujarConexiones, obtenerConexiones,
-} from "./visualizador.js?v=8e51469638";
+} from "./visualizador.js?v=6d808e8010";
 import {
   crearHistorial, guardarAvancePrueba, leerAvancePrueba, filaDeRegistro, nombreCortoCondicion, textoLectura, textoPorcentaje, NOMBRES_MEDICION, UNIDAD_CORRIENTE,
   textoLimite, textoConfiguracion, resumirAvance, claveConfiguracion,
@@ -1745,7 +1745,7 @@ export function iniciarInterfaz(parametros) {
   const estado = {
     parametros,
     secuencia: recuperarSecuencia(),
-    visualizador: crearVisualizador(elemento("svg-circuito"), parametros),
+    visualizador: crearVisualizador(elemento("svg-circuito"), parametros, elemento("circuito-nota-lectura")),
     historial: crearHistorial(),
     datosReporte: null,
     cargaPagina: null,

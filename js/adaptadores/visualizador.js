@@ -133,8 +133,6 @@ const CABLES_FIJOS = Object.freeze([
   ["capNplacaInferior", "capNchasis"],
   ["cargaArribaL", "cargaCajaArriba"],
   ["cargaCajaAbajo", "cargaAbajoN"],
-  ["cargaSalida", "capAPentrada"],
-  ["capAPsalida", "parteEntrada"],
   ["peChasis", "peInterruptorArriba"],
   ["peInterruptorAbajo", "peTierra"],
   ["nodoMD", "mdArriba"],
@@ -319,7 +317,6 @@ const FIGURAS_FIJAS = Object.freeze([
   { etiqueta: "rect", atributos: { x: 150, y: 75, width: 80, height: 170, rx: 6, class: "cable cable--inactivo" } },
   { etiqueta: "circle", atributos: { cx: 60, cy: 160, r: 26, class: "caja-componente" } },
   { etiqueta: "rect", atributos: { x: 385, y: 135, width: 30, height: 50, class: "caja-componente" } },
-  { etiqueta: "rect", atributos: { x: 600, y: 135, width: 120, height: 50, rx: 6, class: "caja-componente" } },
   { etiqueta: "rect", atributos: { x: 620, y: 235, width: 80, height: 40, class: "caja-componente" } },
   // Símbolo de tierra en la acometida (tres rayas)
   { etiqueta: "line", atributos: { x1: 48, y1: 362, x2: 72, y2: 362, class: "cable" } },
@@ -332,8 +329,13 @@ const CLASE_TEXTO = "texto-circuito";
 const CLASE_TITULO = "texto-circuito texto-circuito--titulo";
 const CLASE_PEQUENO = "texto-circuito texto-circuito--pequeno";
 const CLASE_SUBINDICE = "texto-circuito__subindice";
-const CLASE_VALOR = "texto-circuito texto-circuito--valor";
 const CLASE_TITULO_ANALIZADOR = "texto-circuito texto-circuito--analizador";
+const CLASE_LECTURA = "texto-circuito texto-circuito--lectura";
+const CLASE_LECTURA_NOTA = "texto-circuito texto-circuito--lectura-nota";
+const CLASE_NO_MEDIDA = "texto-circuito texto-circuito--no-medida";
+
+/** Clase del grupo de la rama de la parte aplicada cuando no participa en la prueba (se ve en gris). */
+const CLASE_RAMA_INACTIVA = "rama-inactiva";
 
 /** Textos fijos del dibujo: [contenido, x, y, clase, alineación]. */
 const TEXTOS_FIJOS = Object.freeze([
@@ -349,18 +351,114 @@ const TEXTOS_FIJOS = Object.freeze([
   ["interno", 378, 170, CLASE_PEQUENO, "end"],
   ["C_L: fuga fase–chasis", 484, 80, CLASE_PEQUENO, "end"],
   ["C_N: fuga neutro–chasis", 484, 271, CLASE_PEQUENO, "end"],
-  ["C_AP: aislamiento", 490, 130, CLASE_PEQUENO, "middle"],
-  ["de electrodos", 490, 147, CLASE_PEQUENO, "middle"],
-  ["Parte aplicada", 660, 156, CLASE_TITULO, "middle"],
-  ["CF (electrodos)", 660, 172, CLASE_PEQUENO, "middle"],
   ["Punta de contacto", 655, 92, CLASE_PEQUENO, "middle"],
   ["MD", 660, 260, CLASE_TITULO, "middle"],
-  ["MD: cuerpo humano", 708, 251, CLASE_PEQUENO, "start"],
-  ["simulado (1 kΩ)", 708, 265, CLASE_PEQUENO, "start"],
   ["Conductor de protección (PE)", 416, 338, CLASE_PEQUENO, "end"],
   ["Tierra de la instalación", 250, 388, CLASE_PEQUENO, "middle"],
   ["Dentro del Fluke ESA620", 844, 362, CLASE_TITULO_ANALIZADOR, "end"],
 ]);
+
+/**
+ * Rama de la parte aplicada: circuito interno → C_AP → electrodos. Va en su
+ * propio grupo para poder ponerla en gris cuando la prueba no la usa (contacto).
+ */
+const CABLES_PARTE_APLICADA = Object.freeze([
+  ["cargaSalida", "capAPentrada"],
+  ["capAPsalida", "parteEntrada"],
+]);
+const FIGURA_PARTE_APLICADA = Object.freeze({ x: 600, y: 135, width: 120, height: 50, rx: 6, class: "caja-componente" });
+const TEXTOS_PARTE_APLICADA = Object.freeze([
+  ["C_AP: aislamiento", 490, 130, CLASE_PEQUENO, "middle"],
+  ["de electrodos", 490, 147, CLASE_PEQUENO, "middle"],
+  ["Parte aplicada", 660, 156, CLASE_TITULO, "middle"],
+  ["CF (electrodos)", 660, 172, CLASE_PEQUENO, "middle"],
+]);
+
+/** Mediciones que conoce el dibujo. */
+const MEDICION_CONTACTO = "contacto";
+const MEDICION_PACIENTE = "paciente";
+
+/**
+ * Rótulo de la MD según la medición (dos renglones, para que quepa a la
+ * derecha de la MD): en contacto la MD es la persona que toca la carcasa; en
+ * paciente CF, el paciente con los electrodos.
+ */
+const ROTULOS_MD = Object.freeze({
+  [MEDICION_CONTACTO]: Object.freeze(["MD: persona que toca", "la carcasa (1 kΩ)"]),
+  [MEDICION_PACIENTE]: Object.freeze(["MD: paciente con los", "electrodos (1 kΩ)"]),
+  [MEDICION_FUGA_TIERRA]: Object.freeze(["MD: cuerpo humano", "simulado (1 kΩ)"]),
+});
+
+/** Nota de debajo del dibujo: solo en contacto con la tierra cerrada (la lectura ≈ 0 parece un error). */
+export const NOTA_CONTACTO_TIERRA_CERRADA = "La lectura de arriba es solo la corriente que pasa por la MD (la persona). "
+  + "Con la tierra cerrada, casi toda la fuga se va por el conductor de protección; al abrir la tierra, esa corriente pasa por la persona.";
+
+/**
+ * Valida el tipo de medición que llega al dibujo.
+ * @param {string} tipoMedicion - "contacto", "paciente" o "fuga_tierra".
+ * @throws {Error} Si la medición no existe.
+ */
+function validarTipoMedicionDibujo(tipoMedicion) {
+  if (!Object.hasOwn(ROTULOS_MD, tipoMedicion)) {
+    throw new Error(`El dibujo no conoce la medición «${tipoMedicion}». Usa contacto, paciente o fuga_tierra.`);
+  }
+}
+
+/**
+ * Rótulo de la MD y si la rama de la parte aplicada va en gris, según la
+ * medición elegida. Función pura (se prueba sin navegador).
+ * @param {string} tipoMedicion - "contacto", "paciente" o "fuga_tierra".
+ * @returns {{lineasRotuloMD: readonly string[], parteAplicadaEnGris: boolean}}
+ *   Renglones del rótulo y true si los electrodos no participan (contacto).
+ */
+export function describirRotuloMD(tipoMedicion) {
+  validarTipoMedicionDibujo(tipoMedicion);
+  return { lineasRotuloMD: ROTULOS_MD[tipoMedicion], parteAplicadaEnGris: tipoMedicion === MEDICION_CONTACTO };
+}
+
+/**
+ * Renglones de la etiqueta «LECTURA»: el mismo valor de la lectura grande.
+ * Si es menor de 0.01 µA dice «≈ 0 µA» y aclara que es lo que mide la prueba.
+ * @param {number} corriente_uA - Lectura de la prueba (µA).
+ * @returns {string[]} Uno o dos renglones.
+ */
+function renglonesLectura(corriente_uA) {
+  if (Math.abs(corriente_uA) < UMBRAL_CASI_CERO_DIBUJO_UA) {
+    return ["LECTURA: ≈ 0 µA", "(lo que mide esta prueba)"];
+  }
+  return [`LECTURA: ${formatearCorriente_uA(corriente_uA)} µA`];
+}
+
+/**
+ * Arma las etiquetas de las ramas del dibujo: cuál es la «LECTURA» (la que
+ * mide la prueba elegida) y cuál solo se muestra en gris como referencia.
+ * No calcula nada: usa los valores que ya dio el motor (M4). Función pura.
+ *   - Contacto: LECTURA en la MD; con tierra cerrada, la rama del PE va en gris.
+ *   - Paciente CF: LECTURA en la MD (rama de la parte aplicada).
+ *   - Fuga a tierra: LECTURA en el conductor de protección.
+ * @param {{tipoMedicion: string, condicion: object, corriente_uA: number, ramas: object}} medicion - Medición del motor (M4).
+ * @returns {{ramas: {rama: string, esLectura: boolean, lineas: string[]}[], notaDebajo: string | null}}
+ *   rama es "persona" (MD) o "tierra" (PE); notaDebajo es el texto de debajo del dibujo o null.
+ */
+export function armarEtiquetasRamas(medicion) {
+  validarTipoMedicionDibujo(medicion.tipoMedicion);
+  const lectura = { esLectura: true, lineas: renglonesLectura(medicion.corriente_uA) };
+  // Fuga a tierra: se mide en el conductor de protección
+  if (medicion.tipoMedicion === MEDICION_FUGA_TIERRA) {
+    return { ramas: [{ rama: "tierra", ...lectura }], notaDebajo: null };
+  }
+  const ramas = [{ rama: "persona", ...lectura }];
+  // Contacto con tierra cerrada: la fuga que se va por el PE se muestra en gris
+  const contactoConTierra = medicion.tipoMedicion === MEDICION_CONTACTO && medicion.condicion.tierra === "cerrada";
+  if (contactoConTierra) {
+    ramas.push({
+      rama: "tierra",
+      esLectura: false,
+      lineas: [`${formatearCorrienteDibujo_uA(medicion.ramas.porTierra_uA)} · se va por la tierra`, "(no la mide esta prueba)"],
+    });
+  }
+  return { ramas, notaDebajo: contactoConTierra ? NOTA_CONTACTO_TIERRA_CERRADA : null };
+}
 
 /**
  * Zonas invisibles sobre cada parte del dibujo. Al pasar el mouse por una
@@ -460,8 +558,42 @@ function dibujarZonasDeAyuda(padre, parametros) {
 /** Posición de los textos que cambian: estado de los conmutadores y corriente por rama. */
 const POSICION_ESTADO_NEUTRO = Object.freeze([122, 270]);
 const POSICION_ESTADO_POLARIDAD = Object.freeze([190, 262]);
-const POSICION_VALOR_PERSONA = Object.freeze([668, 334]);
-const POSICION_VALOR_TIERRA = Object.freeze([452, 338]);
+const POSICION_ETIQUETA_RAMA = Object.freeze({ persona: Object.freeze([668, 318]), tierra: Object.freeze([452, 334]) });
+const POSICION_ROTULO_MD = Object.freeze([708, 251]);
+
+/** Separación vertical entre renglones de una misma etiqueta (unidades del viewBox). */
+const ALTO_RENGLON = 14;
+
+/**
+ * Escribe varios renglones de texto, uno debajo del otro.
+ * @param {readonly string[]} lineas - Renglones.
+ * @param {readonly number[]} posicion - [x, y] del primer renglón.
+ * @param {Element} padre - Grupo SVG.
+ * @param {(indice: number) => string} claseDeRenglon - Clase CSS de cada renglón según su índice.
+ */
+function escribirRenglones(lineas, [x, y], padre, claseDeRenglon) {
+  // Cada renglón ALTO_RENGLON más abajo que el anterior
+  lineas.forEach((linea, indice) => {
+    escribirTexto(linea, x, y + indice * ALTO_RENGLON, padre, claseDeRenglon(indice), "start");
+  });
+}
+
+/**
+ * Dibuja la rama de la parte aplicada (C_AP, cables y caja de los electrodos).
+ * @param {Element} padre - Grupo SVG propio de esta rama.
+ */
+function dibujarRamaParteAplicada(padre) {
+  crearElementoSvg("rect", FIGURA_PARTE_APLICADA, padre);
+  // Cables de la rama
+  for (const cable of CABLES_PARTE_APLICADA) {
+    dibujarCable(cable, "cable", padre);
+  }
+  dibujarCapacitor("capAPentrada", "capAPsalida", true, padre);
+  // Textos de la rama
+  for (const [contenido, x, y, clase, ancla] of TEXTOS_PARTE_APLICADA) {
+    escribirTexto(contenido, x, y, padre, clase, ancla);
+  }
+}
 
 /**
  * Dibuja las partes que no cambian: fuente, chasis, cajas, cables, capacitores y textos.
@@ -478,10 +610,9 @@ function dibujarPartesFijas(padre) {
     dibujarCable(cable, "cable", padre);
   }
 
-  // Capacitores de fuga (C_L, C_N) y de la barrera de aislamiento (C_AP)
+  // Capacitores de fuga (C_L, C_N); el de la barrera (C_AP) va con la rama de la parte aplicada
   dibujarCapacitor("capLplacaInferior", "capLplacaSuperior", false, padre);
   dibujarCapacitor("capNplacaSuperior", "capNplacaInferior", false, padre);
-  dibujarCapacitor("capAPentrada", "capAPsalida", true, padre);
 
   // Textos fijos
   for (const [contenido, x, y, clase, ancla] of TEXTOS_FIJOS) {
@@ -563,16 +694,19 @@ function construirCaminos(medicion) {
  * Crea el visualizador sobre un elemento <svg> vacío.
  * @param {SVGSVGElement} svg - Elemento SVG de la página.
  * @param {object} parametros - Parámetros validados (M3), para las explicaciones de cada parte.
+ * @param {HTMLElement} notaDebajo - Párrafo de debajo del dibujo que aclara qué mide la lectura.
  * @returns {{mostrarCondicion: Function, mostrarCamino: Function, borrarCamino: Function, establecerVisible: Function}}
  *   Funciones para actualizar el dibujo.
  */
-export function crearVisualizador(svg, parametros) {
+export function crearVisualizador(svg, parametros, notaDebajo) {
   const grupoFijo = crearElementoSvg("g", {}, svg);
+  const grupoParteAplicada = crearElementoSvg("g", {}, svg);
   const grupoConmutadores = crearElementoSvg("g", {}, svg);
   const grupoCamino = crearElementoSvg("g", {}, svg);
   const grupoValores = crearElementoSvg("g", {}, svg);
   const grupoAyuda = crearElementoSvg("g", {}, svg);
   dibujarPartesFijas(grupoFijo);
+  dibujarRamaParteAplicada(grupoParteAplicada);
   dibujarZonasDeAyuda(grupoAyuda, parametros);
 
   const preferenciaMovimiento = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -679,12 +813,18 @@ export function crearVisualizador(svg, parametros) {
     dibujarCable(CABLE_PACIENTE, tipoMedicion === "paciente" ? "cable" : "cable cable--inactivo", grupoConmutadores);
     escribirTexto(condicion.neutro, ...POSICION_ESTADO_NEUTRO, grupoConmutadores, CLASE_PEQUENO);
     escribirTexto(condicion.polaridad, ...POSICION_ESTADO_POLARIDAD, grupoConmutadores, CLASE_PEQUENO);
+    // Rótulo de la MD según la medición y rama de los electrodos en gris si no participa
+    const { lineasRotuloMD, parteAplicadaEnGris } = describirRotuloMD(tipoMedicion);
+    escribirRenglones(lineasRotuloMD, POSICION_ROTULO_MD, grupoConmutadores, () => CLASE_PEQUENO);
+    grupoParteAplicada.classList.toggle(CLASE_RAMA_INACTIVA, parteAplicadaEnGris);
   }
 
-  /** Borra el camino rojo y los valores (por ejemplo, al cambiar la condición). */
+  /** Borra el camino rojo, los valores y la nota de debajo (por ejemplo, al cambiar la condición). */
   function borrarCamino() {
     grupoCamino.replaceChildren();
     grupoValores.replaceChildren();
+    notaDebajo.textContent = "";
+    notaDebajo.hidden = true;
     animacion.caminos = [];
     actualizarAnimacion();
   }
@@ -700,14 +840,20 @@ export function crearVisualizador(svg, parametros) {
     for (const camino of construirCaminos(medicion)) {
       animacion.caminos.push(dibujarCable(camino.puntos, `camino-corriente camino-corriente--${camino.tipo}`, grupoCamino));
     }
-    // Valores por rama, calculados por el motor
-    const esFugaATierra = medicion.tipoMedicion === MEDICION_FUGA_TIERRA;
-    if (!esFugaATierra) {
-      escribirTexto(formatearCorrienteDibujo_uA(medicion.ramas.porPersona_uA), ...POSICION_VALOR_PERSONA, grupoValores, CLASE_VALOR, "start");
+    // Valores por rama (del motor): la LECTURA en negrita, la otra rama en gris
+    const etiquetas = armarEtiquetasRamas(medicion);
+    for (const { rama, esLectura, lineas } of etiquetas.ramas) {
+      const claseDeRenglon = (indice) => {
+        if (!esLectura) {
+          return CLASE_NO_MEDIDA;
+        }
+        return indice === 0 ? CLASE_LECTURA : CLASE_LECTURA_NOTA;
+      };
+      escribirRenglones(lineas, POSICION_ETIQUETA_RAMA[rama], grupoValores, claseDeRenglon);
     }
-    if (esFugaATierra || (medicion.tipoMedicion === "contacto" && medicion.condicion.tierra === "cerrada")) {
-      escribirTexto(formatearCorrienteDibujo_uA(medicion.ramas.porTierra_uA), ...POSICION_VALOR_TIERRA, grupoValores, CLASE_VALOR, "start");
-    }
+    // Nota de debajo del dibujo (solo contacto con tierra cerrada)
+    notaDebajo.textContent = etiquetas.notaDebajo ?? "";
+    notaDebajo.hidden = etiquetas.notaDebajo === null;
     actualizarAnimacion();
   }
 
